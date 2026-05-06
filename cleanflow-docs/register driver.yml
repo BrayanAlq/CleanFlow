@@ -1,0 +1,25 @@
+info:
+  name: register driver
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{actual_url}}/auth/driver"
+  body:
+    type: json
+    data: |-
+      {
+        "username": "driver1",
+        "password": "password",
+        "email": "driver1@example.com",
+        "first_name": "Driver",
+        "last_name": "Lima"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

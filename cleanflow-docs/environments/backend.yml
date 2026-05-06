@@ -1,0 +1,4 @@
+name: backend
+variables:
+  - name: actual_url
+    value: http://localhost:8080

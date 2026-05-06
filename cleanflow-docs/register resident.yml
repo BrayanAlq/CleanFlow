@@ -1,0 +1,27 @@
+info:
+  name: register resident
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{actual_url}}/auth/resident"
+  body:
+    type: json
+    data: |-
+      {
+        "username": "resident1",
+        "password": "password",
+        "email": "user@example.com",
+        "first_name": "Resident",
+        "last_name": "Lima",
+        "longitude": -0.12,
+        "latitude": 1.1
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
