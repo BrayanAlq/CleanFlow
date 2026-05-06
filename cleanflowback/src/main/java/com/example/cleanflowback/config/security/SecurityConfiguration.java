@@ -37,6 +37,14 @@ public class SecurityConfiguration {
                     "/swagger-ui/**",
                     "/api-docs"
                 ).permitAll()
+                .requestMatchers(request -> "OPTIONS".equalsIgnoreCase(request.getMethod())).permitAll()
+                .requestMatchers(
+                    "/resident/**"
+                ).hasRole("RESIDENT")
+                .requestMatchers(
+                    "/driver/**"
+                ).hasRole("DRIVER")
+                .anyRequest().authenticated()
             ).exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
