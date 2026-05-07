@@ -35,11 +35,13 @@ public class SecurityConfiguration {
                     "/error",
                     "/swagger-ui.html",
                     "/swagger-ui/**",
-                    "/api-docs"
+                    "/api-docs",
+                    "/ws"
                 ).permitAll()
                 .requestMatchers(request -> "OPTIONS".equalsIgnoreCase(request.getMethod())).permitAll()
                 .requestMatchers(
-                    "/resident/**"
+                    "/resident/**",
+                    "/report-image/**"
                 ).hasRole("RESIDENT")
                 .requestMatchers(
                     "/driver/**"

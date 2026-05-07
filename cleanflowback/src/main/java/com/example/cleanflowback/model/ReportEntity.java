@@ -24,7 +24,7 @@ public class ReportEntity {
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
-    @OneToMany(mappedBy = "report")
+    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReportImageEntity> images;
 
     @ManyToOne(fetch = FetchType.LAZY)
