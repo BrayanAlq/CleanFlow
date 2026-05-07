@@ -1,5 +1,6 @@
 package com.example.cleanflowback.controller;
 
+import com.example.cleanflowback.dto.in.CreateAdminRequestDTO;
 import com.example.cleanflowback.dto.in.CreateDriverRequestDTO;
 import com.example.cleanflowback.dto.in.CreateResidentRequestDTO;
 import com.example.cleanflowback.dto.in.LoginRequestDTO;
@@ -32,6 +33,14 @@ public class AuthController {
         @Valid @RequestBody CreateDriverRequestDTO dto
     ) {
         authService.createDriver(dto);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/admin")
+    public ResponseEntity<Void> createAdmin(
+        @Valid @RequestBody CreateAdminRequestDTO dto
+    ) {
+        authService.createAdmin(dto);
         return ResponseEntity.noContent().build();
     }
 

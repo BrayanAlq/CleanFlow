@@ -5,10 +5,7 @@ import com.example.cleanflowback.dto.out.ReportResponseDTO;
 import com.example.cleanflowback.exception.ReportImageAlreadyAsignedException;
 import com.example.cleanflowback.exception.ResourceNotFoundException;
 import com.example.cleanflowback.mapper.ReportMapper;
-import com.example.cleanflowback.model.ContainerEntity;
-import com.example.cleanflowback.model.ReportEntity;
-import com.example.cleanflowback.model.ReportImageEntity;
-import com.example.cleanflowback.model.ResidentEntity;
+import com.example.cleanflowback.model.*;
 import com.example.cleanflowback.repository.ContainerRepository;
 import com.example.cleanflowback.repository.ReportImageRepository;
 import com.example.cleanflowback.repository.ReportRepository;
@@ -36,13 +33,13 @@ public class ReportController {
     @MessageMapping("/reports.create")
     public void createReport(
         @Payload CreateReportRequestDTO dto,
-        @AuthenticationPrincipal ResidentEntity residentEntity
-    ) {
+        @AuthenticationPrincipal UserEntity user
+        ) {
         ContainerEntity containerEntity = containerRepository.findById(dto.containerId())
             .orElseThrow(() -> new ResourceNotFoundException("Container not found"));
 
         ReportEntity reportEntity = new ReportEntity();
-        reportEntity.setResident(residentEntity);
+        reportEntity.setUser(user);
         reportEntity.setContainer(containerEntity);
         reportEntity.setContent(dto.content());
 

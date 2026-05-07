@@ -19,7 +19,4 @@ public class ResidentEntity extends UserEntity {
 
     @Column(nullable = false)
     private Double latitude;
-
-    @OneToMany(mappedBy = "resident")
-    private List<ReportEntity> reports;
 }

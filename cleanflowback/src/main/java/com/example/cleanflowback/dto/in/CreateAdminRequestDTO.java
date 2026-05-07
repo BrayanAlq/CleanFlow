@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record CreateDriverRequestDTO(
+public record CreateAdminRequestDTO(
     @NotBlank(message = "username is required")
     String username,
     @NotBlank(message = "password is required")

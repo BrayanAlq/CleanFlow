@@ -26,6 +26,10 @@ public class PointEntity {
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "route_id")
+    private RouteEntity route;
+
     @PrePersist
     public void prePersist() {
         this.timestamp = LocalDateTime.now();

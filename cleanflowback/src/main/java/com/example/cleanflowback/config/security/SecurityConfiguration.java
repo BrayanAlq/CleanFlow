@@ -40,8 +40,7 @@ public class SecurityConfiguration {
                 ).permitAll()
                 .requestMatchers(request -> "OPTIONS".equalsIgnoreCase(request.getMethod())).permitAll()
                 .requestMatchers(
-                    "/resident/**",
-                    "/report-image/**"
+                    "/resident/**"
                 ).hasRole("RESIDENT")
                 .requestMatchers(
                     "/driver/**"

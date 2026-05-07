@@ -1,11 +1,11 @@
 package com.example.cleanflowback.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrimaryKeyJoinColumn;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Table(name = "drivers")
@@ -14,4 +14,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class DriverEntity extends UserEntity {
+    @OneToMany(mappedBy = "driver", fetch = FetchType.LAZY)
+    private List<RouteEntity> routes;
 }

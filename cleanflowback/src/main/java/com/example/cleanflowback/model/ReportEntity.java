@@ -28,8 +28,8 @@ public class ReportEntity {
     private List<ReportImageEntity> images;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "resident_id")
-    private ResidentEntity resident;
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "container_id")
