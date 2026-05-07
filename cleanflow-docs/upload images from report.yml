@@ -1,0 +1,24 @@
+info:
+  name: upload images from report
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{actual_url}}/report-image"
+  body:
+    type: multipart-form
+    data:
+      - name: images
+        type: file
+        value:
+          - /Users/deyvigo/Downloads/fish.jpg
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiJ9.eyJsYXN0X25hbWUiOiJMaW1hIiwiZmlyc3RfbmFtZSI6IlJlc2lkZW50IiwiaWQiOjYsInJvbGUiOiJSRVNJREVOVCIsInVzZXJuYW1lIjoicmVzaWRlbnQxIiwiZXhwIjoxNzc4NzMxOTA4fQ.c9JL4ILuys53SESOyZ28GVZS-xqYyuW5EO9V1zSLtbI
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

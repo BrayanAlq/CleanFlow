@@ -1,17 +1,20 @@
 info:
-  name: login
+  name: register admin
   type: http
-  seq: 2
+  seq: 7
 
 http:
   method: POST
-  url: "{{actual_url}}/auth/login"
+  url: "{{actual_url}}/auth/admin"
   body:
     type: json
     data: |-
       {
         "username": "admin1",
-        "password": "password"
+        "password": "password",
+        "email": "admin1@example.com",
+        "first_name": "Admin",
+        "last_name": "Lima"
       }
   auth: inherit
 

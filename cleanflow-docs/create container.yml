@@ -1,0 +1,25 @@
+info:
+  name: create container
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: "{{actual_url}}/container"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Contenedor 1",
+        "latitude": -11.96,
+        "longitude": -76.99
+      }
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImFkbWluMSIsImxhc3RfbmFtZSI6IkxpbWEiLCJmaXJzdF9uYW1lIjoiQWRtaW4iLCJpZCI6MSwicm9sZSI6IkFETUlOIiwiZXhwIjoxNzc4NzgxMzYwfQ.40vRynE0V_zBXJRYfehgE8Fl89qow6-d6xc9Opy0f74
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
