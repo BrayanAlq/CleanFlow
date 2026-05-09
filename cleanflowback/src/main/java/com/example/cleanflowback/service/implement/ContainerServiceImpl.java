@@ -7,12 +7,16 @@ import com.example.cleanflowback.exception.CredentialsAlreadyUsedException;
 import com.example.cleanflowback.exception.ResourceNotFoundException;
 import com.example.cleanflowback.mapper.ContainerMapper;
 import com.example.cleanflowback.model.ContainerEntity;
+import com.example.cleanflowback.model.ContainerImageEntity;
 import com.example.cleanflowback.model.ReportEntity;
 import com.example.cleanflowback.repository.ContainerRepository;
 import com.example.cleanflowback.repository.ReportRepository;
+import com.example.cleanflowback.service.CloudinaryService;
 import com.example.cleanflowback.service.ContainerService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -22,14 +26,24 @@ public class ContainerServiceImpl implements ContainerService {
     private final ContainerRepository containerRepository;
     private final ContainerMapper containerMapper;
     private final ReportRepository reportRepository;
+    private final CloudinaryService cloudinaryService;
 
     @Override
-    public ContainerResponseDTO createContainer(CreateContainerRequestDTO requestDTO) {
+    @Transactional
+    public ContainerResponseDTO createContainer(CreateContainerRequestDTO requestDTO, MultipartFile image) {
         if (containerRepository.existsByName(requestDTO.name())) {
             throw new CredentialsAlreadyUsedException("name for container already exists");
         }
 
         ContainerEntity containerEntity = containerMapper.fromRequestDTOtoEntity(requestDTO);
+
+        ContainerImageEntity containerImageEntity = new ContainerImageEntity();
+        if (image != null) {
+            String url = cloudinaryService.uploadImage(image);
+            containerImageEntity.setUrl(url);
+            containerEntity.setContainerImage(containerImageEntity);
+        }
+
         containerEntity.setLocation(requestDTO.latitude(), requestDTO.longitude());
         return containerMapper.fromEntitytoDTO(containerRepository.save(containerEntity));
     }
@@ -55,5 +69,13 @@ public class ContainerServiceImpl implements ContainerService {
         }
 
         containerRepository.deleteById(id);
+    }
+
+    @Override
+    public ContainerResponseDTO getContainerById(Long id) {
+        ContainerEntity containerEntity = containerRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException(("container not found")));
+
+        return containerMapper.fromEntitytoDTO(containerEntity);
     }
 }

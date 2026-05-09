@@ -7,6 +7,6 @@ public record ReportResponseDTO(
     Long id,
     String content,
     LocalDateTime timestamp,
-    ResidentInfoDTO resident,
+    UserInfoResponseDTO user,
     List<ReportImageResponseDTO> images
 ) {}

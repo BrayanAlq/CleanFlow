@@ -1,61 +1,58 @@
 package com.example.cleanflowback.controller;
 
 import com.example.cleanflowback.dto.in.CreateReportRequestDTO;
+import com.example.cleanflowback.dto.out.CursorPageResponseDTO;
 import com.example.cleanflowback.dto.out.ReportResponseDTO;
-import com.example.cleanflowback.exception.ReportImageAlreadyAsignedException;
-import com.example.cleanflowback.exception.ResourceNotFoundException;
-import com.example.cleanflowback.mapper.ReportMapper;
 import com.example.cleanflowback.model.*;
-import com.example.cleanflowback.repository.ContainerRepository;
-import com.example.cleanflowback.repository.ReportImageRepository;
-import com.example.cleanflowback.repository.ReportRepository;
+import com.example.cleanflowback.service.ReportService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/report")
 @AllArgsConstructor
 public class ReportController {
-
-    private final ContainerRepository containerRepository;
-    private final ReportImageRepository reportImageRepository;
-    private final ReportRepository reportRepository;
-    private final ReportMapper reportMapper;
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final ReportService reportService;
 
+    @Transactional
     @MessageMapping("/reports.create")
     public void createReport(
         @Payload CreateReportRequestDTO dto,
-        @AuthenticationPrincipal UserEntity user
-        ) {
-        ContainerEntity containerEntity = containerRepository.findById(dto.containerId())
-            .orElseThrow(() -> new ResourceNotFoundException("Container not found"));
+        Principal principal
+    ) {
+        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) principal;
+        UserEntity user = (UserEntity) auth.getPrincipal();
 
-        ReportEntity reportEntity = new ReportEntity();
-        reportEntity.setUser(user);
-        reportEntity.setContainer(containerEntity);
-        reportEntity.setContent(dto.content());
-
-        List<ReportImageEntity> images = reportImageRepository.findAllById(dto.imageIds());
-        boolean anyAlreadyAssigned = images.stream().anyMatch(i -> i.getReport() != null);
-        if (anyAlreadyAssigned) {
-            throw new ReportImageAlreadyAsignedException("Image already assigned");
-        }
-
-        images.forEach(image -> image.setReport(reportEntity));
-
-        reportEntity.setImages(images);
-
-        ReportEntity saved = reportRepository.save(reportEntity);
-        ReportResponseDTO reportResponseDTO = reportMapper.fromEntityToDTO(saved);
+        ReportResponseDTO reportResponseDTO = reportService.createReport(user, dto);
 
         simpMessagingTemplate.convertAndSend("/topic/reports/" + dto.containerId(), reportResponseDTO);
+    }
+
+    @PostMapping("")
+    public ResponseEntity<ReportResponseDTO> createReport(
+        @AuthenticationPrincipal UserEntity user,
+        @Valid @RequestBody CreateReportRequestDTO createReportRequestDTO
+    ) {
+        return ResponseEntity.ok(reportService.createReport(user, createReportRequestDTO));
+    }
+
+    @GetMapping("/container/{containerId}")
+    public ResponseEntity<CursorPageResponseDTO<ReportResponseDTO>> getReportsByContainerId(
+        @PathVariable Long containerId,
+        @RequestParam(value = "cursor", required = false) Long cursor,
+        @RequestParam(value = "size", defaultValue = "5") int size
+    ) {
+        return ResponseEntity.ok(reportService.getReportsByContainerIdWithCursor(containerId, cursor, size));
     }
 }

@@ -7,7 +7,7 @@ import org.mapstruct.MappingConstants;
 
 @Mapper(
     componentModel = MappingConstants.ComponentModel.SPRING,
-    uses = {ReportImageMapper.class}
+    uses = {ReportImageMapper.class, UserMapper.class}
 )
 public interface ReportMapper {
     ReportResponseDTO fromEntityToDTO(ReportEntity entity);

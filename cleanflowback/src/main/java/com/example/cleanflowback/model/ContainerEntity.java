@@ -24,8 +24,15 @@ public class ContainerEntity {
     @Column(nullable = false, unique = true)
     private String name;
 
+    @Column(nullable = false)
+    private String addressName;
+
     @Column(columnDefinition = "geography(Point, 4326)", nullable = false)
     private Point location;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "container_image_id", referencedColumnName = "id")
+    private ContainerImageEntity containerImage;
 
     @OneToMany(mappedBy = "container")
     private List<ReportEntity> reports;

@@ -7,7 +7,10 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(
+    componentModel = MappingConstants.ComponentModel.SPRING,
+    uses = {ContainerImageMapper.class}
+)
 public interface ContainerMapper {
     @Mapping(target = "location", ignore = true)
     ContainerEntity fromRequestDTOtoEntity(CreateContainerRequestDTO dto);

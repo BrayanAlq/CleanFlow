@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,9 +21,10 @@ public class ContainerController {
     @PostMapping("")
     @PreAuthorize("hasRole('ADMIN')") // Only admin can create containers
     public ResponseEntity<ContainerResponseDTO> createContainer(
-        @Valid @RequestBody CreateContainerRequestDTO createContainerRequestDTO
+        @Valid @RequestPart("container") CreateContainerRequestDTO createContainerRequestDTO,
+        @RequestParam(value = "image", required = true) MultipartFile image
     ) {
-       return ResponseEntity.ok(containerService.createContainer(createContainerRequestDTO));
+       return ResponseEntity.ok(containerService.createContainer(createContainerRequestDTO, image));
     }
 
     @GetMapping("/viewport")
@@ -33,6 +35,13 @@ public class ContainerController {
         @RequestParam("east") Double east
     ) {
         return ResponseEntity.ok(containerService.findAllContainersInViewport(north, south, west, east));
+    }
+
+    @GetMapping("/{containerId}")
+    public ResponseEntity<ContainerResponseDTO> getContainerById(
+        @PathVariable Long containerId
+    ) {
+        return ResponseEntity.ok(containerService.getContainerById(containerId));
     }
 
     @DeleteMapping("/{containerId}")
