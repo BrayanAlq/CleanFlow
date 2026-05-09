@@ -1,0 +1,25 @@
+info:
+  name: create report
+  type: http
+  seq: 12
+
+http:
+  method: POST
+  url: "{{actual_url}}/report"
+  body:
+    type: json
+    data: |-
+      {
+        "container_id": 1,
+        "content": "El contenedor está caído",
+        "image_ids": [1, 2]
+      }
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiJ9.eyJsYXN0X25hbWUiOiJMaW1hIiwiZmlyc3RfbmFtZSI6IkFkbWluIiwiaWQiOjEsInJvbGUiOiJBRE1JTiIsInVzZXJuYW1lIjoiYWRtaW4xIiwiZXhwIjoxNzc4ODUzNzY3fQ._zEboIHmwI-VHuRqiC88aPdFfhouSV-vEW3Aj5PYSY8
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -5,8 +5,23 @@ info:
 
 http:
   method: GET
-  url: "{{actual_url}}/container/viewport"
-  auth: inherit
+  url: "{{actual_url}}/container/viewport?north=&south=&east=&west="
+  params:
+    - name: north
+      value: ""
+      type: query
+    - name: south
+      value: ""
+      type: query
+    - name: east
+      value: ""
+      type: query
+    - name: west
+      value: ""
+      type: query
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImFkbWluMSIsImxhc3RfbmFtZSI6IkxpbWEiLCJmaXJzdF9uYW1lIjoiQWRtaW4iLCJpZCI6MSwicm9sZSI6IkFETUlOIiwiZXhwIjoxNzc4Nzg1NzA3fQ.-qu_L3TPVGoktOS1BMbP4zZ_hAnu4shUp9DUD0LKm_0
 
 settings:
   encodeUrl: true
