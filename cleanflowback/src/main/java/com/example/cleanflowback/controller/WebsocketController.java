@@ -1,0 +1,69 @@
+package com.example.cleanflowback.controller;
+
+import com.example.cleanflowback.dto.in.DriverLocationRequestDTO;
+import com.example.cleanflowback.dto.in.ViewportRequestDTO;
+import com.example.cleanflowback.dto.out.DriverLocationResponseDTO;
+import com.example.cleanflowback.model.UserEntity;
+import com.example.cleanflowback.model.ViewportEntity;
+import com.example.cleanflowback.repository.ViewportRepository;
+import com.example.cleanflowback.service.ViewportService;
+import lombok.AllArgsConstructor;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.security.Principal;
+import java.util.List;
+
+@RestController
+@RequestMapping("websocket")
+@AllArgsConstructor
+public class WebsocketController {
+    private final ViewportService viewportService;
+    private final ViewportRepository viewportRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
+
+    @MessageMapping("/viewport.update")
+    public void createOrUpdateViewPort(
+        Principal principal,
+        @Payload ViewportRequestDTO requestDTO
+    ) {
+        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) principal;
+        UserEntity user = (UserEntity) auth.getPrincipal();
+
+        viewportService.createOrUpdateViewport(requestDTO, user);
+    }
+
+    @MessageMapping("/driver.location")
+    public void updateDriverLocation(
+        Principal principal,
+        @Payload DriverLocationRequestDTO requestDTO
+    ) {
+        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) principal;
+        UserEntity driverEntity = (UserEntity) auth.getPrincipal();
+
+        if (driverEntity == null) {
+            System.out.println("No driver found");
+            return;
+        }
+
+        List<ViewportEntity> visibleUsers = viewportRepository.findVisibleUsers(
+            requestDTO.latitude(), requestDTO.longitude()
+        );
+
+        DriverLocationResponseDTO responseDTO = new DriverLocationResponseDTO(
+            driverEntity.getId(), requestDTO.latitude(), requestDTO.longitude()
+        );
+
+        for (ViewportEntity viewport: visibleUsers) {
+            simpMessagingTemplate.convertAndSendToUser(
+                viewport.getUser().getUsername(),
+                "/queue/drivers",
+                responseDTO
+            );
+        }
+    }
+}
