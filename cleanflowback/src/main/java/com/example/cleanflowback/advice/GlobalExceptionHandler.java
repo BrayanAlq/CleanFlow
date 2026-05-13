@@ -1,8 +1,7 @@
 package com.example.cleanflowback.advice;
 
 import com.example.cleanflowback.dto.out.ErrorResponseDTO;
-import com.example.cleanflowback.exception.CredentialsAlreadyUsedException;
-import com.example.cleanflowback.exception.UserInvalidCredentialsException;
+import com.example.cleanflowback.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -68,6 +67,30 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> handleUserInvalidCredentialsException(UserInvalidCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
             .body(ErrorResponseDTO.of(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ReportImagesNotProvidedException.class)
+    public ResponseEntity<ErrorResponseDTO> handleReportImagesNotProvidedException(ReportImagesNotProvidedException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(ErrorResponseDTO.of(HttpStatus.BAD_REQUEST, "IMAGES_NOT_PROVIDED", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ReportImageAlreadyAsignedException.class)
+    public ResponseEntity<ErrorResponseDTO> handleReportImageAlreadyAsignedException(ReportImageAlreadyAsignedException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(ErrorResponseDTO.of(HttpStatus.CONFLICT, "IMAGE_ALREADY_ASSIGNED", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ContainerConflictException.class)
+    public ResponseEntity<ErrorResponseDTO> handleContainerConflictException(ContainerConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(ErrorResponseDTO.of(HttpStatus.CONFLICT, "CONTAINER_CONFLICT", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(ErrorResponseDTO.of(HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND", ex.getMessage()));
     }
 
     private static String toSnakeCase(String field) {

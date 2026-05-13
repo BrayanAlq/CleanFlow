@@ -1,0 +1,17 @@
+info:
+  name: delete container by id
+  type: http
+  seq: 9
+
+http:
+  method: DELETE
+  url: "{{actual_url}}/container/1"
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQURNSU4iLCJpZCI6MSwiZmlyc3RfbmFtZSI6IkFkbWluIiwibGFzdF9uYW1lIjoiTGltYSIsInVzZXJuYW1lIjoiYWRtaW4xIiwiZXhwIjoxNzc4NzY5MjUzfQ.naobjpMTMn-CojuApYcGqulrn56cbg1kzwkmLOkCF4I
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

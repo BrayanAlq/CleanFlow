@@ -17,5 +17,4 @@ public record CreateDriverRequestDTO(
     String firstName,
     @NotBlank(message = "last_name is required")
     String lastName
-) {
-}
+) {}
