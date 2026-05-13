@@ -74,7 +74,7 @@ export const MapView = () => {
 
   useEffect(() => {
     if (!connected) return
-    const sub = subscribe(
+    const driverSub = subscribe(
       '/user/queue/drivers',
       (msg: IMessage) => {
         const driver = JSON.parse(msg.body) as DriverType
@@ -86,7 +86,18 @@ export const MapView = () => {
         })
       }
     )
-    return () => sub?.unsubscribe()
+
+    const metricSub = subscribe(
+      '/user/queue/metrics',
+      (msg: IMessage) => {
+        const metric = JSON.parse(msg.body)
+        console.log(metric)
+      }
+    )
+    return () => {
+      driverSub?.unsubscribe()
+      metricSub?.unsubscribe()
+    }
   }, [connected])
 
   useEffect(() => {
