@@ -24,6 +24,12 @@ public class ContainerEntity {
     @Column(nullable = false, unique = true)
     private String name;
 
+    @Column(nullable = false, unique = true)
+    private String apiKey;
+
+    @Column(nullable = false)
+    private String secret;
+
     @Column(nullable = false)
     private String addressName;
 

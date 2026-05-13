@@ -2,6 +2,8 @@ package com.example.cleanflowback.config;
 
 import com.example.cleanflowback.config.security.JwtService;
 import com.example.cleanflowback.exception.UnauthorizedAccessException;
+import com.example.cleanflowback.model.ContainerEntity;
+import com.example.cleanflowback.repository.ContainerRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,9 +17,11 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -25,6 +29,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 @Configuration
@@ -33,6 +38,8 @@ import java.util.Map;
 public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final ContainerRepository containerRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -72,6 +79,22 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
 
                 if (accessor == null || accessor.getCommand() == null) return message;
                 if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+                    String apiKey = accessor.getFirstNativeHeader("X-Api-Key");
+                    String secret = accessor.getFirstNativeHeader("X-Secret");
+
+                    if (apiKey != null && secret != null) {
+                        ContainerEntity containerEntity = containerRepository.findByApiKey(apiKey);
+                        if (containerEntity != null && passwordEncoder.matches(secret, containerEntity.getSecret())) {
+                            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                                containerEntity, null, List.of(new SimpleGrantedAuthority("ROLE_DEVICE"))
+                            );
+                            accessor.setUser(auth);
+                            accessor.setLeaveMutable(true);
+                            return message;
+                        }
+                        throw new UnauthorizedAccessException("Invalid api key");
+                    }
+
                     String token = accessor.getFirstNativeHeader("Authorization");
                     if (token != null && token.startsWith("Bearer ")) {
                         token = token.substring(7);

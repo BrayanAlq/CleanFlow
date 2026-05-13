@@ -14,11 +14,13 @@ import com.example.cleanflowback.repository.ReportRepository;
 import com.example.cleanflowback.service.CloudinaryService;
 import com.example.cleanflowback.service.ContainerService;
 import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -27,6 +29,7 @@ public class ContainerServiceImpl implements ContainerService {
     private final ContainerMapper containerMapper;
     private final ReportRepository reportRepository;
     private final CloudinaryService cloudinaryService;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -43,8 +46,16 @@ public class ContainerServiceImpl implements ContainerService {
             containerImageEntity.setUrl(url);
             containerEntity.setContainerImage(containerImageEntity);
         }
+        String secret = "password";
+        String apiKey;
+        do {
+            apiKey = UUID.randomUUID().toString();
+        } while (containerRepository.existsByApiKey(apiKey));
 
+        containerEntity.setApiKey(apiKey);
+        containerEntity.setSecret(passwordEncoder.encode(secret));
         containerEntity.setLocation(requestDTO.latitude(), requestDTO.longitude());
+
         return containerMapper.fromEntitytoDTO(containerRepository.save(containerEntity));
     }
 

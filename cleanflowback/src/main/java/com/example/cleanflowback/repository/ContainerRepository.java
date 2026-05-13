@@ -24,4 +24,7 @@ public interface ContainerRepository extends JpaRepository<ContainerEntity, Long
         @Param("east") double east,
         @Param("west") double west
     );
+
+    ContainerEntity findByApiKey(String apiKey);
+    boolean existsByApiKey(String apiKey);
 }

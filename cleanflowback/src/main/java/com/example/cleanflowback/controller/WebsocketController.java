@@ -1,8 +1,11 @@
 package com.example.cleanflowback.controller;
 
+import com.example.cleanflowback.dto.in.ContainerInfoRequestDTO;
 import com.example.cleanflowback.dto.in.DriverLocationRequestDTO;
 import com.example.cleanflowback.dto.in.ViewportRequestDTO;
+import com.example.cleanflowback.dto.out.ContainerInfoResponseDTO;
 import com.example.cleanflowback.dto.out.DriverLocationResponseDTO;
+import com.example.cleanflowback.model.ContainerEntity;
 import com.example.cleanflowback.model.UserEntity;
 import com.example.cleanflowback.model.ViewportEntity;
 import com.example.cleanflowback.repository.ViewportRepository;
@@ -68,6 +71,42 @@ public class WebsocketController {
                 simpMessagingTemplate.convertAndSendToUser(
                     username,
                     "/queue/drivers",
+                    responseDTO
+                );
+            } catch (Exception e) {
+                System.out.println("Error sending to: " + username + ": " + e.getMessage());
+            }
+        }
+    }
+
+    @Transactional
+    @MessageMapping("/container.metrics")
+    public void createContainerMetrics(
+        Principal principal,
+        @Payload ContainerInfoRequestDTO requestDTO
+    ) {
+        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) principal;
+        ContainerEntity containerEntity = (ContainerEntity) auth.getPrincipal();
+
+        if (containerEntity == null) {
+            System.out.println("No container found");
+            return;
+        }
+
+        List<ViewportEntity> visibleUsers = viewportRepository.findVisibleUsers(
+            containerEntity.getLatitude(), containerEntity.getLongitude()
+        );
+
+        ContainerInfoResponseDTO responseDTO = new ContainerInfoResponseDTO(
+            containerEntity.getId(), requestDTO.isAlive(), requestDTO.airQualityLevel(), requestDTO.ppm(), requestDTO.fillingLevel()
+        );
+
+        for (ViewportEntity viewport: visibleUsers) {
+            String username = viewport.getUser().getUsername();
+            try {
+                simpMessagingTemplate.convertAndSendToUser(
+                    username,
+                    "/queue/metrics",
                     responseDTO
                 );
             } catch (Exception e) {
