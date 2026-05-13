@@ -4,13 +4,16 @@ import { IconSend } from "../icons/IconSend"
 import { useStoreContainer } from "../store/useStoreContainer"
 import { sendImages } from "../service/reportService"
 import { toast } from "sonner"
+import { useStomp } from "../context/StompContext"
 
-export const SendReport = ({ sendMessage }: { sendMessage: (destination: string, body: object) => void }) => {
+export const SendReport = () => {
   const [value, setValue] = useState("")
   const [selectedImages, setSelectedImages] = useState<File[]>([])
   const selectedId = useStoreContainer((s) => s.selectedId)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isSending, setIsSending] = useState(false)
+
+  const { publish } = useStomp()
 
   const handleSendReport = async () => {
     if (!value.trim()) return
@@ -23,11 +26,12 @@ export const SendReport = ({ sendMessage }: { sendMessage: (destination: string,
         imageIds = images.map(i => i.id)
       }
   
-      sendMessage('/app/reports.create', {
+      publish('/app/reports.create', {
         container_id: selectedId,
         content: value.trim(),
         image_ids: imageIds,
       })
+      
       setValue("")
       setSelectedImages([])
     } catch (e: any) {
@@ -37,7 +41,6 @@ export const SendReport = ({ sendMessage }: { sendMessage: (destination: string,
     } finally {
       setIsSending(false)
     }
-
   }
 
   const handleCameraClick = () => {

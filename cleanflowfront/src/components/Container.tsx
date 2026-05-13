@@ -4,28 +4,36 @@ import { ContainerInfo } from "./ContainerInfo"
 import { ReportSection } from "./ReportSection"
 import { SendReport } from "./SendReport"
 import type { ReportType } from "../models/report.model"
-import { useStomp } from "../hooks/useStomp"
 import { useQueryClient } from "@tanstack/react-query"
+import { useStomp } from "../context/StompContext"
+import type { IMessage } from "@stomp/stompjs"
 
 export const Container = () => {
   const selectedId = useStoreContainer((s) => s.selectedId)
   const queryClient = useQueryClient()
   const [liveReports, setLiveReports] = useState<ReportType[]>([])
 
+  const { connected, subscribe } = useStomp()
+
   useEffect(() => {
     setLiveReports([])
   }, [selectedId])
 
-  const { sendMessage } = useStomp(
-    `/topic/reports/${selectedId}`,
-    (newReport: ReportType) => {
-      setLiveReports((prev) => [newReport, ...prev])
+  useEffect(() => {
+    const sub = subscribe(
+      `/topic/reports/${selectedId}`,
+      (msg: IMessage) => {
+        const newReport = JSON.parse(msg.body) as ReportType
+        setLiveReports((prev) => [newReport, ...prev])
+  
+        queryClient.invalidateQueries({
+          queryKey: ['reports', 'container', selectedId],
+        })
+      }
+    )
 
-      queryClient.invalidateQueries({
-        queryKey: ['reports', 'container', selectedId],
-      })
-    }
-  )
+    return () => sub?.unsubscribe()
+  }, [connected, selectedId])
 
   return (
     <>
@@ -36,7 +44,7 @@ export const Container = () => {
           >
             <ContainerInfo />
             <ReportSection liveReports={liveReports} />
-            <SendReport sendMessage={sendMessage} />
+            <SendReport />
           </div>
         )
       }
