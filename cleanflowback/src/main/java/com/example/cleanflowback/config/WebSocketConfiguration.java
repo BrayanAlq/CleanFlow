@@ -54,6 +54,8 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
             .setAllowedOriginPatterns("*")
             .setHandshakeHandler(defaultHandshakeHandler())
             .withSockJS();
+        registry.addEndpoint("/ws-device")
+            .setAllowedOriginPatterns("*");
     }
 
     @Bean
