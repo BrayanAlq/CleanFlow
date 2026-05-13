@@ -18,9 +18,8 @@ public interface ViewportRepository extends JpaRepository<ViewportEntity, Long> 
         SELECT *
         FROM user_viewports uv
         WHERE uv.active = true
-        AND uv.last_seen > now() - interval '30 seconds'
         AND ST_Contains(
-            v.viewport,
+            uv.viewport,
             ST_SetSRID(ST_Point(:lng, :lat), 4326)
         )
     """, nativeQuery = true)

@@ -36,8 +36,9 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic");
+        config.enableSimpleBroker("/topic", "/queue");
         config.setApplicationDestinationPrefixes("/app");
+        config.setUserDestinationPrefix("/user");
     }
 
     @Override
@@ -70,7 +71,6 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
                 StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
                 if (accessor == null || accessor.getCommand() == null) return message;
-
                 if (StompCommand.CONNECT.equals(accessor.getCommand())) {
                     String token = accessor.getFirstNativeHeader("Authorization");
                     if (token != null && token.startsWith("Bearer ")) {
@@ -85,6 +85,7 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
                                     userDetails, null, userDetails.getAuthorities()
                                 );
                                 accessor.setUser(auth);
+                                accessor.setLeaveMutable(true);
                                 SecurityContextHolder.getContext().setAuthentication(auth);
 
                                 return message;

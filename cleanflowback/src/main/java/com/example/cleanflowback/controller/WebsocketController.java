@@ -11,7 +11,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,6 +27,7 @@ public class WebsocketController {
     private final ViewportService viewportService;
     private final ViewportRepository viewportRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final SimpUserRegistry simpUserRegistry;
 
     @MessageMapping("/viewport.update")
     public void createOrUpdateViewPort(
@@ -37,6 +40,7 @@ public class WebsocketController {
         viewportService.createOrUpdateViewport(requestDTO, user);
     }
 
+    @Transactional
     @MessageMapping("/driver.location")
     public void updateDriverLocation(
         Principal principal,
@@ -59,11 +63,16 @@ public class WebsocketController {
         );
 
         for (ViewportEntity viewport: visibleUsers) {
-            simpMessagingTemplate.convertAndSendToUser(
-                viewport.getUser().getUsername(),
-                "/queue/drivers",
-                responseDTO
-            );
+            String username = viewport.getUser().getUsername();
+            try {
+                simpMessagingTemplate.convertAndSendToUser(
+                    username,
+                    "/queue/drivers",
+                    responseDTO
+                );
+            } catch (Exception e) {
+                System.out.println("Error sending to: " + username + ": " + e.getMessage());
+            }
         }
     }
 }
