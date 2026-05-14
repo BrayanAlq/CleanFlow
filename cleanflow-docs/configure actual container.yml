@@ -1,0 +1,23 @@
+info:
+  name: configure actual container
+  type: http
+  seq: 15
+
+http:
+  method: POST
+  url: "{{actual_url}}/actual-container"
+  body:
+    type: json
+    data: |-
+      {
+        "container_id": 3
+      }
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQURNSU4iLCJpZCI6MSwiZmlyc3RfbmFtZSI6IkFkbWluIiwibGFzdF9uYW1lIjoiTGltYSIsInVzZXJuYW1lIjoiYWRtaW4xIiwiZXhwIjoxNzc5Mzg4OTg3fQ.zTBqGU29n1ADDMmpihQ4fogO3dF_7dqynu8UNYBpdRo
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
