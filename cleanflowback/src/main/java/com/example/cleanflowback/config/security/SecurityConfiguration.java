@@ -35,14 +35,10 @@ public class SecurityConfiguration {
                     "/error",
                     "/swagger-ui.html",
                     "/swagger-ui/**",
-<<<<<<< Updated upstream
-                    "/api-docs"
-=======
                     "/api-docs",
                     "/ws/**",
                     "/ws-device/**",
                     "/container/device/**"
->>>>>>> Stashed changes
                 ).permitAll()
                 .requestMatchers(request -> "OPTIONS".equalsIgnoreCase(request.getMethod())).permitAll()
                 .requestMatchers(

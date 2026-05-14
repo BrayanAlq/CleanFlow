@@ -1,0 +1,15 @@
+info:
+  name: get container by id (public)
+  type: http
+  seq: 14
+
+http:
+  method: GET
+  url: "{{actual_url}}/container/device/1"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
