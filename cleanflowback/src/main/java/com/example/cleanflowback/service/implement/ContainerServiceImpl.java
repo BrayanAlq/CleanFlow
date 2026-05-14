@@ -2,6 +2,7 @@ package com.example.cleanflowback.service.implement;
 
 import com.example.cleanflowback.dto.in.CreateContainerRequestDTO;
 import com.example.cleanflowback.dto.out.ContainerResponseDTO;
+import com.example.cleanflowback.dto.out.ContainerResponseForDeviceDTO;
 import com.example.cleanflowback.exception.ContainerConflictException;
 import com.example.cleanflowback.exception.CredentialsAlreadyUsedException;
 import com.example.cleanflowback.exception.ResourceNotFoundException;
@@ -88,5 +89,16 @@ public class ContainerServiceImpl implements ContainerService {
             .orElseThrow(() -> new ResourceNotFoundException(("container not found")));
 
         return containerMapper.fromEntitytoDTO(containerEntity);
+    }
+
+    @Override
+    public ContainerResponseForDeviceDTO getContainerForDeviceById(Long id) {
+        ContainerEntity containerEntity = containerRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException(("container not found")));
+        ContainerResponseForDeviceDTO response = containerMapper.fromEntityToDTOForDevice(containerEntity);
+
+        return new ContainerResponseForDeviceDTO(
+            response.id(), response.apiKey(), "password"
+        );
     }
 }

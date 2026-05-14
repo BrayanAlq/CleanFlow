@@ -2,6 +2,7 @@ package com.example.cleanflowback.controller;
 
 import com.example.cleanflowback.dto.in.CreateContainerRequestDTO;
 import com.example.cleanflowback.dto.out.ContainerResponseDTO;
+import com.example.cleanflowback.dto.out.ContainerResponseForDeviceDTO;
 import com.example.cleanflowback.service.ContainerService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -51,5 +52,12 @@ public class ContainerController {
     ) {
         containerService.deleteContainerById(containerId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/device/{containerId}")
+    public ResponseEntity<ContainerResponseForDeviceDTO> getContainerByDeviceId(
+        @PathVariable Long containerId
+    ) {
+        return ResponseEntity.ok(containerService.getContainerForDeviceById(containerId));
     }
 }

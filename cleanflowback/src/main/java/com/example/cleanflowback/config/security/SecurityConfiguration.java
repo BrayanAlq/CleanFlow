@@ -35,9 +35,14 @@ public class SecurityConfiguration {
                     "/error",
                     "/swagger-ui.html",
                     "/swagger-ui/**",
+<<<<<<< Updated upstream
+                    "/api-docs"
+=======
                     "/api-docs",
                     "/ws/**",
-                    "/ws-device/**"
+                    "/ws-device/**",
+                    "/container/device/**"
+>>>>>>> Stashed changes
                 ).permitAll()
                 .requestMatchers(request -> "OPTIONS".equalsIgnoreCase(request.getMethod())).permitAll()
                 .requestMatchers(
@@ -58,7 +63,7 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOriginPatterns(List.of("http://localhost:*"));
-        configuration.setAllowedMethods(List.of("POST", "GET", "OPTIONS",  "DELETE", "PUT", "PATCH"));
+        configuration.setAllowedMethods(List.of("*"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
         configuration.setExposedHeaders(List.of("Authorization"));
