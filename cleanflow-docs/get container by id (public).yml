@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{actual_url}}/container/device/1"
+  url: "{{actual_url}}/container/device"
   auth: inherit
 
 settings:
