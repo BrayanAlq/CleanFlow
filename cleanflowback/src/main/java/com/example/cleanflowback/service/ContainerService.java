@@ -14,5 +14,5 @@ public interface ContainerService {
     );
     void deleteContainerById(Long id);
     ContainerResponseDTO getContainerById(Long id);
-    ContainerResponseForDeviceDTO getContainerForDeviceById(Long id);
+    ContainerResponseForDeviceDTO getContainerForDevice();
 }

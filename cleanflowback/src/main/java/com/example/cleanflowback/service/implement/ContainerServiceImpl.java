@@ -7,9 +7,11 @@ import com.example.cleanflowback.exception.ContainerConflictException;
 import com.example.cleanflowback.exception.CredentialsAlreadyUsedException;
 import com.example.cleanflowback.exception.ResourceNotFoundException;
 import com.example.cleanflowback.mapper.ContainerMapper;
+import com.example.cleanflowback.model.ActualContainerEntity;
 import com.example.cleanflowback.model.ContainerEntity;
 import com.example.cleanflowback.model.ContainerImageEntity;
 import com.example.cleanflowback.model.ReportEntity;
+import com.example.cleanflowback.repository.ActualContainerRepository;
 import com.example.cleanflowback.repository.ContainerRepository;
 import com.example.cleanflowback.repository.ReportRepository;
 import com.example.cleanflowback.service.CloudinaryService;
@@ -31,6 +33,7 @@ public class ContainerServiceImpl implements ContainerService {
     private final ReportRepository reportRepository;
     private final CloudinaryService cloudinaryService;
     private final PasswordEncoder passwordEncoder;
+    private final ActualContainerRepository actualContainerRepository;
 
     @Override
     @Transactional
@@ -92,8 +95,14 @@ public class ContainerServiceImpl implements ContainerService {
     }
 
     @Override
-    public ContainerResponseForDeviceDTO getContainerForDeviceById(Long id) {
-        ContainerEntity containerEntity = containerRepository.findById(id)
+    public ContainerResponseForDeviceDTO getContainerForDevice() {
+        List<ActualContainerEntity> actualContainerEntities = actualContainerRepository.findAll();
+
+        if (actualContainerEntities.isEmpty()) {
+            throw new ResourceNotFoundException(("actual container is not set"));
+        }
+
+        ContainerEntity containerEntity = containerRepository.findById(actualContainerEntities.getFirst().getContainerId())
             .orElseThrow(() -> new ResourceNotFoundException(("container not found")));
         ContainerResponseForDeviceDTO response = containerMapper.fromEntityToDTOForDevice(containerEntity);
 

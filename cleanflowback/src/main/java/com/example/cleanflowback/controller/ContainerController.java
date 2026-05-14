@@ -54,10 +54,8 @@ public class ContainerController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/device/{containerId}")
-    public ResponseEntity<ContainerResponseForDeviceDTO> getContainerByDeviceId(
-        @PathVariable Long containerId
-    ) {
-        return ResponseEntity.ok(containerService.getContainerForDeviceById(containerId));
+    @GetMapping("/device")
+    public ResponseEntity<ContainerResponseForDeviceDTO> getContainerByDeviceId() {
+        return ResponseEntity.ok(containerService.getContainerForDevice());
     }
 }
