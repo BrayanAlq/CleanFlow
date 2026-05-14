@@ -47,6 +47,9 @@ public class SecurityConfiguration {
                 .requestMatchers(
                     "/driver/**"
                 ).hasRole("DRIVER")
+                .requestMatchers(
+                    "/actual-container/**"
+                ).hasRole("ADMIN")
                 .anyRequest().authenticated()
             ).exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
