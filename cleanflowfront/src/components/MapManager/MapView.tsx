@@ -1,21 +1,23 @@
-import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet"
+import { MapContainer, Marker, TileLayer } from "react-leaflet"
+import type { IMessage } from "@stomp/stompjs"
 import { useEffect, useState } from "react"
-import "leaflet/dist/leaflet.css"
 
+import "leaflet/dist/leaflet.css"
 import L from "leaflet"
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png"
 import markerIcon from "leaflet/dist/images/marker-icon.png"
 import markerShadow from "leaflet/dist/images/marker-shadow.png"
 
-import driverSvg from './../assets/driver.svg?raw'
-import trashSvg from './../assets/trash.svg?raw'
+import driverSvg from '@/assets/driver.svg?raw'
+import trashSvg from '@/assets/trash.svg?raw'
 
-import { useContainerInViewport } from "../hooks/useContainer"
-import { useStoreContainer } from "../store/useStoreContainer"
-import { Container } from "./Container"
-import { useStomp } from "../context/StompContext"
-import type { IMessage } from "@stomp/stompjs"
-import type { DriverType } from "../models/driver.model"
+import { useContainerInViewport } from "@/hooks/useContainer"
+import { useStoreContainer } from "@/store/useStoreContainer"
+import { Container } from "@/components/MapManager/Container"
+import { useStomp } from "@/context/StompContext"
+import type { DriverType } from "@/models/driver.model"
+import { getBounds, type BoundType } from "@/models/bound.model"
+import { MapEventHandler } from "./MapHandler"
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -37,32 +39,6 @@ const trashIcon = L.divIcon({
   iconSize: [36, 36],
   iconAnchor: [18, 18],
 })
-
-export interface BoundType {
-  north: number,
-  south: number,
-  east: number,
-  west: number
-}
-
-const getBounds = (map: L.Map) => {
-  const bounds = map.getBounds()
-  return {
-    north: bounds.getNorth(),
-    south: bounds.getSouth(),
-    east: bounds.getEast(),
-    west: bounds.getWest()
-  }
-}
-
-const MapEventHandler = ({ onMove }: { onMove: (bounds: BoundType) => void }) => {
-  const map = useMapEvents({
-    moveend: () => onMove(getBounds(map)),
-    zoomend: () => onMove(getBounds(map)),
-    load: () => onMove(getBounds(map)),
-  })
-  return null
-}
 
 export const MapView = () => {
   const [bounds, setBounds] = useState<BoundType | null>(null)

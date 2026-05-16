@@ -1,18 +1,18 @@
 import axiosInstance from "../api/axiosInstance";
 
-interface LoginResponse {
+export interface LoginResponse {
   token: string,
 }
 
-export async function login(username: string, password: string) {
+export interface LoginRequest {
+  username: string,
+  password: string,
+}
+
+export async function login({ username, password }: LoginRequest) {
   const response = await axiosInstance.post<LoginResponse>(
     `/auth/login`,
-    { username, password },
-    {
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    }
+    { username, password }
   )
 
   return response.data

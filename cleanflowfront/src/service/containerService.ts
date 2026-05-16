@@ -1,6 +1,6 @@
-import type { BoundType } from "../components/MapView"
-import type { ContainerType } from "../models/container.model"
-import axiosInstance from "../api/axiosInstance"
+import type { BoundType } from "@/models/bound.model"
+import type { ContainerType } from "@/models/container.model"
+import axiosInstance from "@/api/axiosInstance"
 
 export async function getContainerInViewport(bounds: BoundType) {
   const { north, south, east, west } = bounds

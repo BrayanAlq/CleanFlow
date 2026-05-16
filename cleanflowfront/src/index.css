@@ -1,12 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Grey+Qo&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Markazi+Text:wght@400..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Marko+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Macondo+Swash+Caps&display=swap');
 @import 'tailwindcss';
 
 @theme {
   --color-border-accent: #ffffff4d;
   --color-bg-secondary: #292929;
-  --font-display: 'Grey Qo', cursive;
-  --font-normal: 'Markazi Text', serif;
+  --font-normal: 'Marko One', serif;
+  --font-main-title: 'Macondo Swash Caps', cursive;
+  --text-tiny: 0.625rem;
+  --text-tiny--line-height: 1.5rem;
 }
 
 :root {

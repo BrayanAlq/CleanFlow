@@ -1,4 +1,4 @@
-import { ExpandableImage } from "./ExpandableImage"
+import { ExpandableImage } from "@/components/MapManager/ExpandableImage"
 
 type ReportImageProps = {
   id: number,

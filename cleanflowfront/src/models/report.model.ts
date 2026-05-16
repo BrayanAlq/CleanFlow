@@ -1,5 +1,5 @@
-import type { ImageType } from "./image.model";
-import type { UserType } from "./user.model";
+import type { ImageType } from "@/models/image.model"
+import type { UserType } from "@/models/user.model"
 
 export interface ReportType {
   id: number,

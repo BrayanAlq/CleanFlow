@@ -1,10 +1,10 @@
+import { useStoreContainer } from "@/store/useStoreContainer"
+import { ReportItem } from "@/components/MapManager/ReportItem"
+import { getReportsByContainerId } from "@/service/reportService"
+import type { ReportType } from "@/models/report.model"
 import { useInfiniteQuery } from "@tanstack/react-query"
-import { useStoreContainer } from "../store/useStoreContainer"
-import { ReportItem } from "./ReportItem"
-import { getReportsByContainerId } from "../service/reportService"
 import { toast } from "sonner"
 import { useCallback, useEffect, useRef } from "react"
-import type { ReportType } from "../models/report.model"
 
 export const ReportSection = ({ liveReports }: { liveReports: ReportType[]} ) => {
   const selectedId = useStoreContainer((s) => s.selectedId)

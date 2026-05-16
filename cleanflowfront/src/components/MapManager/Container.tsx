@@ -1,11 +1,11 @@
+import { useStoreContainer } from "@/store/useStoreContainer"
+import { ContainerInfo } from "@/components/MapManager/ContainerInfo"
+import { ReportSection } from "@/components/MapManager/ReportSection"
+import { SendReport } from "@/components/MapManager/SendReport"
+import type { ReportType } from "@/models/report.model"
+import { useStomp } from "@/context/StompContext"
 import { useEffect, useState } from "react"
-import { useStoreContainer } from "../store/useStoreContainer"
-import { ContainerInfo } from "./ContainerInfo"
-import { ReportSection } from "./ReportSection"
-import { SendReport } from "./SendReport"
-import type { ReportType } from "../models/report.model"
 import { useQueryClient } from "@tanstack/react-query"
-import { useStomp } from "../context/StompContext"
 import type { IMessage } from "@stomp/stompjs"
 
 export const Container = () => {

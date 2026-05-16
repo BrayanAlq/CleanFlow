@@ -1,10 +1,10 @@
+import { IconCamera } from "@/icons/IconCamera"
+import { IconSend } from "@/icons/IconSend"
+import { useStoreContainer } from "@/store/useStoreContainer"
+import { sendImages } from "@/service/reportService"
+import { useStomp } from "@/context/StompContext"
 import React, { useRef, useState } from "react"
-import { IconCamera } from "../icons/IconCamera"
-import { IconSend } from "../icons/IconSend"
-import { useStoreContainer } from "../store/useStoreContainer"
-import { sendImages } from "../service/reportService"
 import { toast } from "sonner"
-import { useStomp } from "../context/StompContext"
 
 export const SendReport = () => {
   const [value, setValue] = useState("")

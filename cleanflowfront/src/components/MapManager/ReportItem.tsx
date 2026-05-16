@@ -1,13 +1,8 @@
-import type { ReportType } from "../models/report.model"
-import dayjs from "dayjs"
-import "dayjs/locale/es"
-import { ReportImage } from "./ReportImage"
-dayjs.locale("es")
+import type { ReportType } from "@/models/report.model"
+import { ReportImage } from "@/components/MapManager/ReportImage"
+import { formatDate } from "@/utils/dateutils"
 
 export const ReportItem = ({ content, images, timestamp, user }: ReportType) => {
-  const formatDate = (dateString: string) => {
-    return dayjs(dateString).format("D [de] MMMM YYYY, HH:mm")
-  }
   return (
     <div className="flex flex-col border-t-[0.1px] border-t-border-accent py-2">
       <div className="flex items-center justify-between">

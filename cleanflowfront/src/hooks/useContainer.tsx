@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import type { BoundType } from "../components/MapView";
-import { getContainerInViewport } from "../service/containerService";
-import { toast } from "sonner";
+import type { BoundType } from "@/models/bound.model"
+import { getContainerInViewport } from "@/service/containerService"
+import { useQuery } from "@tanstack/react-query"
+import { toast } from "sonner"
 
 export function useContainerInViewport(bounds: BoundType | null) {
   return useQuery({
