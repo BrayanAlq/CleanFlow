@@ -1,0 +1,17 @@
+info:
+  name: finish route
+  type: http
+  seq: 17
+
+http:
+  method: PATCH
+  url: "{{actual_url}}/route/24"
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImRyaXZlcjUiLCJyb2xlIjoiRFJJVkVSIiwiaWQiOjcsImZpcnN0X25hbWUiOiJEcml2ZXIiLCJsYXN0X25hbWUiOiJMaW1hIiwiZXhwIjoxNzc5NDkwNzQwfQ.2PoRxnWWNMKnoaID-9WBKnsjwEtk77ty_Z_1S_ZhdqI
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

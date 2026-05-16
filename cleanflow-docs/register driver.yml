@@ -10,9 +10,9 @@ http:
     type: json
     data: |-
       {
-        "username": "driver1",
+        "username": "driver15",
         "password": "password",
-        "email": "driver1@example.com",
+        "email": "driver15@example.com",
         "first_name": "Driver",
         "last_name": "Lima"
       }

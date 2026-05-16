@@ -1,0 +1,35 @@
+info:
+  name: get routes with filters
+  type: http
+  seq: 18
+
+http:
+  method: GET
+  url: "{{actual_url}}/route?driverId=9&date=2026-05-12&size=6"
+  params:
+    - name: driverId
+      value: "9"
+      type: query
+    - name: date
+      value: 2026-05-12
+      type: query
+    - name: size
+      value: "6"
+      type: query
+    - name: driverId
+      value: "3"
+      type: query
+      disabled: true
+    - name: date
+      value: 2026-05-14
+      type: query
+      disabled: true
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQURNSU4iLCJpZCI6MSwiZmlyc3RfbmFtZSI6IkFkbWluIiwibGFzdF9uYW1lIjoiTGltYSIsInVzZXJuYW1lIjoiYWRtaW4xIiwiZXhwIjoxNzc5NDg2Nzk2fQ.0lm1765joFkLdiXlBLO3H3Xwi7ySAHfpsQF1JqhNCHE
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
