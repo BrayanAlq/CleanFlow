@@ -10,14 +10,14 @@ public record ErrorResponseDTO(
     int statusCode, String message, String code, Map<String, String> details
 ) {
     public static ErrorResponseDTO of(
-        HttpStatus statusCode, String message, String code
+        HttpStatus statusCode, String code, String message
     ) {
         return ErrorResponseDTO.builder()
             .statusCode(statusCode.value()).message(message).code(code).build();
     }
 
     public static ErrorResponseDTO of(
-        HttpStatus statusCode, String message, String code, Map<String, String> details
+        HttpStatus statusCode, String code, String message, Map<String, String> details
     ) {
         return ErrorResponseDTO.builder()
             .statusCode(statusCode.value()).message(message).code(code).details(details).build();

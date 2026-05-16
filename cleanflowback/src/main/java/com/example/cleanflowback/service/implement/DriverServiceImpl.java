@@ -9,6 +9,8 @@ import com.example.cleanflowback.service.DriverService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class DriverServiceImpl implements DriverService {
@@ -21,5 +23,13 @@ public class DriverServiceImpl implements DriverService {
             .orElseThrow(() -> new ResourceNotFoundException("Driver Not Found"));
 
         return driverMapper.toInfoDTO(driverOnDb);
+    }
+
+    @Override
+    public List<DriverInfoResponseDTO> getAllDrivers() {
+        List<DriverEntity> driverEntities = driverRepository.findAll();
+        return driverEntities.stream()
+            .map(driverMapper::toInfoDTO)
+            .toList();
     }
 }

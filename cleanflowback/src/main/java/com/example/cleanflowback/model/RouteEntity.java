@@ -24,6 +24,12 @@ public class RouteEntity {
     @Column(nullable = true)
     private LocalDateTime endAt;
 
+    @Enumerated(EnumType.STRING)
+    private RouteStatusEnum status;
+
+    @Column(columnDefinition = "TEXT", nullable = true)
+    private String polyline;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "driver_id")
     private DriverEntity driver;
@@ -34,5 +40,6 @@ public class RouteEntity {
     @PrePersist
     public void prePersist() {
         this.startAt = LocalDateTime.now();
+        this.status = RouteStatusEnum.STARTED;
     }
 }

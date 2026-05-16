@@ -1,11 +1,9 @@
 package com.example.cleanflowback.controller;
 
 import com.example.cleanflowback.dto.out.DriverInfoResponseDTO;
-import com.example.cleanflowback.model.DriverEntity;
 import com.example.cleanflowback.service.DriverService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,15 +11,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/driver")
+@RequestMapping("admin")
 @AllArgsConstructor
-public class DriverController {
+public class AdminController {
     private final DriverService driverService;
 
-    @GetMapping("")
-    public ResponseEntity<DriverInfoResponseDTO> getDriverInfo(
-        @AuthenticationPrincipal DriverEntity driverEntity
-    ) {
-        return ResponseEntity.ok(driverService.getDriverInfo(driverEntity));
+    @GetMapping("/driver")
+    public ResponseEntity<List<DriverInfoResponseDTO>> getDriverInfo() {
+        return ResponseEntity.ok(driverService.getAllDrivers());
     }
 }

@@ -93,6 +93,18 @@ public class GlobalExceptionHandler {
             .body(ErrorResponseDTO.of(HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND", ex.getMessage()));
     }
 
+    @ExceptionHandler(RouteConflictException.class)
+    public ResponseEntity<ErrorResponseDTO> handleRouteConflictException(RouteConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(ErrorResponseDTO.of(HttpStatus.CONFLICT, "ROUTE_CONFLICT", ex.getMessage()));
+    }
+
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<ErrorResponseDTO> handleUnauthorizedAccessException(UnauthorizedAccessException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body(ErrorResponseDTO.of(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", ex.getMessage()));
+    }
+
     private static String toSnakeCase(String field) {
         return field.replaceAll("([a-z])([A-Z]+)", "$1_$2").toLowerCase();
     }
