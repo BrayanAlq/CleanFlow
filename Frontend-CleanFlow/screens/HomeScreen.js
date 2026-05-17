@@ -5,12 +5,13 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
+import { BINS } from "../data/mock";
 
-const data = [
-  { name: "Av. Los Olivos 245", status: "Lleno", percent: "92%" },
-  { name: "Jr. Lampa 480", status: "Disponible", percent: "64%" },
-  { name: "Av. Benavides 1820", status: "Disponible", percent: "28%" },
-];
+const citizenBins = BINS.slice(0, 3).map((b) => ({
+  name: b.name,
+  status: b.status,
+  percent: `${b.percent}%`,
+}));
 
 export default function HomeScreen({ navigation }) {
   return (
@@ -55,7 +56,7 @@ export default function HomeScreen({ navigation }) {
 
         <Text style={styles.section}>Tachos cerca de ti</Text>
 
-        {data.map((item, index) => (
+        {citizenBins.map((item, index) => (
           <View key={index} style={styles.listItem}>
             <View>
               <Text style={styles.bold}>{item.name}</Text>

@@ -10,10 +10,11 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
+import { BINS } from "../data/mock";
 
 export default function ReportarScreen() {
   const [selected, setSelected] = useState("Mal olor");
-  const [container, setContainer] = useState("CNT-001");
+  const [container, setContainer] = useState(BINS[0].id);
   const [details, setDetails] = useState("");
   const [image, setImage] = useState(null);
   const [reports, setReports] = useState([]);
@@ -24,7 +25,6 @@ export default function ReportarScreen() {
     { title: "Tacho dañado", subtitle: "Roto o vandalizado" },
   ];
 
-  // 🖼️ GALERÍA
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -43,7 +43,6 @@ export default function ReportarScreen() {
     }
   };
 
-  // 📸 CÁMARA
   const takePhoto = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
 
@@ -61,7 +60,6 @@ export default function ReportarScreen() {
     }
   };
 
-  // 🚀 ENVIAR REPORTE
   const handleReport = () => {
     const newReport = {
       id: Date.now().toString(),
@@ -75,7 +73,6 @@ export default function ReportarScreen() {
 
     setReports([newReport, ...reports]);
 
-    // limpiar
     setDetails("");
     setImage(null);
   };
@@ -87,7 +84,6 @@ export default function ReportarScreen() {
         <Text style={styles.title}>Reportar</Text>
         <Text style={styles.subtitle}>Ayuda a mejorar tu barrio</Text>
 
-        {/* OPCIONES */}
         <Text style={styles.label}>¿Qué quieres reportar?</Text>
 
         {options.map((item) => (
@@ -104,7 +100,6 @@ export default function ReportarScreen() {
           </TouchableOpacity>
         ))}
 
-        {/* SELECT */}
         <Text style={styles.label}>Contenedor cercano</Text>
 
         <View style={styles.select}>
@@ -112,15 +107,16 @@ export default function ReportarScreen() {
             selectedValue={container}
             onValueChange={(itemValue) => setContainer(itemValue)}
           >
-            <Picker.Item label="CNT-001 · Av. Los Olivos 245" value="CNT-001" />
-            <Picker.Item label="CNT-002 · Jr. Lampa 480" value="CNT-002" />
-            <Picker.Item label="CNT-003 · Av. Benavides 1820" value="CNT-003" />
-            <Picker.Item label="CNT-004 · Av. La Molina 540" value="CNT-004" />
-            <Picker.Item label="CNT-005 · Av. Los Olivos 410" value="CNT-005" />
+            {BINS.map((bin) => (
+              <Picker.Item
+                key={bin.id}
+                label={`BIN-00${bin.id} · ${bin.name}`}
+                value={bin.id}
+              />
+            ))}
           </Picker>
         </View>
 
-        {/* DETALLES */}
         <Text style={styles.label}>Detalles (opcional)</Text>
 
         <TextInput
@@ -131,7 +127,6 @@ export default function ReportarScreen() {
           onChangeText={setDetails}
         />
 
-        {/* BOTONES FOTO */}
         <View style={{ flexDirection: "row", gap: 10 }}>
           <TouchableOpacity style={styles.photo} onPress={pickImage}>
             <Text>🖼️ Galería</Text>
@@ -142,17 +137,14 @@ export default function ReportarScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* PREVIEW */}
         {image && (
           <Image source={{ uri: image }} style={styles.preview} />
         )}
 
-        {/* BOTÓN */}
         <TouchableOpacity style={styles.button} onPress={handleReport}>
           <Text style={styles.buttonText}>Enviar reporte</Text>
         </TouchableOpacity>
 
-        {/* LISTA */}
         <Text style={styles.section}>Tus reportes</Text>
 
         {reports.length === 0 && (
@@ -188,31 +180,25 @@ export default function ReportarScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f5f5", padding: 16 },
-
   title: { fontSize: 24, fontWeight: "bold" },
   subtitle: { color: "#666", marginBottom: 16 },
-
   label: { marginTop: 16, marginBottom: 8, fontWeight: "bold" },
-
   option: {
     backgroundColor: "#fff",
     padding: 16,
     borderRadius: 16,
     marginBottom: 10,
   },
-
   optionActive: {
     borderWidth: 2,
     borderColor: "#2e7d32",
     backgroundColor: "#eef7ef",
   },
-
   select: {
     backgroundColor: "#fff",
     borderRadius: 16,
     overflow: "hidden",
   },
-
   input: {
     backgroundColor: "#fff",
     padding: 16,
@@ -220,21 +206,18 @@ const styles = StyleSheet.create({
     height: 100,
     textAlignVertical: "top",
   },
-
   photo: {
     marginTop: 10,
     backgroundColor: "#fff",
     padding: 12,
     borderRadius: 20,
   },
-
   preview: {
     width: "100%",
     height: 150,
     borderRadius: 12,
     marginTop: 10,
   },
-
   button: {
     marginTop: 20,
     backgroundColor: "#111",
@@ -242,14 +225,11 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     alignItems: "center",
   },
-
   buttonText: { color: "#fff", fontWeight: "bold" },
-
   section: {
     marginTop: 20,
     fontWeight: "bold",
   },
-
   reportItem: {
     backgroundColor: "#fff",
     padding: 16,
@@ -258,14 +238,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-
   reportImage: {
     width: 60,
     height: 60,
     borderRadius: 10,
     marginTop: 5,
   },
-
   badgePending: {
     backgroundColor: "#fde7c7",
     paddingHorizontal: 10,
@@ -274,7 +252,6 @@ const styles = StyleSheet.create({
     color: "#f57c00",
     alignSelf: "flex-start",
   },
-
   bold: { fontWeight: "bold" },
   gray: { color: "#777" },
 });
