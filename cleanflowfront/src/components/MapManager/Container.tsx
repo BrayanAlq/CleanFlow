@@ -40,7 +40,7 @@ export const Container = () => {
       {
         selectedId && (
           <div
-            className="absolute w-90 h-auto rounded-2xl bg-bg-secondary top-5 right-5 z-1000 border-border-accent border-[0.1px] shadow-2xs overflow-hidden flex flex-col"
+            className="absolute w-90 h-auto rounded-2xl bg-bg-secondary top-5 right-5 z-1000 border-border-accent border-[0.1px] shadow-2xs overflow-hidden flex flex-col font-normal"
           >
             <ContainerInfo />
             <ReportSection liveReports={liveReports} />

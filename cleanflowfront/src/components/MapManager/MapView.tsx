@@ -87,6 +87,7 @@ export const MapView = () => {
     >
       <MapContainer
         key="main-map"
+        zoomControl={false}
         className="h-full w-full"
         center={[-12.088, -77.016]}
         zoom={17}

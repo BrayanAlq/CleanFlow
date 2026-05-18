@@ -16,10 +16,6 @@ http:
     - name: size
       value: "6"
       type: query
-    - name: driverId
-      value: "3"
-      type: query
-      disabled: true
     - name: date
       value: 2026-05-14
       type: query

@@ -4,7 +4,7 @@ export const BadgeItem = ({ text, children } : { text: string, children: ReactNo
   return (
     <div className="flex items-center gap-1">
       {children}
-      <p className="text-sm">{text}</p>
+      <p className="">{text}</p>
     </div>
   )
 }

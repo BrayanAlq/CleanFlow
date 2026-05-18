@@ -45,11 +45,11 @@ export const RouteViewerScreen = () => {
 
   return (
     <div
-      className="h-[96vh] rounded-2xl w-[90%] border-[0.1px] border-border-accent relative overflow-hidden"
+      className="h-[96vh] rounded-xl w-[97%] border-[0.1px] border-border-accent relative overflow-hidden"
     >
       <MapContainer
-        // key={`map-${selectedRouteId}`}
         key="main-map"
+        zoomControl={false}
         className="h-full w-full"
         center={[-12.088, -77.016]}
         zoom={16}

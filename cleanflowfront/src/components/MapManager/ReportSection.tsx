@@ -55,13 +55,16 @@ export const ReportSection = ({ liveReports }: { liveReports: ReportType[]} ) =>
 
   return (
     <div className="overflow-y-scroll px-5 text-white flex flex-col max-h-64">
-      <h1 className="text-lg font-bold pb-2">Reportes</h1>
-      {
-        allReports?.map(
-          ({ id, content, images, timestamp, user }) => 
-          <ReportItem key={id} id={id} content={content} images={images} timestamp={timestamp} user={user} />
-        )
-      }
+      <h1 className="text-sm font-bold pb-2">Reportes</h1>
+      <div className="flex-1 flex flex-col gap-2">
+        {
+          allReports
+            ? allReports?.map(({ id, content, images, timestamp, user }) => 
+                <ReportItem key={id} id={id} content={content} images={images} timestamp={timestamp} user={user} />
+              )
+            : <p className="text-center text-sm text-gray-400">No hay reportes</p>
+        }
+      </div>
       <div ref={bottomRef} className="py-1">
         {isFetchingNextPage && (
           <p className="text-center text-sm text-gray-400">Cargando más...</p>

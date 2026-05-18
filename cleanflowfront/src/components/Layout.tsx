@@ -4,9 +4,7 @@ import { NavBar } from "@/components/NavBar"
 export const Layout = () => {
   return (
     <div className="flex w-dvw h-dvh bg-black">
-      <div className="w-50">
-        <NavBar />
-      </div>
+      <NavBar />
       <div className="flex flex-1 items-center justify-center">
         <Outlet />
       </div>

@@ -36,7 +36,7 @@ export const Filters = ({ driverId, onDriverChange, date, onDateChange }: Filter
             )
           }}
           defaultValue=""
-          className="appearance-none w-full border-border-accent border-[0.1px] rounded-lg p-2 cursor-pointer text-tiny"
+          className="appearance-none w-full border-border-accent border-[0.1px] rounded-lg p-2 cursor-pointer text-tiny bg-black/20"
         >
           <option value="" disabled selected hidden>Seleccione un conductor</option>
           {
@@ -54,7 +54,7 @@ export const Filters = ({ driverId, onDriverChange, date, onDateChange }: Filter
           )
         }}
         type="date"
-        className="w-5/12 border-border-accent border-[0.1px] rounded-lg p-2 outline-none text-tiny cursor-text"
+        className="w-5/12 border-border-accent border-[0.1px] rounded-lg p-2 outline-none text-tiny cursor-text bg-black/20"
       />
     </div>
   )

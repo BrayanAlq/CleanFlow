@@ -45,8 +45,8 @@ export const ContainerInfo = () => {
         </ExpandableImage>
       </div>
       <div className="text-white px-5 py-3 flex flex-col gap-2">
-        <h1 className="text-lg font-bold">{container?.name}</h1>
-        <div className="flex items-center justify-between gap-1 text-sm">
+        <h1 className="text-sm font-bold">{container?.name}</h1>
+        <div className="flex items-center justify-between gap-1 text-xs">
           <BadgeItem text="Trabajando">
             {
               true ? <IconAlive className="w-4 h-4 text-red-400" /> : <IconOff className="w-4 h-4 text-red-400" />
@@ -64,7 +64,7 @@ export const ContainerInfo = () => {
         </div>
         <div className="flex items-center gap-1">
           <IconAddress className="w-4 h-4 text-red-400" />
-          <p className="text-xs">{container?.address_name}</p>
+          <p className="text-tiny">{container?.address_name}</p>
         </div>
       </div>
     </div>

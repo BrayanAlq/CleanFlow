@@ -73,7 +73,7 @@ export const SendReport = () => {
       <div className="relative shrink-0">
         <button 
           onClick={handleCameraClick}
-          className="shrink-0 rounded-lg bg-amber-100 cursor-pointer px-2 h-full"
+          className="shrink-0 rounded-lg bg-tertiary/80 cursor-pointer px-2 h-full"
         >
           <IconCamera className="w-6 h-6 text-bg-secondary" />
         </button>
@@ -84,7 +84,7 @@ export const SendReport = () => {
         )}
       </div>
       <input
-        className="flex-1 min-w-0 rounded-lg border-[0.1px] border-border-accent px-3 text-sm outline-none text-white"
+        className="flex-1 min-w-0 rounded-lg border-[0.1px] border-border-accent px-3 outline-none text-white bg-black/20 text-tiny"
         placeholder="Escribe aquí tu reporte"
         value={value}
         onChange={(e) => setValue(e.target.value)}
@@ -93,7 +93,7 @@ export const SendReport = () => {
       <button
         onClick={handleSendReport}
         disabled={isSending}
-        className="shrink-0 rounded-lg text-sm bg-amber-100 cursor-pointer px-2"
+        className="shrink-0 rounded-lg text-sm bg-tertiary/80 cursor-pointer px-2"
       >
         <IconSend className="w-6 h-6 text-bg-secondary" />
       </button>
