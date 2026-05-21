@@ -29,13 +29,13 @@ COPY public.actual_container (id, container_id) FROM stdin;
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: dbuser
 --
 
-COPY public.users (id, email, first_name, last_name, password, role, username) FROM stdin;
-1	admin1@example.com	Admin	San Isidro	$2a$10$V/H82VltpU9mTax7yzAsW.qj0eG3HCpYVdjL7LfYSoL81g66AxVVy	ADMIN	admin1
-2	driver1@example.com	Juan	Driver	$2a$10$Jy7F6EvKnOJh4IuMgl9Hh.4sYHxldhW9vOKIiGzR9A9hSlaE4MGCC	DRIVER	driver1
-3	driver2@example.com	María	Driver	$2a$10$MoRUk57mM.Sk9UkRvtMNnuEyOvF3uCgs6tXqsQzzT6123NqKOdsgq	DRIVER	driver2
-4	driver3@example.com	Carlos	Driver	$2a$10$kRyevS0bLqA8mrsRmd.Yg.0uVc.rOvpuO09dUwX3BOBQSQQkViL36	DRIVER	driver3
-5	driver4@example.com	Pamela	Driver	$2a$10$uFbunJb8AoTTMghVc9gWl.vWpAWSOhvHotphLAa/5hHdF/UfQfJWW	DRIVER	driver4
-6	driver5@example.com	Alma	Driver	$2a$10$wed3tiycOjcArTVNAGg8/.Avo32acE3xcXb4EqKY6DhbSwgT2/QJC	DRIVER	driver5
+COPY public.users (id, email, first_name, last_name, password, role, username, enabled) FROM stdin;
+5	driver4@example.com	Pamela	Driver	$2a$10$uFbunJb8AoTTMghVc9gWl.vWpAWSOhvHotphLAa/5hHdF/UfQfJWW	DRIVER	driver4	t
+3	driver2@example.com	María	Driver	$2a$10$MoRUk57mM.Sk9UkRvtMNnuEyOvF3uCgs6tXqsQzzT6123NqKOdsgq	DRIVER	driver2	t
+6	driver5@example.com	Alma	Driver	$2a$10$wed3tiycOjcArTVNAGg8/.Avo32acE3xcXb4EqKY6DhbSwgT2/QJC	DRIVER	driver5	t
+4	driver3@example.com	Carlos	Driver	$2a$10$kRyevS0bLqA8mrsRmd.Yg.0uVc.rOvpuO09dUwX3BOBQSQQkViL36	DRIVER	driver3	t
+2	driver1@example.com	Juan	Driver	$2a$10$Jy7F6EvKnOJh4IuMgl9Hh.4sYHxldhW9vOKIiGzR9A9hSlaE4MGCC	DRIVER	driver1	t
+1	admin1@example.com	Admin	San Isidro	$2a$10$V/H82VltpU9mTax7yzAsW.qj0eG3HCpYVdjL7LfYSoL81g66AxVVy	ADMIN	admin1	t
 \.
 
 
