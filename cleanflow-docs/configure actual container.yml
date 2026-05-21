@@ -1,7 +1,7 @@
 info:
   name: configure actual container
   type: http
-  seq: 15
+  seq: 21
 
 http:
   method: POST
@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-        "container_id": 4
+        "container_id": 2
       }
   auth:
     type: bearer

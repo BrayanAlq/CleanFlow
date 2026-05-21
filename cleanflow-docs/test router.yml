@@ -1,7 +1,7 @@
 info:
   name: test router
   type: http
-  seq: 20
+  seq: 19
 
 http:
   method: GET

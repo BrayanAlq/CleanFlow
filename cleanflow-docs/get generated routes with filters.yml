@@ -1,7 +1,7 @@
 info:
   name: get generated routes with filters
   type: http
-  seq: 21
+  seq: 20
 
 http:
   method: GET
