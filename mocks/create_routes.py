@@ -28,46 +28,6 @@ drivers = [
   {
     "username": "driver5",
     "password": "password"
-  },
-  {
-    "username": "driver6",
-    "password": "password"
-  },
-  {
-    "username": "driver7",
-    "password": "password"
-  },
-  {
-    "username": "driver8",
-    "password": "password"
-  },
-  {
-    "username": "driver9",
-    "password": "password"
-  },
-  {
-    "username": "driver10",
-    "password": "password"
-  },
-  {
-    "username": "driver11",
-    "password": "password"
-  },
-  {
-    "username": "driver12",
-    "password": "password"
-  },
-  {
-    "username": "driver13",
-    "password": "password"
-  },
-  {
-    "username": "driver14",
-    "password": "password"
-  },
-  {
-    "username": "driver15",
-    "password": "password"
   }
 ]
 
@@ -102,7 +62,7 @@ if __name__ == '__main__':
     print(json.dumps(response, indent=2, ensure_ascii=False))
     token = response['token']
 
-    routes = random.randint(5, 9)
+    routes = random.randint(5, 12)
 
     for _ in range(routes):
       route_response = create_route(token)

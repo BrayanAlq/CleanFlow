@@ -1,0 +1,29 @@
+info:
+  name: get generated routes with filters
+  type: http
+  seq: 21
+
+http:
+  method: GET
+  url: "{{actual_url}}/generated-route?driverId=4"
+  params:
+    - name: cursor
+      value: eyJpZCI6NDgsImNyZWF0ZWRfYXQiOiIyMDI2LTA1LTExVDE3OjA2OjMxLjc0NyJ9
+      type: query
+      disabled: true
+    - name: driverId
+      value: "4"
+      type: query
+    - name: size
+      value: "6"
+      type: query
+      disabled: true
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQURNSU4iLCJpZCI6MSwiZmlyc3RfbmFtZSI6IkFkbWluIiwibGFzdF9uYW1lIjoiU2FuIElzaWRybyIsInVzZXJuYW1lIjoiYWRtaW4xIiwiZXhwIjoxNzc5OTE1MjY3fQ.00Fc__oXO--LGWCHlV6kvf1AvPYsgUA321kqRPvgz3U
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

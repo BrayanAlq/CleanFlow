@@ -5,19 +5,18 @@ info:
 
 http:
   method: GET
-  url: "{{actual_url}}/route?driverId=9&date=2026-05-12&size=6"
+  url: "{{actual_url}}/route"
   params:
     - name: driverId
       value: "9"
       type: query
+      disabled: true
     - name: date
       value: 2026-05-12
       type: query
+      disabled: true
     - name: size
       value: "6"
-      type: query
-    - name: date
-      value: 2026-05-14
       type: query
       disabled: true
   auth:

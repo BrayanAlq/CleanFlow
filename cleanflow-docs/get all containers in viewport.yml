@@ -5,23 +5,27 @@ info:
 
 http:
   method: GET
-  url: "{{actual_url}}/container/viewport?north=&south=&east=&west="
+  url: "{{actual_url}}/container/viewport"
   params:
     - name: north
       value: ""
       type: query
+      disabled: true
     - name: south
       value: ""
       type: query
+      disabled: true
     - name: east
       value: ""
       type: query
+      disabled: true
     - name: west
       value: ""
       type: query
+      disabled: true
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImFkbWluMSIsImxhc3RfbmFtZSI6IkxpbWEiLCJmaXJzdF9uYW1lIjoiQWRtaW4iLCJpZCI6MSwicm9sZSI6IkFETUlOIiwiZXhwIjoxNzc4Nzg1NzA3fQ.-qu_L3TPVGoktOS1BMbP4zZ_hAnu4shUp9DUD0LKm_0
+    token: eyJhbGciOiJIUzI1NiJ9.eyJmaXJzdF9uYW1lIjoiQWRtaW4iLCJsYXN0X25hbWUiOiJTYW4gSXNpZHJvIiwidXNlcm5hbWUiOiJhZG1pbjEiLCJyb2xlIjoiQURNSU4iLCJpZCI6MSwiZXhwIjoxNzc5ODQ0MDM2fQ.SW228FWSluQYutDwx3NwvOwcvC2gcvqBXMqqB0waLNw
 
 settings:
   encodeUrl: true
