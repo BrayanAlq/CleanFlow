@@ -30,10 +30,10 @@ public class ContainerController {
 
     @GetMapping("/viewport")
     public ResponseEntity<List<ContainerResponseDTO>> findAllInViewport(
-        @RequestParam("north") Double north,
-        @RequestParam("south") Double south,
-        @RequestParam("west")  Double west,
-        @RequestParam("east") Double east
+        @RequestParam(value = "north", required = true) Double north,
+        @RequestParam(value = "south", required = true) Double south,
+        @RequestParam(value = "west", required = true)  Double west,
+        @RequestParam(value = "east", required = true) Double east
     ) {
         return ResponseEntity.ok(containerService.findAllContainersInViewport(north, south, west, east));
     }

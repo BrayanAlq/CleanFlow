@@ -60,7 +60,7 @@ public class ContainerServiceImpl implements ContainerService {
         containerEntity.setSecret(passwordEncoder.encode(secret));
         containerEntity.setLocation(requestDTO.latitude(), requestDTO.longitude());
 
-        return containerMapper.fromEntitytoDTO(containerRepository.save(containerEntity));
+        return containerMapper.fromEntityDTO(containerRepository.save(containerEntity));
     }
 
     @Override
@@ -68,7 +68,7 @@ public class ContainerServiceImpl implements ContainerService {
         List<ContainerEntity> containerInViewport = containerRepository.findAllInViewport(north, south, east, west);
 
         return containerInViewport.stream()
-            .map(containerMapper::fromEntitytoDTO)
+            .map(containerMapper::fromEntityDTO)
             .toList();
     }
 
@@ -91,7 +91,7 @@ public class ContainerServiceImpl implements ContainerService {
         ContainerEntity containerEntity = containerRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException(("container not found")));
 
-        return containerMapper.fromEntitytoDTO(containerEntity);
+        return containerMapper.fromEntityDTO(containerEntity);
     }
 
     @Override

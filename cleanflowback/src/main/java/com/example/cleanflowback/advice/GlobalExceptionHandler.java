@@ -105,6 +105,12 @@ public class GlobalExceptionHandler {
             .body(ErrorResponseDTO.of(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", ex.getMessage()));
     }
 
+    @ExceptionHandler(KMeansConflictException.class)
+    public ResponseEntity<ErrorResponseDTO> handleKMeansConflictException(KMeansConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(ErrorResponseDTO.of(HttpStatus.CONFLICT, "CONFLICT", ex.getMessage()));
+    }
+
     private static String toSnakeCase(String field) {
         return field.replaceAll("([a-z])([A-Z]+)", "$1_$2").toLowerCase();
     }

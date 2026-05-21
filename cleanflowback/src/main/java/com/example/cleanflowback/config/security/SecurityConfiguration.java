@@ -48,7 +48,8 @@ public class SecurityConfiguration {
                     "/driver/**"
                 ).hasRole("DRIVER")
                 .requestMatchers(
-                    "/actual-container/**"
+                    "/actual-container/**",
+                    "/edge/**"
                 ).hasRole("ADMIN")
                 .anyRequest().authenticated()
             ).exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))

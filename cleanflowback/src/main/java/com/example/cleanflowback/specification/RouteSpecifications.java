@@ -14,7 +14,7 @@ public class RouteSpecifications {
         return (r, q, cb) ->
             cb.and(
                 cb.greaterThanOrEqualTo(r.get("startAt"), start),
-                cb.lessThanOrEqualTo(r.get("startAt"), end)
+                cb.lessThan(r.get("startAt"), end)
             );
     }
 

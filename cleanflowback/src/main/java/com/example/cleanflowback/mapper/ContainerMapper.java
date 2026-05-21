@@ -15,6 +15,6 @@ import org.mapstruct.MappingConstants;
 public interface ContainerMapper {
     @Mapping(target = "location", ignore = true)
     ContainerEntity fromRequestDTOtoEntity(CreateContainerRequestDTO dto);
-    ContainerResponseDTO fromEntitytoDTO(ContainerEntity entity);
+    ContainerResponseDTO fromEntityDTO(ContainerEntity entity);
     ContainerResponseForDeviceDTO fromEntityToDTOForDevice(ContainerEntity entity);
 }

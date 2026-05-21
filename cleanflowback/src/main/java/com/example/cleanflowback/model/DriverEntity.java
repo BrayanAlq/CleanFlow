@@ -16,4 +16,7 @@ import java.util.List;
 public class DriverEntity extends UserEntity {
     @OneToMany(mappedBy = "driver", fetch = FetchType.LAZY)
     private List<RouteEntity> routes;
+
+    @OneToMany(mappedBy = "driver", fetch = FetchType.LAZY)
+    private List<GeneratedRouteEntity>  generatedRoutes;
 }
