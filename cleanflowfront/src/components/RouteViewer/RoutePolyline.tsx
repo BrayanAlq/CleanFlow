@@ -1,28 +1,20 @@
 import { useEffect, useRef } from "react"
 import { Polyline, useMap } from "react-leaflet"
 
-import L from "leaflet"
-
 interface RoutePolylineProps {
   positions: [number, number][]
-  selected: boolean
+  selected: boolean,
+  color: string
 }
 
-export const RoutePolyline = ({ positions, selected }: RoutePolylineProps) => {
+export const RoutePolyline = ({ positions, selected, color }: RoutePolylineProps) => {
   const ref = useRef<any>(null)
   const map = useMap()
 
   useEffect(() => {
-    const bounds = L.latLngBounds(positions)
-    map.fitBounds(bounds, {
-      padding: [60, 60],
-      animate: true,
-      maxZoom: 16,
-    })
-
     if (ref.current) {
       ref.current.setStyle({
-        color: selected ? "blue" : "red",
+        color:  color,
         weight: selected ? 6 : 3,
       })
     }
@@ -32,8 +24,8 @@ export const RoutePolyline = ({ positions, selected }: RoutePolylineProps) => {
     <Polyline
       ref={ref}
       positions={positions}
-      color={selected ? "blue" : "red"} // fallback inicial
-      weight={selected ? 6 : 3}
+      color={'blue'} // fallback inicial
+      weight={selected ? 8 : 5}
     />
   )
 }

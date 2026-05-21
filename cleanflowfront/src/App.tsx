@@ -3,7 +3,8 @@ import { MapManageScreen } from '@/pages/MapManageScreen'
 import { LoginScreen } from '@/pages/LoginScreen'
 import { PrivateRoute } from '@/auth/PrivateRoute'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { RouteViewerScreen } from './pages/RouteViewerScreen'
+import { RouteViewerScreen } from '@/pages/RouteViewerScreen'
+import { GeneratedRoutesScreen } from '@/pages/GeneratedRoutesScreen'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
           <Route path="map" element={<MapManageScreen />} />
           <Route path="routes" element={<RouteViewerScreen />} />
+          <Route path="generated-routes" element={<GeneratedRoutesScreen />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" replace />} />

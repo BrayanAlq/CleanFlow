@@ -1,16 +1,20 @@
 interface InputProps {
-  className?: string,
+  inputStyle?: string,
+  labelStyle?: string,
+  readonly?: boolean,
   name: string,
   type: string,
   placeholder: string,
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
-  value: string,
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void,
+  value: string | number,
   errors?: string,
   children?: React.ReactNode,
 }
 
 export const Input = ({
-  className,
+  inputStyle,
+  labelStyle,
+  readonly,
   name,
   type,
   placeholder,
@@ -21,11 +25,12 @@ export const Input = ({
 }: InputProps
 ) => {
   return (
-    <div className={`flex flex-col h-auto w-full gap-2 text-xs ${className}`}>
-      <label className="">{name}</label>
+    <div className={`flex flex-col h-auto w-full gap-2`}>
+      <label className={labelStyle}>{name}</label>
       <input
         type={type}
-        className={`${errors ? 'border-red-500' : ''} h-10 rounded-lg border-black border-[0.1px] px-3 py-0 outline-none text-black`}
+        readOnly={readonly}
+        className={`${errors ? 'border-red-500' : ''} h-10 rounded-lg border-[0.1px] px-2 py-0 outline-none text-black ${inputStyle}`}
         placeholder={placeholder}
         onChange={onChange}
         value={value}

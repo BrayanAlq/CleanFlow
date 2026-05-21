@@ -1,5 +1,5 @@
 import type { BoundType } from "@/models/bound.model"
-import type { ContainerType } from "@/models/container.model"
+import type { ContainerCreateType, ContainerType } from "@/models/container.model"
 import axiosInstance from "@/api/axiosInstance"
 
 export async function getContainerInViewport(bounds: BoundType) {
@@ -17,4 +17,23 @@ export async function getContainerById(id: number) {
   )
 
   return container.data
+}
+
+export const createContainer = async (container: ContainerCreateType, image: File) => {
+  const formData = new FormData()
+  formData.append(
+    'container',
+    new Blob([JSON.stringify(container)], { type: 'application/json' }),
+  )
+  formData.append('image', image)
+  const response = await axiosInstance.post<ContainerType>(
+    '/container',
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    }
+  )
+  return response.data
 }

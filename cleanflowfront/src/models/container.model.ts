@@ -7,6 +7,8 @@ export interface ContainerType {
   container_image: ContainerImageType,
 }
 
+export interface ContainerCreateType extends Omit<ContainerType, 'id' | 'container_image'> {}
+
 export interface ContainerImageType {
   id: number,
   url: string,

@@ -15,6 +15,8 @@ import { MapEventHandler } from "@/components/MapManager/MapHandler"
 import { DriverContainer } from "@/components/RouteViewer/DriverContainer"
 import { useStoreRoute } from "@/store/useStoreRoute"
 import { RoutePolyline } from "@/components/RouteViewer/RoutePolyline"
+import { palette } from "@/utils/palete"
+import { MapEffects } from "@/components/RouteViewer/MapEffects"
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -37,10 +39,30 @@ export const RouteViewerScreen = () => {
   const selectedRouteId = useStoreRoute((r) => r.selectedRouteId)
 
   const decodedRoutes = useMemo(() => {
-    return routes.map((route) => ({
-      id: route.id,
-      positions: polyline.decode(route.polyline) as [number, number][],
-    }))
+    if (!routes || routes.length === 0) return []
+    return routes
+      .filter(route => route.polyline != null && route.polyline.length > 0)
+      .map((route) => ({
+        id: route.id,
+        positions: polyline.decode(route.polyline) as [number, number][],
+        driver_id: route.driver.id
+      }))
+  }, [routes])
+
+  const driverColors = useMemo(() => {
+    const map = new Map<number, string>()
+
+    if (!Array.isArray(routes)) return map
+
+    routes?.forEach(r => {
+      if (!map.has(r.driver.id)) {
+        map.set(
+          r.driver.id,
+          palette[map.size % palette.length]
+        )
+      }
+    })
+    return map
   }, [routes])
 
   return (
@@ -51,7 +73,7 @@ export const RouteViewerScreen = () => {
         key="main-map"
         zoomControl={false}
         className="h-full w-full"
-        center={[-12.088, -77.016]}
+        center={[-12.0799, -77.019]}
         zoom={16}
         whenReady={function (this: L.Map) { setBounds(getBounds(this)) }}
       >
@@ -59,6 +81,7 @@ export const RouteViewerScreen = () => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution="© OpenStreetMap contributors"
         />
+        <MapEffects routes={routes} selectedRouteId={selectedRouteId} />
         {
           containers.map(({ id, latitude, longitude }) => {
             return (
@@ -70,11 +93,12 @@ export const RouteViewerScreen = () => {
           })
         }
         {
-          decodedRoutes?.map(({ positions, id }) => (
+          decodedRoutes?.map(({ positions, id, driver_id }) => (
             <RoutePolyline
               key={id}
               positions={positions}
               selected={id === selectedRouteId}
+              color={driverColors.get(driver_id)!}
             />
           ))
         }

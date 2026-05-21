@@ -1,6 +1,9 @@
 import type { BoundType } from "@/models/bound.model"
-import { getContainerInViewport } from "@/service/containerService"
-import { useQuery } from "@tanstack/react-query"
+import type { ContainerCreateType, ContainerType } from "@/models/container.model"
+import type { ErrorApiType } from "@/models/error.model"
+import { createContainer, getContainerInViewport } from "@/service/containerService"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import type { AxiosError } from "axios"
 import { toast } from "sonner"
 
 export function useContainerInViewport(bounds: BoundType | null) {
@@ -16,6 +19,28 @@ export function useContainerInViewport(bounds: BoundType | null) {
           description: error.message,
         })
       }
+    }
+  })
+}
+
+interface CreateContainerPayload {
+  container: ContainerCreateType,
+  image: File,
+}
+
+export const useCreateContainer = () => {
+  const queryClient = useQueryClient()
+  return useMutation<
+    ContainerType,
+    AxiosError<ErrorApiType>,
+    CreateContainerPayload
+  >({
+    mutationFn: ({ container, image }) => createContainer(container, image),
+    onError: (e) => console.log(e),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['container', 'viewport']
+      })
     }
   })
 }

@@ -1,23 +1,21 @@
-import { formatToDate, formatToHour } from "@/utils/dateutils"
+import { formatToDate } from "@/utils/dateutils"
 import { ShapeRoute } from "@/components/RouteViewer/ShapeRoute"
-import { useStoreRoute } from "@/store/useStoreRoute"
 import { IconCalendar } from "@/icons/IconCalendar"
-import { IconClock } from "@/icons/IconClock"
+import { useStoreGeneratedRoutes } from "@/store/useStoreGeneratedRoutes"
 
-interface CardRouteProps {
+interface CardGeneratedRouteProps {
   id: number
   name: string
-  startTime: string
-  endTime: string
   polyline: string
+  created_at: string
 }
 
-export const CardRoute = ({ id, name, startTime, endTime, polyline }: CardRouteProps) => {
-  const setSelectedRouteId = useStoreRoute((r) => r.setSelectedRouteId)
+export const CardGeneratedRoute = ({ id, name, created_at, polyline }: CardGeneratedRouteProps) => {
+  const setSelectedGeneratedRouteId = useStoreGeneratedRoutes((r) => r.setSelectedGeneratedRouteId)
   return (
     <div
       onClick={() => {
-        setSelectedRouteId(id)
+        setSelectedGeneratedRouteId(id)
       }}
       className="flex w-full h-16 px-1 gap-2 items-center rounded-lg text-tiny cursor-pointer bg-black/20 hover:bg-white/10"
     >
@@ -26,6 +24,7 @@ export const CardRoute = ({ id, name, startTime, endTime, polyline }: CardRouteP
       >
         {
           polyline && <ShapeRoute
+            key={`${id}-shape`}
             polyline={polyline}
             className="w-full h-full text-black"
           />
@@ -35,11 +34,7 @@ export const CardRoute = ({ id, name, startTime, endTime, polyline }: CardRouteP
         <p>{name}</p>
         <div className="flex items-center gap-1">
           <IconCalendar className="w-3 h-3" />
-          <p>{formatToDate(startTime)}</p>
-        </div>
-        <div className="flex items-center gap-1">
-          <IconClock className="w-3 h-3" />
-          <p>{formatToHour(startTime) + ' - ' + formatToHour(endTime)}</p>
+          <p>{formatToDate(created_at)}</p>
         </div>
       </div>
     </div>

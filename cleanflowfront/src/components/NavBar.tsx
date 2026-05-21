@@ -15,6 +15,11 @@ const routes = [
     name: 'Rutas',
     path: '/routes',
     icon: <IconRoute className="w-5 h-5" />
+  },
+  {
+    name: 'Rutas Generadas',
+    path: '/generated-routes',
+    icon: <IconRoute className="w-5 h-5" />
   }
 ]
 
@@ -39,7 +44,7 @@ export const NavBar = () => {
               <NavLink
                 key={path}
                 to={path}
-                className={({ isActive }) => `h-10 text-base flex items-center gap-2 p-2 rounded-lg ${
+                className={({ isActive }) => `h-10 text-xs flex items-center gap-2 p-2 rounded-lg ${
                   isActive
                     ? 'bg-black/20'
                     : 'hover:bg-white/10'
@@ -51,9 +56,13 @@ export const NavBar = () => {
           })
         }
       </div>
-      <div className="p-5 h-auto text-base flex items-center justify-between">
+      <div className="p-5 h-auto text-xs flex items-center justify-between">
         {!collapsed && <p>Salir</p>}
-        <IconLogOut className="w-5 h-5" />
+        <button
+          className="cursor-pointer"
+        >
+          <IconLogOut className="w-5 h-5" />
+        </button>
       </div>
     </main>
   )

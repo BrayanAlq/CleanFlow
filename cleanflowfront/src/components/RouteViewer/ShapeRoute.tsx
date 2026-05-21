@@ -6,6 +6,7 @@ interface ShapeRouteProps {
 }
 
 export const ShapeRoute = ({ polyline: plString, className }: ShapeRouteProps) => {
+  if (!plString) return null
   const points = polyline.decode(plString)
   
   if (points.length === 0) return null

@@ -18,6 +18,9 @@ import { useStomp } from "@/context/StompContext"
 import type { DriverType } from "@/models/driver.model"
 import { getBounds, type BoundType } from "@/models/bound.model"
 import { MapEventHandler } from "@/components/MapManager/MapHandler"
+import { CreateContainer } from "@/components/MapManager/CreateContainer"
+import { CreateContainerButtom } from "@/components/MapManager/CreateContainerButtom"
+import type { PositionType } from "@/models/position.model"
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -45,6 +48,10 @@ export const MapManageScreen = () => {
   const { data: containers = [] } = useContainerInViewport(bounds)
   const setSelectedId = useStoreContainer((s) => s.setSelectedId)
   const [drivers, setDrivers] = useState<DriverType[]>([])
+  // create container
+  const [isCreating, setIsCreating] = useState(false)
+  const [position, setPosition] = useState<PositionType | null>(null)
+  const [map, setMap] = useState<L.Map | null>(null)
 
   const { connected, subscribe, publish } = useStomp()
 
@@ -81,6 +88,17 @@ export const MapManageScreen = () => {
     publish('/app/viewport.update', bounds)
   }, [bounds, connected])
 
+  const handleCreateClick = () => {
+    if (!map) return
+    const center = map.getCenter()
+    setIsCreating(prev => !prev)
+    
+    setPosition({
+      latitude: center.lat,
+      longitude: center.lng,
+    })
+  }
+
   return (
     <div
       className="h-[96vh] rounded-xl w-[97%] border-[0.1px] border-border-accent relative overflow-hidden"
@@ -89,9 +107,12 @@ export const MapManageScreen = () => {
         key="main-map"
         zoomControl={false}
         className="h-full w-full"
-        center={[-12.088, -77.016]}
-        zoom={17}
-        whenReady={function (this: L.Map) { setBounds(getBounds(this)) }}
+        center={[-12.0799, -77.019]}
+        zoom={16}
+        whenReady={function (this: L.Map) {
+          setBounds(getBounds(this))
+          setMap(this)
+        }}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -117,7 +138,34 @@ export const MapManageScreen = () => {
             />
           ))
         }
+        {
+          isCreating && position && <Marker
+            position={[position?.latitude, position?.longitude]}
+            draggable
+            eventHandlers={{
+              dragend: (e: L.DragEndEvent) => {
+                const marker = e.target as L.Marker
+                const latlng = marker.getLatLng()
+                
+                setPosition({
+                  latitude: latlng.lat,
+                  longitude: latlng.lng
+                })
+              }
+            }}
+          />
+        }
       </MapContainer>
+      <CreateContainerButtom
+        onCreate={handleCreateClick}
+      />
+      {
+        isCreating && <CreateContainer
+          latitude={position?.latitude ?? 0}
+          longitude={position?.longitude ?? 0}
+          onEnd={setIsCreating}
+        />
+      }
       <Container />
     </div>
   )

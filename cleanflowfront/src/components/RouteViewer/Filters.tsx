@@ -38,7 +38,8 @@ export const Filters = ({ driverId, onDriverChange, date, onDateChange }: Filter
           defaultValue=""
           className="appearance-none w-full border-border-accent border-[0.1px] rounded-lg p-2 cursor-pointer text-tiny bg-black/20"
         >
-          <option value="" disabled selected hidden>Seleccione un conductor</option>
+          <option value="" disabled hidden>Seleccione un conductor</option>
+          <option value="">Quitar selección</option>
           {
             drivers?.map(({ id, first_name, last_name }) => (
               <option key={id} value={id}>{first_name} {last_name}</option>

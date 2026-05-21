@@ -53,16 +53,18 @@ export const ReportSection = ({ liveReports }: { liveReports: ReportType[]} ) =>
     ...paginatedReports.filter(r => !liveReports.some(lr => lr.id === r.id))
   ]
 
+  console.log(allReports)
+
   return (
     <div className="overflow-y-scroll px-5 text-white flex flex-col max-h-64">
       <h1 className="text-sm font-bold pb-2">Reportes</h1>
       <div className="flex-1 flex flex-col gap-2">
         {
-          allReports
+          allReports.length > 0
             ? allReports?.map(({ id, content, images, timestamp, user }) => 
                 <ReportItem key={id} id={id} content={content} images={images} timestamp={timestamp} user={user} />
               )
-            : <p className="text-center text-sm text-gray-400">No hay reportes</p>
+            : <p className="text-center text-tiny text-gray-400">No hay reportes</p>
         }
       </div>
       <div ref={bottomRef} className="py-1">
