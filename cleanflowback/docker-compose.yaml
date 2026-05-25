@@ -7,7 +7,7 @@ services:
     env_file:
       - .env
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dbuser -d pawify-db"]
+      test: ["CMD-SHELL", "pg_isready -U dbuser -d cleanflow-db"]
       interval: 10s
       timeout: 5s
       retries: 5
