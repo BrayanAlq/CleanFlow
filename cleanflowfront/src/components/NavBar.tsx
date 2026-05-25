@@ -1,9 +1,11 @@
+import { useAuth } from "@/auth/AuthContext"
+import { IconDriver } from "@/icons/IconDriver"
 import { IconLogOut } from "@/icons/IconLogOut"
 import { IconMap } from "@/icons/IconMap"
 import { IconRoute } from "@/icons/IconRoute"
 import { IconSidebar } from "@/icons/IconSidebar"
 import { useState } from "react"
-import { NavLink } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
 
 const routes = [
   {
@@ -20,11 +22,24 @@ const routes = [
     name: 'Rutas Generadas',
     path: '/generated-routes',
     icon: <IconRoute className="w-5 h-5" />
+  },
+  {
+    name: 'Conductores',
+    path: '/drivers',
+    icon: <IconDriver className="w-5 h-5 fill-white" />
   }
 ]
 
 export const NavBar = () => {
   const [collapsed, setCollapsed] = useState(false)
+  const auth = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogOut = () => {
+    auth.logout()
+    navigate('/login')
+  }
+
   return (
     <main className={`flex flex-col border-[0.1px] border-border-accent rounded-xl m-5 h-[96vh] bg-bg-secondary text-white font-normal transition-all duration-300 ease-in-out overflow-hidden ${collapsed ? 'w-15' : 'w-50'}`}>
       <div
@@ -59,6 +74,7 @@ export const NavBar = () => {
       <div className="p-5 h-auto text-xs flex items-center justify-between">
         {!collapsed && <p>Salir</p>}
         <button
+          onClick={handleLogOut}
           className="cursor-pointer"
         >
           <IconLogOut className="w-5 h-5" />
