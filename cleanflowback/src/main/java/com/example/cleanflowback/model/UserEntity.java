@@ -41,6 +41,9 @@ public abstract class UserEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     private RoleEnum role;
 
+    @Column(nullable = false)
+    private boolean enabled;
+
     @OneToMany(mappedBy = "user")
     private List<ReportEntity> reports;
 
@@ -50,5 +53,10 @@ public abstract class UserEntity implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 }

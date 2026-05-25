@@ -7,6 +7,7 @@ import com.example.cleanflowback.dto.in.CreateResidentRequestDTO;
 import com.example.cleanflowback.dto.in.LoginRequestDTO;
 import com.example.cleanflowback.dto.out.LoginResponseDTO;
 import com.example.cleanflowback.exception.CredentialsAlreadyUsedException;
+import com.example.cleanflowback.exception.UserDisabledException;
 import com.example.cleanflowback.exception.UserInvalidCredentialsException;
 import com.example.cleanflowback.mapper.AdminMapper;
 import com.example.cleanflowback.mapper.DriverMapper;
@@ -73,6 +74,10 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponseDTO login(LoginRequestDTO dto) {
         UserEntity user = userRepository.findByUsername(dto.username())
             .orElseThrow(() -> new UserInvalidCredentialsException("username not found"));
+
+        if (!user.isEnabled()) {
+            throw new UserDisabledException("user is disabled");
+        }
 
         if (!bCryptPasswordEncoder.matches(dto.password(), user.getPassword())) {
             throw new UserInvalidCredentialsException("username or password is incorrect");

@@ -111,6 +111,12 @@ public class GlobalExceptionHandler {
             .body(ErrorResponseDTO.of(HttpStatus.CONFLICT, "CONFLICT", ex.getMessage()));
     }
 
+    @ExceptionHandler(UserDisabledException.class)
+    public ResponseEntity<ErrorResponseDTO> handleUserDisabledException(UserDisabledException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(ErrorResponseDTO.of(HttpStatus.FORBIDDEN, "USER_DISABLED", ex.getMessage()));
+    }
+
     private static String toSnakeCase(String field) {
         return field.replaceAll("([a-z])([A-Z]+)", "$1_$2").toLowerCase();
     }

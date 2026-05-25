@@ -1,10 +1,26 @@
 services:
-  cleanflow-db:
+  db:
     image: postgis/postgis:16-3.4
     container_name: cleanflow-db
     ports:
       - "5432:5432"
-    environment:
-      - POSTGRES_DB=cleanflow-db
-      - POSTGRES_USER=dbuser
-      - POSTGRES_PASSWORD=password
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dbuser -d pawify-db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./database/init:/docker-entrypoint-initdb.d
+
+  backend:
+    build: .
+    container_name: cleanflow-backend 
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
