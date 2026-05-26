@@ -4,13 +4,15 @@
 
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <WebSocketsClient.h>
 #include <ArduinoJson.h>
 #include <Preferences.h>
 #include <MQUnifiedsensor.h>
-#include "secrets.h"   // <-- WiFi credentials aquí (NO subir a git)
+#include "secrets.h"
 
-// --- Configuración del Servidor ---
-const char* serverName = "http://webhook.site/d32820fd-276b-4050-bef8-12add98f9bd5";
+// --- Configuración del Backend ---
+const char* wsPath = "/ws-device";
+const unsigned long METRIC_INTERVAL_MS = 3000;
 
 // --- Pines Hardware ---
 const int trigPin        = 22;
@@ -45,6 +47,13 @@ uint32_t wifiUltimoIntento = 0;
 bool     wifiEnBackoff   = false;
 uint32_t wifiBackoffInicio = 0;
 
+// --- WebSocket / STOMP ---
+WebSocketsClient webSocket;
+String    deviceApiKey    = "";
+String    deviceSecret    = "";
+bool      stompConnected  = false;
+uint32_t  ultimoEnvio     = 0;
+
 // Instancias
 Preferences    preferences;
 MQUnifiedsensor MQ135(placa, Voltage_Resolution, ADC_Bit_Resolution, pinMQ, type);
@@ -57,6 +66,11 @@ void   ejecutarCalibracionCompleta();
 void   reconectarWiFi();
 void   enviarDatos(float nivel, float gas, bool inclinado);
 void   logSerial(const char* nivel, const String& msg);
+void   obtenerCredenciales();
+void   conectarWebSocket();
+void   webSocketEvent(WStype_t type, uint8_t* payload, size_t length);
+void   enviarFrameStompConnect();
+void   enviarFrameStompSend(const String& body);
 
 void setup() {
   Serial.begin(115200);
@@ -91,6 +105,8 @@ void setup() {
   if (WiFi.status() == WL_CONNECTED) {
     logSerial("INFO", "WiFi conectado. IP: " + WiFi.localIP().toString());
     wifiIntentos = 0;
+    obtenerCredenciales();
+    conectarWebSocket();
   } else {
     logSerial("WARN", "No se pudo conectar al WiFi. Se reintentará en el loop.");
   }
@@ -104,13 +120,16 @@ void setup() {
     modoProduccion = false;
     logSerial("INFO", "MODO CONFIGURACION. Usa 'c' para calibrar o 'p' para producción.");
   }
-
-  Serial.println("\n--- COMANDOS: [c] Calibrar  |  [p] Modo Producción  |  [r] Reset ---\n");
+  
+  Serial.println("--- COMANDOS: [c] Calibrar | [p] Producción | [r] Reset | [s] Estado ---");
 }
 
 // =============================================================
 void loop() {
   uint32_t ahora = millis();
+
+  // ── Mantener WebSocket vivo ─────────────────────────────────
+  webSocket.loop();
 
   // ── Verificar precalentamiento MQ-135 ──────────────────────
   if (!mqCalentado && (ahora - tiempoEncendido >= MQ135_WARMUP_MS)) {
@@ -161,40 +180,43 @@ void loop() {
     Serial.printf("  mqR0    (flash): %.4f\n",       preferences.getFloat("mqR0",   0));
     Serial.printf("  enProd  (flash): %s\n",          preferences.getBool("enProd", false) ? "SI" : "NO");
     Serial.println("========================================\n");
-}
+    }
     else {
       logSerial("WARN", "Comando desconocido: '" + String(tecla) + "'");
     }
   }
 
-  // ── Lectura de Sensores ─────────────────────────────────────
-  distanciaAct    = calcularDistanciaCm();
-  MQ135.update();
-  float gasPPM    = mqCalentado ? MQ135.readSensor() : -1.0;
-  float nivelLlenado = calcularLlenado();
-  bool  inclinado = estaInclinado();
+  // ── Envío periódico cada METRIC_INTERVAL_MS ────────────────
+  if (ahora - ultimoEnvio >= METRIC_INTERVAL_MS) {
+    ultimoEnvio = ahora;
 
-  // ── Log de estado ───────────────────────────────────────────
-  String modo = modoProduccion ? "[PROD]  " : "[CONFIG]";
-  String gasStr = mqCalentado ? String(gasPPM, 2) + " PPM" : "calentando...";
-  Serial.printf("%s Nivel: %5.1f%% | Gas: %s | Dist: %.1f cm | Inc: %s | WiFi: %s\n",
-    modo.c_str(),
-    nivelLlenado,
-    gasStr.c_str(),
-    distanciaAct,
-    inclinado ? "SI" : "NO",
-    WiFi.status() == WL_CONNECTED ? "OK" : "X"
-  );
+    // ── Lectura de Sensores ─────────────────────────────────────
+    distanciaAct    = calcularDistanciaCm();
+    MQ135.update();
+    float gasPPM    = mqCalentado ? MQ135.readSensor() : -1.0;
+    float nivelLlenado = calcularLlenado();
+    bool  inclinado = estaInclinado();
 
-  // ── Envío de datos (solo en producción y con MQ calentado) ──
-  if (modoProduccion && mqCalentado) {
-    enviarDatos(nivelLlenado, gasPPM, inclinado);
+    // ── Log de estado ───────────────────────────────────────────
+    String modo = modoProduccion ? "[PROD]  " : "[CONFIG]";
+    String gasStr = mqCalentado ? String(gasPPM, 2) + " PPM" : "calentando...";
+    Serial.printf("%s Nivel: %5.1f%% | Gas: %s | Dist: %.1f cm | Inc: %s | WiFi: %s\n",
+      modo.c_str(),
+      nivelLlenado,
+      gasStr.c_str(),
+      distanciaAct,
+      inclinado ? "SI" : "NO",
+      WiFi.status() == WL_CONNECTED ? "OK" : "X"
+    );
+
+    // ── Envío de datos (solo en producción y con MQ calentado) ──
+    if (modoProduccion && mqCalentado) {
+      enviarDatos(nivelLlenado, gasPPM, inclinado);
+    }
   }
 
   // ── Reconexión WiFi no bloqueante ───────────────────────────
   reconectarWiFi();
-
-  delay(5000);
 }
 
 // =============================================================
@@ -344,37 +366,117 @@ void reconectarWiFi() {
 }
 
 /**
- * Envía datos al servidor vía HTTP POST en formato JSON.
+ * Envía datos al servidor vía STOMP SEND sobre WebSocket.
  */
 void enviarDatos(float nivel, float gas, bool inclinado) {
-  if (WiFi.status() != WL_CONNECTED) {
-    logSerial("WARN", "Sin WiFi. Dato no enviado.");
+  if (!stompConnected) {
+    logSerial("WARN", "STOMP no conectado. Dato no enviado.");
     return;
   }
 
+  String body = String("{") +
+    "\"is_alive\":" +String(inclinado ? "true" : "false")+","+
+    "\"air_quality_level\":\"good\"," +
+    "\"ppm\":" + String(gas, 2) + "," +
+    "\"filling_level\":" + String(nivel / 100.0, 4) +
+    "}";
+
+  enviarFrameStompSend(body);
+}
+
+/**
+ * Obtiene credenciales del backend vía HTTP GET /container/device.
+ */
+void obtenerCredenciales() {
   HTTPClient http;
-  http.begin(serverName);
-  http.addHeader("Content-Type", "application/json");
-  http.setTimeout(8000); // 8 segundos máximo para no bloquear demasiado
+  String url = "http://" + String(backendHost) + ":" + String(backendPort) + "/container/device";
+  http.begin(url);
+  http.setTimeout(8000);
 
-  // 400 bytes: margen cómodo para campos actuales y futuros
-  StaticJsonDocument<400> doc;
-  doc["id_dispositivo"] = "BIN-001";
-  doc["nivel"]          = serialized(String(nivel, 2));
-  doc["gas_ppm"]        = serialized(String(gas,   2));
-  doc["inclinado"]      = inclinado;
-  doc["uptime_seg"]     = millis() / 1000;
-
-  String jsonStr;
-  serializeJson(doc, jsonStr);
-
-  int httpCode = http.POST(jsonStr);
-  if (httpCode > 0) {
-    logSerial("INFO", "POST OK -> HTTP " + String(httpCode));
+  int httpCode = http.GET();
+  if (httpCode == 200) {
+    String payload = http.getString();
+    StaticJsonDocument<200> doc;
+    DeserializationError error = deserializeJson(doc, payload);
+    if (error) {
+      logSerial("ERROR", "JSON mal formado: " + String(error.c_str()));
+      http.end();
+      return;
+    }
+    deviceApiKey = doc["apiKey"].as<String>();
+    deviceSecret = doc["secret"].as<String>();
+    logSerial("INFO", "Credenciales obtenidas. apiKey: " + deviceApiKey);
   } else {
-    logSerial("ERROR", "POST fallido -> " + http.errorToString(httpCode));
+    logSerial("ERROR", "Fallo al obtener credenciales. HTTP " + String(httpCode));
   }
   http.end();
+}
+
+/**
+ * Inicia conexión WebSocket con el backend.
+ */
+void conectarWebSocket() {
+  webSocket.begin(backendHost, backendPort, wsPath);
+  webSocket.onEvent(webSocketEvent);
+  webSocket.setReconnectInterval(5000);
+  logSerial("INFO", "Conectando WebSocket a ws://" + String(backendHost) + ":" + String(backendPort) + wsPath);
+}
+
+/**
+ * Callback de eventos WebSocket.
+ */
+void webSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
+  switch (type) {
+    case WStype_DISCONNECTED:
+      stompConnected = false;
+      logSerial("WARN", "WebSocket desconectado. Reintentando...");
+      break;
+
+    case WStype_CONNECTED:
+      logSerial("INFO", "WebSocket conectado. Enviando STOMP CONNECT...");
+      enviarFrameStompConnect();
+      break;
+
+    case WStype_TEXT: {
+      String msg = String((char*)payload);
+      if (msg.indexOf("CONNECTED") >= 0) {
+        stompConnected = true;
+        logSerial("INFO", "STOMP CONNECTED. Listo para enviar métricas.");
+      }
+      break;
+    }
+
+    default:
+      break;
+  }
+}
+
+/**
+ * Envía frame STOMP CONNECT con credenciales del dispositivo.
+ */
+void enviarFrameStompConnect() {
+  String frame = "CONNECT\n";
+  frame += "accept-version:1.2\n";
+  frame += "host:" + String(backendHost) + "\n";
+  frame += "X-Api-Key:" + deviceApiKey + "\n";
+  frame += "X-Secret:" + deviceSecret + "\n";
+  frame += "\n";
+  frame += '\0';
+  webSocket.sendTXT(frame);
+  logSerial("DEBUG", "STOMP CONNECT enviado.");
+}
+
+/**
+ * Envía frame STOMP SEND a /app/container.metrics.
+ */
+void enviarFrameStompSend(const String& body) {
+  String frame = "SEND\n";
+  frame += "destination:/app/container.metrics\n";
+  frame += "content-type:application/json\n";
+  frame += "\n";
+  frame += body;
+  frame += '\0';
+  webSocket.sendTXT(frame);
 }
 
 /**
