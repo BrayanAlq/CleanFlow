@@ -7,7 +7,7 @@ const client = new Client({
   webSocketFactory: () => new SockJS(`${API_URL}/ws`),
   reconnectDelay: 1000,
   connectHeaders: { 
-    "X-Api-Key": "30129463-553a-4e17-88a2-bc8e04d1b3fe",
+    "X-Api-Key": "b396bd16-5e58-467c-9141-8c0ceba31e6d",
     "X-Secret": "password"
    },
   onConnect: () => {

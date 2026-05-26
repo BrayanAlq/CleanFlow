@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "simulate:iot": "npx tsx src/mocks/simulateIOT.js",
+    "simulate:iot:ws": "npx tsx src/mocks/simulateIOTPureWebsocket.js",
+    "simulate:driver": "npx tsx src/mocks/simulateDriver.js"
   },
   "dependencies": {
     "@mapbox/polyline": "^1.2.1",
