@@ -45,7 +45,6 @@ public class WebsocketController {
     }
 
     @Transactional
-    @PreAuthorize("hasRole('DRIVER')")
     @MessageMapping("/driver.location")
     public void updateDriverLocation(
         Principal principal,

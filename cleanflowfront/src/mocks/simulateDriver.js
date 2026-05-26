@@ -1,8 +1,12 @@
 import { Client } from "@stomp/stompjs"
 import SockJS from "sockjs-client"
 
+import polyline from "@mapbox/polyline"
+
 const API_URL = "http://localhost:8080"
-const JWT_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImRyaXZlcjEiLCJyb2xlIjoiRFJJVkVSIiwiaWQiOjIsImZpcnN0X25hbWUiOiJEcml2ZXIiLCJsYXN0X25hbWUiOiJMaW1hIiwiZXhwIjoxNzc5MjE5OTg1fQ.5qh9qqmE7MOhehqHFLIu6s3aMqc92DDdlhVUyqBUhFE"
+const JWT_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImRyaXZlcjEiLCJsYXN0X25hbWUiOiJEcml2ZXIiLCJmaXJzdF9uYW1lIjoiSnVhbiIsImlkIjoyLCJyb2xlIjoiRFJJVkVSIiwiZXhwIjoxNzgwNDMxODQ0fQ.I5Y_WcY22_ElWbCzydGuTqy6MPLtsZexMTK2IIXKakE"
+
+const POLYLINE = 'nfwhAxdbuMw@PeBJm@Hk@D]DYBW@YBYBWD]@W@WBWDYFW?W@M@?TBTBTDT@PDZ@JBVDZ@TBT@VFPBT@TI@KCMEOEOCQIYAUCMCSEQAQCOAMCQCOCOCMAIAOAQEOCMAMAOCOCQAOEQCSAS?UCWCWEQCQCUAUEB]AU?OCSCQEUIOGMDEDCFEFEFGDCFEFEHEDEFCFGDEFCFEDCFEDEFEDCEIGGIIGIIIIGEGIGKIKIKGKEGEOEIEIEKEKCOCKCKAMAKEM?OAK?K?Q?O?M?MBQBM@MBQBKDKBQFKDMFKFOHOJOLIHGDKHEJGFEFGDCFDDHFDDHBHFDDFDDBBBBBB@BB@@B@B@BBB@B@@BB@DB@BB@BBD@BBB@BBB@ADCDABADCBAFCFCHCHAFAH?D?FAJ?F?F@H?F@F@D?F@D?DC@EBE@I@GBE@EBG@E@EBE@G@IBG@GBEBG@IBG@EBIBG@C@IBGBG@IBGBG@GBIBCBG@G@GBGBE@GBI@GBGBG@EB'
 
 const client = new Client({
   webSocketFactory: () => new SockJS(`${API_URL}/ws`),
@@ -11,28 +15,24 @@ const client = new Client({
   onConnect: () => {
     console.log("Connected")
 
-    let latitude = -12.082
-    let longitude = -77.016
+    const polylineDecoded = polyline.decode(POLYLINE)
 
-    setInterval(() => {
-
-      latitude += 0.0001
-      longitude += 0.0001
-
-      client.publish({
-        destination: "/app/driver.location",
-        body: JSON.stringify({
-          latitude,
-          longitude
+    polylineDecoded.forEach(([lat, lng], index) => {
+      setTimeout(() => {
+        client.publish({
+          destination: "/app/driver.location",
+          body: JSON.stringify({
+            latitude: lat,
+            longitude: lng
+          })
         })
-      })
+        console.log({
+          latitude: lat,
+          longitude: lng
+        })
+      }, index * 500)
 
-      console.log({
-        latitude,
-        longitude
-      })
-
-    }, 2000)
+    })
   },
   onStompError: (frame) => {
     console.error('STOMP error: ', frame)
