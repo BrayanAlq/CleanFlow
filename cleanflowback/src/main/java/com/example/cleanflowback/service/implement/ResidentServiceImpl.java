@@ -7,6 +7,8 @@ import com.example.cleanflowback.model.ResidentEntity;
 import com.example.cleanflowback.repository.ResidentRepository;
 import com.example.cleanflowback.service.ResidentService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,7 +21,12 @@ public class ResidentServiceImpl implements ResidentService {
     public ResidentInfoDTO getResidentInfo(ResidentEntity residentEntity) {
         ResidentEntity residentOnDb = residentRepository.findById(residentEntity.getId())
             .orElseThrow(() -> new ResourceNotFoundException("resident not found"));
-
         return residentMapper.toInfoDTO(residentOnDb);
+    }
+
+    @Override
+    public Page<ResidentInfoDTO> getAllResidentsInfo(Pageable pageable) {
+        return residentRepository.findAll(pageable)
+            .map(residentMapper::toInfoDTO);
     }
 }

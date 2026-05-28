@@ -6,5 +6,6 @@ public record ResidentInfoDTO(
     String lastName,
     String email,
     double latitude,
-    double longitude
+    double longitude,
+    boolean enabled
 ) {}

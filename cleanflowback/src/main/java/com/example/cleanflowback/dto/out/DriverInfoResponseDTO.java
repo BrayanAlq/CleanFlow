@@ -5,5 +5,6 @@ public record DriverInfoResponseDTO(
     String username,
     String firstName,
     String lastName,
-    String email
+    String email,
+    boolean enabled
 ) {}

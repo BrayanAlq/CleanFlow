@@ -7,9 +7,9 @@ import com.example.cleanflowback.model.DriverEntity;
 import com.example.cleanflowback.repository.DriverRepository;
 import com.example.cleanflowback.service.DriverService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -26,10 +26,8 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
-    public List<DriverInfoResponseDTO> getAllDrivers() {
-        List<DriverEntity> driverEntities = driverRepository.findAll();
-        return driverEntities.stream()
-            .map(driverMapper::toInfoDTO)
-            .toList();
+    public Page<DriverInfoResponseDTO> getAllDrivers(Pageable pageable) {
+        return driverRepository.findAll(pageable)
+            .map(driverMapper::toInfoDTO);
     }
 }
