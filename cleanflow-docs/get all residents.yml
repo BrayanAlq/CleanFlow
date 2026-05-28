@@ -1,15 +1,11 @@
 info:
-  name: get all drivers
+  name: get all residents
   type: http
-  seq: 18
+  seq: 23
 
 http:
   method: GET
-  url: "{{actual_url}}/admin/driver?sort=username,desc"
-  params:
-    - name: sort
-      value: username,desc
-      type: query
+  url: "{{actual_url}}/admin/resident"
   auth:
     type: bearer
     token: eyJhbGciOiJIUzI1NiJ9.eyJmaXJzdF9uYW1lIjoiQWRtaW4iLCJpZCI6MSwicm9sZSI6IkFETUlOIiwidXNlcm5hbWUiOiJhZG1pbjEiLCJsYXN0X25hbWUiOiJTYW4gSXNpZHJvIiwiZXhwIjoxNzgwNjA0MTI0fQ.pa2LrJr92O84RKxSVD-jdCc51nP6Gn28cCNZnCZoW1s
