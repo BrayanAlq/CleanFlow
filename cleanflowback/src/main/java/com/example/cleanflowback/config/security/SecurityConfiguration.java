@@ -38,7 +38,8 @@ public class SecurityConfiguration {
                     "/api-docs",
                     "/ws/**",
                     "/ws-device/**",
-                    "/container/device/**"
+                    "/container/device/**",
+                    "/helloworld/**"
                 ).permitAll()
                 .requestMatchers(request -> "OPTIONS".equalsIgnoreCase(request.getMethod())).permitAll()
                 .requestMatchers(
