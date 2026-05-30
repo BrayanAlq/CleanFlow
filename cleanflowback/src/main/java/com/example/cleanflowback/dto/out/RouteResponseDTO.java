@@ -1,10 +1,10 @@
 package com.example.cleanflowback.dto.out;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record RouteResponseDTO(
     Long id,
-    LocalDateTime startAt,
-    LocalDateTime endAt,
+    Instant startAt,
+    Instant endAt,
     String status
 ) {}

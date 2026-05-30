@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Entity
@@ -19,10 +19,10 @@ public class RouteEntity {
     private Long id;
 
     @Column(nullable = false)
-    private LocalDateTime startAt;
+    private Instant startAt;
 
     @Column(nullable = true)
-    private LocalDateTime endAt;
+    private Instant endAt;
 
     @Enumerated(EnumType.STRING)
     private RouteStatusEnum status;
@@ -39,7 +39,7 @@ public class RouteEntity {
 
     @PrePersist
     public void prePersist() {
-        this.startAt = LocalDateTime.now();
+        this.startAt = Instant.now();
         this.status = RouteStatusEnum.STARTED;
     }
 }

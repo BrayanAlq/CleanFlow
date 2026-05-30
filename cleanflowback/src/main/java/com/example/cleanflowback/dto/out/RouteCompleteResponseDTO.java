@@ -1,12 +1,11 @@
 package com.example.cleanflowback.dto.out;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.Instant;
 
 public record RouteCompleteResponseDTO(
     Long id,
-    LocalDateTime startAt,
-    LocalDateTime endAt,
+    Instant startAt,
+    Instant endAt,
     String status,
     String polyline,
     DriverInfoResponseDTO driver

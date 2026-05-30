@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.locationtech.jts.geom.Polygon;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "user_viewports")
@@ -28,7 +28,7 @@ public class ViewportEntity {
     private boolean active;
 
     @Column(nullable = false)
-    private LocalDateTime lastSeen;
+    private Instant lastSeen;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

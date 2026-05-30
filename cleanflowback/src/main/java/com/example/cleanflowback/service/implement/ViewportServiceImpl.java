@@ -14,7 +14,7 @@ import org.locationtech.jts.geom.Polygon;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Service
 @AllArgsConstructor
@@ -51,7 +51,7 @@ public class ViewportServiceImpl implements ViewportService {
 
         viewport.setViewport(polygon);
         viewport.setActive(true);
-        viewport.setLastSeen(LocalDateTime.now());
+        viewport.setLastSeen(Instant.now());
 
         viewportRepository.save(viewport);
     }
