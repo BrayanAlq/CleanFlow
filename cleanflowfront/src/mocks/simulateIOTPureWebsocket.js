@@ -1,8 +1,8 @@
 import { Client } from "@stomp/stompjs"
 import axios from "axios"
 
-const API_URL = "ws://localhost:8080"
-const REST_URL = "http://localhost:8080"
+const API_URL = "wss://domain"
+const REST_URL = "https://domain"
 
 const getCredentials = async () => {
   const response = await axios.get(`${REST_URL}/container/device`)

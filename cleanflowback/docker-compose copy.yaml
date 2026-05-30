@@ -11,10 +11,12 @@ services:
       retries: 5
     volumes:
       - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - internal
 
   backend:
     build: .
-    container_name: cleanflow-backend 
+    container_name: cleanflow-backend
     depends_on:
       db:
         condition: service_healthy
@@ -22,13 +24,21 @@ services:
       - .env
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.cleanflow.rule=Host(`cleanflow.deyvigo.com`)"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.cleanflow.rule=Host(`cleanflow.deyvigo.online`)"
       - "traefik.http.routers.cleanflow.entrypoints=websecure"
       - "traefik.http.routers.cleanflow.tls.certresolver=myresolver"
-      - "traefik.http.routers.cleanflow.loadbalancer.server.port=8080"
+      - "traefik.http.services.cleanflow.loadbalancer.server.port=8080"
+      - "traefik.http.routers.cleanflow-http.rule=Host(`cleanflow.deyvigo.online`)"
+      - "traefik.http.routers.cleanflow-http.entrypoints=web"
+      - "traefik.http.routers.cleanflow-http.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
     networks:
       - web
+      - internal
 
 networks:
   web:
     external: true
+  internal:
+    driver: bridge
