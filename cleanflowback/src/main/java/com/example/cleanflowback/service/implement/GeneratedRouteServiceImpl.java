@@ -16,6 +16,7 @@ import com.example.cleanflowback.utils.CursorUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,7 +41,7 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
 
         if (cursorPass != null) {
             cursorInternal = new GeneratedCursorInternalDTO(
-                LocalDateTime.parse(cursorPass.createdAt()), cursorPass.id()
+                Instant.parse(cursorPass.createdAt()), cursorPass.id()
             );
         }
 

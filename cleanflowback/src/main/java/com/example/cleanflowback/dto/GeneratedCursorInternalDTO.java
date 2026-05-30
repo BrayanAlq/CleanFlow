@@ -1,8 +1,8 @@
 package com.example.cleanflowback.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record GeneratedCursorInternalDTO(
-    LocalDateTime createdAt,
+    Instant createdAt,
     Long id
 ) {}
