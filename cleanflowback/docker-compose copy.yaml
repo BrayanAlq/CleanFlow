@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: cleanflow-db
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dbuser -d cleanflow-db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./database/init:/docker-entrypoint-initdb.d
+
+  backend:
+    build: .
+    container_name: cleanflow-backend 
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cleanflow.rule=Host(`cleanflow.deyvigo.com`)"
+      - "traefik.http.routers.cleanflow.entrypoints=websecure"
+      - "traefik.http.routers.cleanflow.tls.certresolver=myresolver"
+      - "traefik.http.routers.cleanflow.loadbalancer.server.port=8080"
+    networks:
+      - web
+
+networks:
+  web:
+    external: true

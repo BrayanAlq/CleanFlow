@@ -12,12 +12,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("admin")
 @AllArgsConstructor
 public class AdminController {
     private final DriverService driverService;
     private final ResidentService residentService;
+
+    @GetMapping("/drivers")
+    public ResponseEntity<List<DriverInfoResponseDTO>> getAllDrivers() {
+        return ResponseEntity.ok(driverService.getAllDrivers());
+    }
 
     @GetMapping("/driver")
     public ResponseEntity<Page<DriverInfoResponseDTO>> getDriverInfo(

@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @AllArgsConstructor
@@ -63,5 +64,34 @@ public class GeneratedRouteCustomImpl implements GeneratedRouteCustom {
             .createQuery(cq)
             .setMaxResults(size)
             .getResultList();
+    }
+
+    @Override
+    public Optional<GeneratedRouteEntity> getByDriverIdAndDate(Long driverId, LocalDate date) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<GeneratedRouteEntity> cq = cb.createQuery(GeneratedRouteEntity.class);
+        Root<GeneratedRouteEntity> root = cq.from(GeneratedRouteEntity.class);
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (driverId != null) {
+            predicates.add(cb.equal(root.get("driver").get("id"), driverId));
+        }
+
+        if (date != null) {
+            LocalDateTime startDate = date.atStartOfDay();
+            LocalDateTime endDate = date.atStartOfDay().plusDays(1);
+            predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), startDate));
+            predicates.add(cb.lessThan(root.get("createdAt"), endDate));
+        }
+
+        cq.where(predicates.toArray(new Predicate[0]));
+
+        return em
+            .createQuery(cq)
+            .setMaxResults(1)
+            .getResultList()
+            .stream()
+            .findFirst();
     }
 }

@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class DriverServiceImpl implements DriverService {
@@ -29,5 +31,11 @@ public class DriverServiceImpl implements DriverService {
     public Page<DriverInfoResponseDTO> getAllDrivers(Pageable pageable) {
         return driverRepository.findAll(pageable)
             .map(driverMapper::toInfoDTO);
+    }
+
+    @Override
+    public List<DriverInfoResponseDTO> getAllDrivers() {
+        return driverRepository.findAll()
+            .stream().map(driverMapper::toInfoDTO).toList();
     }
 }
