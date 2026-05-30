@@ -11,7 +11,7 @@ interface FiltersProps {
 
 export const Filters = ({ driverId, onDriverChange, date, onDateChange }: FiltersProps) => {
   const { data: drivers } = useQuery({
-    queryKey: ['admin', 'driver'],
+    queryKey: ['admin', 'drivesr'],
     queryFn: () => getDrivers(),
     staleTime: 30_000,
     throwOnError: false,
