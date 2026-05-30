@@ -6,7 +6,9 @@ info:
 http:
   method: GET
   url: "{{actual_url}}/driver/scheduled-route"
-  auth: inherit
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiRFJJVkVSIiwiaWQiOjIsImZpcnN0X25hbWUiOiJKdWFuIiwibGFzdF9uYW1lIjoiRHJpdmVyIiwidXNlcm5hbWUiOiJkcml2ZXIxIiwiZXhwIjoxNzgwNzA2NjExfQ.S1syBE5QxYwGx7I7ST2Y2LEOQO7Ko1pzbpBc6UC_uN8
 
 settings:
   encodeUrl: true
