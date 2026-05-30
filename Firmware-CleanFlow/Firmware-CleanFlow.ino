@@ -23,7 +23,7 @@ const int inclinacionPin = 15;
 // --- Configuración MQ-135 ---
 #define placa                 "ESP-32"
 #define Voltage_Resolution    3.3
-#define type                  "MQ-135"
+#define TIPO_MQ135            "MQ-135"
 #define ADC_Bit_Resolution    12
 #define RatioMQ135CleanAir    3.6
 #define MQ135_WARMUP_MS       20000UL   // 20 seg demo | cambiar a 1200000UL (20 min) en producción real
@@ -56,7 +56,7 @@ uint32_t  ultimoEnvio     = 0;
 
 // Instancias
 Preferences    preferences;
-MQUnifiedsensor MQ135(placa, Voltage_Resolution, ADC_Bit_Resolution, pinMQ, type);
+MQUnifiedsensor MQ135(placa, Voltage_Resolution, ADC_Bit_Resolution, pinMQ, TIPO_MQ135);
 
 // --- Prototipos ---
 float  calcularDistanciaCm();
@@ -388,9 +388,11 @@ void enviarDatos(float nivel, float gas, bool inclinado) {
  * Obtiene credenciales del backend vía HTTP GET /container/device.
  */
 void obtenerCredenciales() {
+  WiFiClientSecure client;
+  client.setInsecure();
   HTTPClient http;
-  String url = "http://" + String(backendHost) + ":" + String(backendPort) + "/container/device";
-  http.begin(url);
+  String url = "https://" + String(backendHost) + "/container/device";
+  http.begin(client, url);
   http.setTimeout(8000);
 
   int httpCode = http.GET();
@@ -416,10 +418,10 @@ void obtenerCredenciales() {
  * Inicia conexión WebSocket con el backend.
  */
 void conectarWebSocket() {
-  webSocket.begin(backendHost, backendPort, wsPath);
+  webSocket.beginSSL(backendHost, backendPort, wsPath);
   webSocket.onEvent(webSocketEvent);
   webSocket.setReconnectInterval(5000);
-  logSerial("INFO", "Conectando WebSocket a ws://" + String(backendHost) + ":" + String(backendPort) + wsPath);
+  logSerial("INFO", "Conectando WebSocket a wss://" + String(backendHost) + ":" + String(backendPort) + wsPath);
 }
 
 /**
