@@ -1,3 +1,4 @@
+import { useContext } from "react";
 import {
   View,
   Text,
@@ -6,8 +7,10 @@ import {
   TextInput,
 } from "react-native";
 import { useState } from "react";
+import { AppContext } from "../App";
 
-export default function PerfilScreen() {
+export default function PerfilCiudadano() {
+  const { setRole } = useContext(AppContext);
   const [edit, setEdit] = useState(false);
 
   const [name, setName] = useState("María Vásquez");
@@ -18,7 +21,6 @@ export default function PerfilScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Mi perfil</Text>
 
-      {/* PERFIL */}
       <View style={styles.profileCard}>
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>
@@ -49,7 +51,6 @@ export default function PerfilScreen() {
         </View>
       </View>
 
-      {/* STATS */}
       <View style={styles.stats}>
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>14</Text>
@@ -62,7 +63,6 @@ export default function PerfilScreen() {
         </View>
       </View>
 
-      {/* OPCIONES */}
       <View style={styles.card}>
         <View style={styles.row}>
           <Text>🏠 Mi dirección</Text>
@@ -88,7 +88,6 @@ export default function PerfilScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* BOTÓN EDITAR / GUARDAR */}
       <TouchableOpacity
         style={styles.btn}
         onPress={() => setEdit(!edit)}
@@ -98,8 +97,7 @@ export default function PerfilScreen() {
         </Text>
       </TouchableOpacity>
 
-      {/* LOGOUT */}
-      <TouchableOpacity style={styles.logout}>
+      <TouchableOpacity style={styles.logout} onPress={() => setRole(null)}>
         <Text style={{ color: "red" }}>Cerrar sesión</Text>
       </TouchableOpacity>
     </View>
