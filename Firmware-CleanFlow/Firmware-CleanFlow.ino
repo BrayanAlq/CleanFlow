@@ -418,6 +418,7 @@ void obtenerCredenciales() {
  * Inicia conexión WebSocket con el backend.
  */
 void conectarWebSocket() {
+  webSocket.setInsecure();
   webSocket.beginSSL(backendHost, backendPort, wsPath);
   webSocket.onEvent(webSocketEvent);
   webSocket.setReconnectInterval(5000);
@@ -441,12 +442,22 @@ void webSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
 
     case WStype_TEXT: {
       String msg = String((char*)payload);
+      Serial.print("[WS RX] ");
+      Serial.println(msg);
       if (msg.indexOf("CONNECTED") >= 0) {
         stompConnected = true;
         logSerial("INFO", "STOMP CONNECTED. Listo para enviar métricas.");
       }
       break;
     }
+
+    case WStype_ERROR:
+      logSerial("ERROR", "WebSocket error");
+      break;
+
+    case WStype_BIN:
+      logSerial("WARN", "WebSocket binario recibido (no esperado)");
+      break;
 
     default:
       break;
