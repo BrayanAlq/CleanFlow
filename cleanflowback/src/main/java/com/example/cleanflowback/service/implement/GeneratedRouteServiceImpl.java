@@ -34,7 +34,7 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
     public CursorPageWithEncodedResponseDTO<GeneratedRouteResponseDTO> getGeneratedRoutes(
         Long driverId, LocalDate date, String cursor, Integer size
     ) {
-        GeneratedCursorInternalDTO cursorInternal = cursorUtil.decode(cursor);
+        GeneratedCursorInternalDTO cursorInternal = cursor == null ? null : cursorUtil.decode(cursor);
 
         if (size == null) {
             size = 10;
