@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-        "container_id": 33,
+        "container_id": 20,
         "content": "Pasó el caminó de basura, pero no ha recogido de este contenedor"
       }
   auth:
