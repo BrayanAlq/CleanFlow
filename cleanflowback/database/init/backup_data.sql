@@ -4607,6 +4607,7 @@ COPY public.report_images (id, path, report_id) FROM stdin;
 --
 
 COPY public.reports (id, content, "timestamp", container_id, user_id) FROM stdin;
+1	Hola	2026-05-30 18:52:16.821665	10	1
 \.
 
 
@@ -4618,6 +4619,7 @@ COPY public.residents (latitude, longitude, id) FROM stdin;
 -12.079402	-77.023008	7
 -12.076625	-77.019768	8
 -12.088844	-77.01918	9
+-12.088844	-77.01918	10
 \.
 
 
@@ -4682,7 +4684,7 @@ COPY public.spatial_ref_sys (srid, auth_name, auth_srid, srtext, proj4text) FROM
 --
 
 COPY public.user_viewports (id, active, last_seen, viewport, user_id) FROM stdin;
-1	t	2026-05-26 16:26:05.170394	0103000020E610000001000000050000000100001AEB4153C05A7ED13D692E28C0010000CE834053C05A7ED13D692E28C0010000CE834053C05FD78C43662328C00100001AEB4153C05FD78C43662328C00100001AEB4153C05A7ED13D692E28C0	1
+1	t	2026-05-30 19:33:46.621606	0103000020E61000000100000005000000010000EEDA4153C05A7ED13D692E28C0010000FA934053C05A7ED13D692E28C0010000FA934053C05FD78C43662328C0010000EEDA4153C05FD78C43662328C0010000EEDA4153C05A7ED13D692E28C0	1
 \.
 
 
@@ -4697,9 +4699,10 @@ COPY public.users (id, email, first_name, last_name, password, role, username, e
 4	driver3@example.com	Carlos	Driver	$2a$10$kRyevS0bLqA8mrsRmd.Yg.0uVc.rOvpuO09dUwX3BOBQSQQkViL36	DRIVER	driver3	t
 2	driver1@example.com	Juan	Driver	$2a$10$Jy7F6EvKnOJh4IuMgl9Hh.4sYHxldhW9vOKIiGzR9A9hSlaE4MGCC	DRIVER	driver1	t
 1	admin1@example.com	Admin	San Isidro	$2a$10$V/H82VltpU9mTax7yzAsW.qj0eG3HCpYVdjL7LfYSoL81g66AxVVy	ADMIN	admin1	t
-7	resident1@example.com	Resident	Lima	$2a$10$c80H1zOubcZaxmjAupKgA.EgmuBOXFKoEtAKivDXh21EA0vLYV.iS	RESIDENT	resident1	f
-8	resident2@example.com	Resident	Victoria	$2a$10$ZgwbxXQ4qB36SAt6zWV8OuXlAiWjzvsXi1/VxHR8o0j9xKEGGeqVm	RESIDENT	resident2	f
-9	resident3@example.com	Resident	Nolan	$2a$10$zxxBRydADQYo9QDL4dq5Tex8ksbxA0u13tlYhHcXlGG13KrXBE5MW	RESIDENT	resident3	f
+8	resident2@example.com	Resident	Victoria	$2a$10$ZgwbxXQ4qB36SAt6zWV8OuXlAiWjzvsXi1/VxHR8o0j9xKEGGeqVm	RESIDENT	resident2	t
+9	resident3@example.com	Resident	Nolan	$2a$10$zxxBRydADQYo9QDL4dq5Tex8ksbxA0u13tlYhHcXlGG13KrXBE5MW	RESIDENT	resident3	t
+7	resident1@example.com	Resident	Lima	$2a$10$c80H1zOubcZaxmjAupKgA.EgmuBOXFKoEtAKivDXh21EA0vLYV.iS	RESIDENT	resident1	t
+10	resident4@example.com	Resident	Carlos	$2a$10$kVHar8bPLLuRjiNRtumePOG4styuBL.B3o2EK86.ZTKgmnwYkYq/6	RESIDENT	resident4	t
 \.
 
 
@@ -4825,7 +4828,7 @@ SELECT pg_catalog.setval('public.report_images_id_seq', 1, false);
 -- Name: reports_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dbuser
 --
 
-SELECT pg_catalog.setval('public.reports_id_seq', 1, false);
+SELECT pg_catalog.setval('public.reports_id_seq', 1, true);
 
 
 --
@@ -4846,7 +4849,7 @@ SELECT pg_catalog.setval('public.user_viewports_id_seq', 1, true);
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dbuser
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 9, true);
+SELECT pg_catalog.setval('public.users_id_seq', 10, true);
 
 
 --
