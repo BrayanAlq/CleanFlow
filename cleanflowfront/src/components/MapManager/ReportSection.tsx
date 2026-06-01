@@ -53,8 +53,6 @@ export const ReportSection = ({ liveReports }: { liveReports: ReportType[]} ) =>
     ...paginatedReports.filter(r => !liveReports.some(lr => lr.id === r.id))
   ]
 
-  console.log(allReports)
-
   return (
     <div className="overflow-y-scroll px-5 text-white flex flex-col max-h-64">
       <h1 className="text-sm font-bold pb-2">Reportes</h1>

@@ -1,3 +1,5 @@
+export type ContainerCodeType = 'ORGANIC' | 'GENERAL' | 'RECYCLABLE'
+
 export interface ContainerType {
   id: number,
   name: string,
@@ -5,6 +7,7 @@ export interface ContainerType {
   longitude: number,
   address_name: string,
   container_image: ContainerImageType,
+  type: ContainerCodeType,
 }
 
 export interface ContainerCreateType extends Omit<ContainerType, 'id' | 'container_image'> {}

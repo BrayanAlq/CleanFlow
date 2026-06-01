@@ -99,7 +99,7 @@ export const MapManageScreen = () => {
     })
   }
 
-  console.log(drivers)
+  console.log(containers)
 
   return (
     <div

@@ -1,8 +1,8 @@
 import { Client } from "@stomp/stompjs"
 import axios from "axios"
 
-const API_URL = "wss://domain"
-const REST_URL = "https://domain"
+const API_URL = "ws://localhost:8080"
+const REST_URL = "http://localhost:8080"
 
 const getCredentials = async () => {
   const response = await axios.get(`${REST_URL}/container/device`)
@@ -44,7 +44,7 @@ getCredentials().then(({ api_key, secret }) => {
           fillingLevel
         })
   
-      }, 2000)
+      }, 3000)
     },
     onWebSocketError: (error) => {
       console.error('WebSocket error:', error)

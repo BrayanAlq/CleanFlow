@@ -10,6 +10,7 @@ interface ErrorsType {
   address?: string,
   latitude?: string,
   longitude?: string,
+  type?: string,
   file?: string,
 }
 
@@ -19,9 +20,18 @@ interface CreateContainerProps {
   onEnd: Dispatch<SetStateAction<boolean>>
 }
 
+type ContainerCodeType = 'ORGANIC' | 'GENERAL' | 'RECYCLABLE'
+
+const ContainerTypeMap: Record<ContainerCodeType, string> = {
+  ORGANIC: 'Orgánico',
+  GENERAL: 'General',
+  RECYCLABLE: 'Reciclable'
+}
+
 export const CreateContainer = ({ latitude, longitude, onEnd }: CreateContainerProps) => {
   const [nameContainer, setNameContainer] = useState("")
   const [address, setAddress] = useState("")
+  const [type, setType] = useState<ContainerCodeType>('GENERAL')
   const [file, setFile] = useState<File | null>(null)
   const [errors, setErrors] = useState<ErrorsType>({})
   const { mutate } = useCreateContainer()
@@ -58,7 +68,8 @@ export const CreateContainer = ({ latitude, longitude, onEnd }: CreateContainerP
         name: nameContainer,
         address_name: address,
         latitude,
-        longitude
+        longitude,
+        type
       },
       image: file!
     })
@@ -118,6 +129,16 @@ export const CreateContainer = ({ latitude, longitude, onEnd }: CreateContainerP
           />
         </div>
       </div>
+      <select
+        name="Tipo de contenedor"
+        value={type}
+        onChange={(e) => setType(e.target.value as ContainerCodeType)}
+        className="appearance-none w-full border-border-accent border-[0.1px] rounded-lg px-2 h-10 text-xs text-white/50 bg-black/20"
+      >
+        { Object.keys(ContainerTypeMap).map((type) => (
+          <option key={type} value={type}>{ContainerTypeMap[type as ContainerCodeType]}</option>
+        )) }
+        </select>
       <div className="w-full flex h-10 gap-2">
         <input
           ref={fileInputRef}
