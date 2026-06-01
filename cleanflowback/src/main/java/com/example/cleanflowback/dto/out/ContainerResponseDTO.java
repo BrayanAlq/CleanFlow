@@ -4,8 +4,9 @@ public record ContainerResponseDTO(
     Long id,
     String name,
     String addressName,
-    String apiKey,
+//    String apiKey,
     double latitude,
     double longitude,
-    ContainerImageResponseDTO containerImage
+    ContainerImageResponseDTO containerImage,
+    MetricResponseDTO lastMetric
 ) {}

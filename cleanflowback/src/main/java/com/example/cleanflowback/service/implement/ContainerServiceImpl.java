@@ -3,16 +3,17 @@ package com.example.cleanflowback.service.implement;
 import com.example.cleanflowback.dto.in.CreateContainerRequestDTO;
 import com.example.cleanflowback.dto.out.ContainerResponseDTO;
 import com.example.cleanflowback.dto.out.ContainerResponseForDeviceDTO;
+import com.example.cleanflowback.dto.out.MetricResponseDTO;
 import com.example.cleanflowback.exception.ContainerConflictException;
 import com.example.cleanflowback.exception.CredentialsAlreadyUsedException;
 import com.example.cleanflowback.exception.ResourceNotFoundException;
+import com.example.cleanflowback.mapper.ContainerImageMapper;
 import com.example.cleanflowback.mapper.ContainerMapper;
-import com.example.cleanflowback.model.ActualContainerEntity;
-import com.example.cleanflowback.model.ContainerEntity;
-import com.example.cleanflowback.model.ContainerImageEntity;
-import com.example.cleanflowback.model.ReportEntity;
+import com.example.cleanflowback.mapper.MetricMapper;
+import com.example.cleanflowback.model.*;
 import com.example.cleanflowback.repository.ActualContainerRepository;
 import com.example.cleanflowback.repository.ContainerRepository;
+import com.example.cleanflowback.repository.MetricRepository;
 import com.example.cleanflowback.repository.ReportRepository;
 import com.example.cleanflowback.service.CloudinaryService;
 import com.example.cleanflowback.service.ContainerService;
@@ -22,8 +23,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -34,6 +39,9 @@ public class ContainerServiceImpl implements ContainerService {
     private final CloudinaryService cloudinaryService;
     private final PasswordEncoder passwordEncoder;
     private final ActualContainerRepository actualContainerRepository;
+    private final MetricRepository metricRepository;
+    private final ContainerImageMapper containerImageMapper;
+    private final MetricMapper metricMapper;
 
     @Override
     @Transactional
@@ -67,9 +75,30 @@ public class ContainerServiceImpl implements ContainerService {
     public List<ContainerResponseDTO> findAllContainersInViewport(double north, double south, double east, double west) {
         List<ContainerEntity> containerInViewport = containerRepository.findAllInViewport(north, south, east, west);
 
+        List<Long> containerIds = containerInViewport.stream().map(ContainerEntity::getId).toList();
+
+        Map<Long, MetricEntity> latestMetrics = metricRepository
+            .findLatestByContainerIds(containerIds)
+            .stream()
+            .collect(Collectors.toMap(m -> m.getContainer().getId(), m -> m));
+
         return containerInViewport.stream()
-            .map(containerMapper::fromEntityDTO)
-            .toList();
+            .map(container -> {
+                MetricResponseDTO lastMetric = Optional
+                    .ofNullable(latestMetrics.get(container.getId()))
+                    .map(metricMapper::fromEntityToDTO)
+                    .orElse(null);
+
+                return new ContainerResponseDTO(
+                    container.getId(),
+                    container.getName(),
+                    container.getAddressName(),
+                    container.getLatitude(),
+                    container.getLongitude(),
+                    containerImageMapper.fromEntityToDTO(container.getContainerImage()),
+                    lastMetric
+                );
+            }).toList();
     }
 
     @Override

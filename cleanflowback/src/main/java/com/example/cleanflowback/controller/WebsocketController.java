@@ -3,7 +3,7 @@ package com.example.cleanflowback.controller;
 import com.example.cleanflowback.dto.in.ContainerInfoRequestDTO;
 import com.example.cleanflowback.dto.in.DriverLocationRequestDTO;
 import com.example.cleanflowback.dto.in.ViewportRequestDTO;
-import com.example.cleanflowback.dto.out.ContainerInfoResponseDTO;
+import com.example.cleanflowback.dto.out.MetricResponseDTO;
 import com.example.cleanflowback.dto.out.DriverLocationResponseDTO;
 import com.example.cleanflowback.model.ContainerEntity;
 import com.example.cleanflowback.model.UserEntity;
@@ -15,7 +15,6 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -98,7 +97,7 @@ public class WebsocketController {
             containerEntity.getLatitude(), containerEntity.getLongitude()
         );
 
-        ContainerInfoResponseDTO responseDTO = new ContainerInfoResponseDTO(
+        MetricResponseDTO responseDTO = new MetricResponseDTO(
             containerEntity.getId(), requestDTO.isAlive(), requestDTO.airQualityLevel(), requestDTO.ppm(), requestDTO.fillingLevel()
         );
 

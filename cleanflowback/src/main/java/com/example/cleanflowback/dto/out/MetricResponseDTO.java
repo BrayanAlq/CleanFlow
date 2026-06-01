@@ -1,6 +1,6 @@
 package com.example.cleanflowback.dto.out;
 
-public record ContainerInfoResponseDTO(
+public record MetricResponseDTO(
     Long containerId,
     boolean isAlive,
     String airQualityLevel,
