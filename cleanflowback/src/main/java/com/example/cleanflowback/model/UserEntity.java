@@ -55,6 +55,11 @@ public abstract class UserEntity implements UserDetails {
         return List.of(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
     }
 
+    @PrePersist
+    public void prePersist() {
+        this.enabled = true;
+    }
+
     @Override
     public boolean isEnabled() {
         return enabled;
