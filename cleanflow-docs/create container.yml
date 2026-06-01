@@ -7,16 +7,24 @@ http:
   method: POST
   url: "{{actual_url}}/container"
   body:
-    type: json
-    data: |-
-      {
-        "name": "Contenedor 1",
-        "latitude": -11.96,
-        "longitude": -76.99
-      }
+    type: multipart-form
+    data:
+      - name: image
+        type: file
+        value:
+          - /Users/deyvigo/dev/CleanFlow/mocks/images/container/container-3.jpg
+      - name: container
+        type: text
+        value: |-
+          "name": "string",
+              "address_name": "string",
+              "latitude": 0.1,
+              "longitude": 0.1,
+              "type": "string"
+        contentType: application/json
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiJ9.eyJsYXN0X25hbWUiOiJMaW1hIiwiZmlyc3RfbmFtZSI6IkFkbWluIiwiaWQiOjEsInJvbGUiOiJBRE1JTiIsInVzZXJuYW1lIjoiYWRtaW4xIiwiZXhwIjoxNzc4ODI0Njc1fQ.ozfYbk3kHqlP0h7qxcPbbLHcA17rDEo7E49vHXthDio
+    token: eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQURNSU4iLCJpZCI6MSwiZmlyc3RfbmFtZSI6IlNhbiBJc2lkcm8iLCJsYXN0X25hbWUiOiJBZG1pbiIsInVzZXJuYW1lIjoiYWRtaW4xIiwiZXhwIjoxNzgwOTQ2MTA4fQ.AVFHvo72G9Sh4eC1pavPN6Dtoe12EPg8hzZb78hpUic
 
 settings:
   encodeUrl: true
