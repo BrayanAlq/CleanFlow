@@ -18,6 +18,8 @@ public record CreateResidentRequestDTO(
     String firstName,
     @NotBlank(message = "last_name is required")
     String lastName,
+    @NotNull(message = "address is required")
+    String address,
     @NotNull(message = "longitude is required")
     Double longitude,
     @NotNull(message = "latitude is required")

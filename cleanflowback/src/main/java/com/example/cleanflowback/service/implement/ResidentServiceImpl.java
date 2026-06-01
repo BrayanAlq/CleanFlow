@@ -1,5 +1,6 @@
 package com.example.cleanflowback.service.implement;
 
+import com.example.cleanflowback.dto.in.PatchResidentRequestDTO;
 import com.example.cleanflowback.dto.out.ResidentInfoDTO;
 import com.example.cleanflowback.exception.ResourceNotFoundException;
 import com.example.cleanflowback.mapper.ResidentMapper;
@@ -28,5 +29,14 @@ public class ResidentServiceImpl implements ResidentService {
     public Page<ResidentInfoDTO> getAllResidentsInfo(Pageable pageable) {
         return residentRepository.findAll(pageable)
             .map(residentMapper::toInfoDTO);
+    }
+
+    @Override
+    public void patchResident(ResidentEntity resident, PatchResidentRequestDTO requestDTO) {
+        resident.setFirstName(requestDTO.firstName());
+        resident.setLastName(requestDTO.lastName());
+        resident.setAddress(requestDTO.address());
+
+        residentRepository.save(resident);
     }
 }

@@ -7,5 +7,8 @@ public record ResidentInfoDTO(
     String email,
     double latitude,
     double longitude,
-    boolean enabled
+    boolean enabled,
+    String address,
+    int reportCount,
+    int badgeCount
 ) {}

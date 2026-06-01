@@ -6,13 +6,11 @@ import com.example.cleanflowback.dto.out.ReportResponseDTO;
 import com.example.cleanflowback.exception.ReportImageAlreadyAsignedException;
 import com.example.cleanflowback.exception.ResourceNotFoundException;
 import com.example.cleanflowback.mapper.ReportMapper;
-import com.example.cleanflowback.model.ContainerEntity;
-import com.example.cleanflowback.model.ReportEntity;
-import com.example.cleanflowback.model.ReportImageEntity;
-import com.example.cleanflowback.model.UserEntity;
+import com.example.cleanflowback.model.*;
 import com.example.cleanflowback.repository.ContainerRepository;
 import com.example.cleanflowback.repository.ReportImageRepository;
 import com.example.cleanflowback.repository.ReportRepository;
+import com.example.cleanflowback.repository.ResidentRepository;
 import com.example.cleanflowback.service.ReportService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Limit;
@@ -29,6 +27,7 @@ public class ReportServiceImpl implements ReportService {
     private final ReportMapper reportMapper;
     private final ContainerRepository containerRepository;
     private final ReportImageRepository reportImageRepository;
+    private final ResidentRepository residentRepository;
 
     @Override
     public Page<ReportResponseDTO> getReportsByContainerId(Long containerId, Pageable pageable) {
@@ -59,6 +58,21 @@ public class ReportServiceImpl implements ReportService {
         reportEntity.setImages(images);
 
         ReportEntity saved = reportRepository.save(reportEntity);
+
+        // report count and badge counts
+        if (user.getRole().equals(RoleEnum.RESIDENT)) {
+            ResidentEntity resident = residentRepository.findById(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Resident not found"));
+            int reportCount = resident.getReportCount();
+            resident.setReportCount(reportCount + 1);
+
+            int badgeCount = getBadgeLevel(reportCount + 1);
+            if (resident.getBadgeCount() != badgeCount) {
+                resident.setBadgeCount(badgeCount);
+            }
+
+            residentRepository.save(resident);
+        }
         return reportMapper.fromEntityToDTO(saved);
     }
 
@@ -90,5 +104,13 @@ public class ReportServiceImpl implements ReportService {
             nextCursor,
             hasNext
         );
+    }
+
+    public int getBadgeLevel(int reportCount) {
+        int[] thresholds = {10, 30, 70, 120};
+        for (int i = 0; i < thresholds.length; i++) {
+            if (reportCount < thresholds[i]) return i + 1;
+        }
+        return thresholds.length + 1;
     }
 }
