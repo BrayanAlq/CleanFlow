@@ -1,21 +1,35 @@
-import { useContext } from "react";
+import { useContext, useState, useEffect } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
+  View, Text, StyleSheet, TouchableOpacity, ActivityIndicator,
 } from "react-native";
-import { useState } from "react";
-import { AppContext } from "../App";
+import { AuthContext } from "../context/AuthContext";
+import api from "../services/api";
 
 export default function PerfilCiudadano() {
-  const { setRole } = useContext(AppContext);
-  const [edit, setEdit] = useState(false);
+  const { user, logout } = useContext(AuthContext);
+  const [profile, setProfile] = useState(null);
 
-  const [name, setName] = useState("María Vásquez");
-  const [zone, setZone] = useState("Zona Norte");
-  const [address, setAddress] = useState("Av. Los Olivos 245");
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await api.get("/resident");
+        setProfile(res.data);
+      } catch (e) {}
+    })();
+  }, []);
+
+  const name = profile
+    ? `${profile.first_name || ""} ${profile.last_name || ""}`
+    : user?.firstName
+      ? `${user.firstName} ${user.lastName}`
+      : "Vecino";
+
+  const initials = name
+    .split(" ")
+    .map((s) => s[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
     <View style={styles.container}>
@@ -23,195 +37,62 @@ export default function PerfilCiudadano() {
 
       <View style={styles.profileCard}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>
-            {name.substring(0, 2).toUpperCase()}
-          </Text>
+          <Text style={styles.avatarText}>{initials}</Text>
         </View>
-
         <View style={{ flex: 1 }}>
-          {edit ? (
-            <>
-              <TextInput
-                value={name}
-                onChangeText={setName}
-                style={styles.input}
-              />
-              <TextInput
-                value={zone}
-                onChangeText={setZone}
-                style={styles.input}
-              />
-            </>
-          ) : (
-            <>
-              <Text style={styles.name}>{name}</Text>
-              <Text style={styles.sub}>Vecino · {zone}</Text>
-            </>
+          <Text style={styles.name}>{name}</Text>
+          <Text style={styles.sub}>Vecino</Text>
+        </View>
+      </View>
+
+      {profile && (
+        <View style={styles.card}>
+          {profile.email && (
+            <View style={styles.row}>
+              <Text>📧 Correo</Text>
+              <Text style={styles.gray}>{profile.email}</Text>
+            </View>
+          )}
+          {profile.latitude && (
+            <View style={[styles.row, { borderBottomWidth: 0 }]}>
+              <Text>📍 Ubicación</Text>
+              <Text style={styles.gray}>
+                {profile.latitude.toFixed(4)}, {profile.longitude.toFixed(4)}
+              </Text>
+            </View>
           )}
         </View>
-      </View>
+      )}
 
-      <View style={styles.stats}>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>14</Text>
-          <Text style={styles.gray}>Reportes</Text>
-        </View>
-
-        <View style={[styles.statItem, { borderRightWidth: 0 }]}>
-          <Text style={styles.statNumber}>2</Text>
-          <Text style={styles.gray}>Insignias</Text>
-        </View>
-      </View>
-
-      <View style={styles.card}>
-        <View style={styles.row}>
-          <Text>🏠 Mi dirección</Text>
-
-          {edit ? (
-            <TextInput
-              value={address}
-              onChangeText={setAddress}
-              style={styles.inputSmall}
-            />
-          ) : (
-            <Text style={styles.gray}>{address}</Text>
-          )}
-        </View>
-
-        <TouchableOpacity style={styles.row}>
-          <Text>🔔 Notificaciones</Text>
-          <Text style={styles.gray}>Cercanía y alertas</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.row}>
-          <Text>🛡️ Privacidad</Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity
-        style={styles.btn}
-        onPress={() => setEdit(!edit)}
-      >
-        <Text>
-          {edit ? "Guardar cambios" : "Editar perfil"}
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.logout} onPress={() => setRole(null)}>
-        <Text style={{ color: "red" }}>Cerrar sesión</Text>
+      <TouchableOpacity style={styles.logout} onPress={logout}>
+        <Text style={{ color: "red", fontWeight: "bold" }}>Cerrar sesión</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-    padding: 16,
-  },
-
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 16,
-  },
-
+  container: { flex: 1, backgroundColor: "#f5f5f5", padding: 16 },
+  title: { fontSize: 22, fontWeight: "bold", marginBottom: 16 },
   profileCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 16,
+    flexDirection: "row", alignItems: "center", backgroundColor: "#fff",
+    padding: 16, borderRadius: 16, marginBottom: 16,
   },
-
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#d0e8d0",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
+    width: 50, height: 50, borderRadius: 25, backgroundColor: "#d0e8d0",
+    justifyContent: "center", alignItems: "center", marginRight: 10,
   },
-
-  avatarText: {
-    fontWeight: "bold",
-    color: "#2e7d32",
-  },
-
-  name: {
-    fontWeight: "bold",
-  },
-
-  sub: {
-    color: "#777",
-  },
-
-  stats: {
-    flexDirection: "row",
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    marginBottom: 16,
-    overflow: "hidden",
-  },
-
-  statItem: {
-    flex: 1,
-    alignItems: "center",
-    padding: 16,
-    borderRightWidth: 1,
-    borderColor: "#eee",
-  },
-
-  statNumber: {
-    fontWeight: "bold",
-    fontSize: 18,
-  },
-
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    marginBottom: 16,
-  },
-
+  avatarText: { fontWeight: "bold", color: "#2e7d32" },
+  name: { fontWeight: "bold" },
+  sub: { color: "#777" },
+  card: { backgroundColor: "#fff", borderRadius: 16, marginBottom: 16 },
   row: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderColor: "#eee",
+    padding: 16, borderBottomWidth: 1, borderColor: "#eee",
+    flexDirection: "row", justifyContent: "space-between",
   },
-
-  btn: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 20,
-    alignItems: "center",
-    marginBottom: 10,
-  },
-
+  gray: { color: "#777" },
   logout: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 20,
-    alignItems: "center",
-  },
-
-  input: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 6,
-    marginBottom: 5,
-  },
-
-  inputSmall: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 6,
-    marginTop: 5,
-  },
-
-  gray: {
-    color: "#777",
+    backgroundColor: "#fff", padding: 16, borderRadius: 20,
+    alignItems: "center", marginTop: "auto", marginBottom: 20,
   },
 });

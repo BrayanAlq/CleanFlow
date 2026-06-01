@@ -1,37 +1,24 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
-import { BINS } from "../data/mock";
-
-const citizenBins = BINS.slice(0, 3).map((b) => ({
-  name: b.name,
-  status: b.status,
-  percent: `${b.percent}%`,
-}));
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 
 export default function HomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll}>
-
         <Text style={styles.title}>Hola, vecino</Text>
         <Text style={styles.subtitle}>Tu zona en tiempo real</Text>
 
         <View style={styles.cardGreen}>
-          <Text style={styles.greenTitle}>Camión en camino</Text>
-          <Text style={styles.bold}>A 5 minutos de tu zona</Text>
-          <Text>Camión #12 · Zona Norte</Text>
-
-          <Text style={styles.action}>¡Saca tus bolsas! 🌱</Text>
+          <Text style={styles.greenTitle}>Monitoreo activo</Text>
+          <Text style={styles.bold}>Conductores cerca de tu zona</Text>
+          <Text>Revisa el mapa para ver su ubicación en tiempo real</Text>
 
           <View style={styles.rowBetween}>
-            <Text>⏰ Estimado: 10:30 AM</Text>
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>Recordarme</Text>
+            <Text>⏰ Actualización en vivo</Text>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate("Cercanos")}
+            >
+              <Text style={styles.buttonText}>Ver mapa</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -54,21 +41,11 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.section}>Tachos cerca de ti</Text>
-
-        {citizenBins.map((item, index) => (
-          <View key={index} style={styles.listItem}>
-            <View>
-              <Text style={styles.bold}>{item.name}</Text>
-              <Text>{item.status}</Text>
-            </View>
-
-            <View style={styles.badge}>
-              <Text>{item.percent}</Text>
-            </View>
-          </View>
-        ))}
-
+        <Text style={styles.section}>Bienvenido a CleanFlow</Text>
+        <Text style={styles.sub}>
+          Usa el mapa para ver contenedores cercanos y la ubicación de los
+          conductores en tiempo real.
+        </Text>
       </ScrollView>
     </View>
   );
@@ -80,45 +57,21 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: "bold" },
   subtitle: { color: "#666", marginBottom: 16 },
   cardGreen: {
-    backgroundColor: "#DFF5E1",
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 16,
+    backgroundColor: "#DFF5E1", padding: 16, borderRadius: 16, marginBottom: 16,
   },
   greenTitle: { color: "#2e7d32" },
   bold: { fontWeight: "bold" },
-  action: { marginVertical: 8 },
   row: { flexDirection: "row", gap: 10, marginBottom: 16 },
   rowBetween: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: "row", justifyContent: "space-between",
+    alignItems: "center", marginTop: 12,
   },
   cardSmall: {
-    flex: 1,
-    backgroundColor: "#FFF",
-    padding: 16,
-    borderRadius: 12,
+    flex: 1, backgroundColor: "#FFF", padding: 16, borderRadius: 12,
   },
   link: { color: "#2e7d32" },
   section: { fontSize: 16, fontWeight: "bold", marginBottom: 10 },
-  listItem: {
-    backgroundColor: "#FFF",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  badge: {
-    backgroundColor: "#EAEAEA",
-    padding: 10,
-    borderRadius: 20,
-  },
-  button: {
-    backgroundColor: "#111",
-    padding: 10,
-    borderRadius: 20,
-  },
+  sub: { color: "#777", marginBottom: 10 },
+  button: { backgroundColor: "#111", padding: 10, borderRadius: 20 },
   buttonText: { color: "#FFF" },
 });

@@ -1,24 +1,23 @@
 import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  ScrollView,
-  TouchableOpacity,
-  Linking,
+  View, Text, StyleSheet, TextInput, ScrollView,
+  TouchableOpacity, Linking, ActivityIndicator,
 } from "react-native";
-import MapView, { Marker, Polyline } from "react-native-maps";
+import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
-import { useEffect, useState } from "react";
-import { BINS, getColor } from "../data/mock";
+import { useEffect, useState, useRef, useContext } from "react";
+import api from "../services/api";
+import { connect, disconnect, subscribe, publish } from "../services/websocket";
+import { AuthContext } from "../context/AuthContext";
+import { getColor } from "../data/mock";
 
 export default function CercanosScreen() {
+  const { token } = useContext(AuthContext);
   const [location, setLocation] = useState(null);
-  const [driverLocation, setDriverLocation] = useState({
-    latitude: -12.0464,
-    longitude: -77.0428,
-  });
-  const [route, setRoute] = useState([]);
+  const [containers, setContainers] = useState([]);
+  const [drivers, setDrivers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [region, setRegion] = useState(null);
+  const wsConnected = useRef(false);
 
   useEffect(() => {
     (async () => {
@@ -26,219 +25,166 @@ export default function CercanosScreen() {
       if (status !== "granted") return;
       let loc = await Location.getCurrentPositionAsync({});
       setLocation(loc.coords);
+      setRegion({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      });
     })();
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setDriverLocation((prev) => ({
-        latitude: prev.latitude + 0.0003,
-        longitude: prev.longitude + 0.0003,
-      }));
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+    if (!region) return;
+
+    const fetchContainers = async () => {
+      try {
+        const res = await api.get("/container/viewport", {
+          params: {
+            north: region.latitude + region.latitudeDelta / 2,
+            south: region.latitude - region.latitudeDelta / 2,
+            east: region.longitude + region.longitudeDelta / 2,
+            west: region.longitude - region.longitudeDelta / 2,
+          },
+        });
+        setContainers(res.data);
+      } catch (e) {
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContainers();
+  }, [region]);
 
   useEffect(() => {
-    setRoute((prev) => [...prev, driverLocation]);
-  }, [driverLocation]);
+    if (!token || wsConnected.current) return;
+    wsConnected.current = true;
 
-  const isVisited = (bin) => {
-    return route.some(
-      (point) =>
-        Math.abs(point.latitude - bin.latitude) < 0.001 &&
-        Math.abs(point.longitude - bin.longitude) < 0.001
-    );
-  };
+    connect(token, (client) => {
+      subscribe("/user/queue/drivers", (data) => {
+        setDrivers((prev) => {
+          const idx = prev.findIndex((d) => d.driver_id === data.driver_id);
+          if (idx >= 0) {
+            const updated = [...prev];
+            updated[idx] = data;
+            return updated;
+          }
+          return [...prev, data];
+        });
+      });
+
+      if (region) {
+        publish("/app/viewport.update", {
+          north: region.latitude + region.latitudeDelta / 2,
+          south: region.latitude - region.latitudeDelta / 2,
+          east: region.longitude + region.longitudeDelta / 2,
+          west: region.longitude - region.longitudeDelta / 2,
+        });
+      }
+    });
+
+    return () => disconnect();
+  }, [token]);
+
+  useEffect(() => {
+    if (!region || !wsConnected.current) return;
+    publish("/app/viewport.update", {
+      north: region.latitude + region.latitudeDelta / 2,
+      south: region.latitude - region.latitudeDelta / 2,
+      east: region.longitude + region.longitudeDelta / 2,
+      west: region.longitude - region.longitudeDelta / 2,
+    });
+  }, [region]);
 
   const openDirections = (lat, lng) => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
-    Linking.openURL(url).catch(() =>
-      alert("No se pudo abrir el mapa")
-    );
+    Linking.openURL(url).catch(() => alert("No se pudo abrir el mapa"));
   };
-
-  const bestBin = BINS.reduce((prev, curr) =>
-    curr.percent < prev.percent ? curr : prev
-  );
 
   return (
     <View style={styles.container}>
       <ScrollView>
-
         <View style={styles.search}>
           <TextInput placeholder="Buscar dirección" />
         </View>
 
         <MapView
           style={styles.map}
-          region={
-            location && {
-              latitude: location.latitude,
-              longitude: location.longitude,
-              latitudeDelta: 0.05,
-              longitudeDelta: 0.05,
-            }
-          }
+          region={region}
           initialRegion={{
-            latitude: -12.0464,
-            longitude: -77.0428,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
+            latitude: -12.0464, longitude: -77.0428,
+            latitudeDelta: 0.05, longitudeDelta: 0.05,
           }}
-          showsUserLocation={true}
+          showsUserLocation
+          onRegionChangeComplete={(r) => setRegion(r)}
         >
-          <Marker coordinate={driverLocation} title="Camión recolector">
-            <Text style={{ fontSize: 22 }}>🚛</Text>
-          </Marker>
-
-          <Polyline
-            coordinates={route}
-            strokeWidth={4}
-            strokeColor="#2e7d32"
-          />
-
-          {BINS.map((bin) => (
+          {drivers.map((d, i) => (
             <Marker
-              key={bin.id}
-              coordinate={{
-                latitude: bin.latitude,
-                longitude: bin.longitude,
-              }}
-              title={bin.name}
-              description={`${bin.percent}% - ${bin.status}`}
+              key={`driver-${d.driver_id || i}`}
+              coordinate={{ latitude: d.latitude, longitude: d.longitude }}
+              title="Conductor"
             >
-              <View
-                style={[
-                  styles.marker,
-                  {
-                    backgroundColor: isVisited(bin)
-                      ? "#999"
-                      : getColor(bin.percent),
-                  },
-                ]}
-              >
-                <Text style={styles.markerText}>{bin.percent}</Text>
+              <Text style={{ fontSize: 22 }}>🚛</Text>
+            </Marker>
+          ))}
+
+          {containers.map((c) => (
+            <Marker
+              key={c.id}
+              coordinate={{ latitude: c.latitude, longitude: c.longitude }}
+              title={c.name}
+              description={c.address_name || ""}
+            >
+              <View style={[styles.marker, { backgroundColor: getColor(50) }]}>
+                <Text style={styles.markerText}>🗑️</Text>
               </View>
             </Marker>
           ))}
         </MapView>
 
-        <View style={styles.suggestion}>
-          <Text style={styles.suggestTitle}>Sugerencia</Text>
-
-          <Text style={styles.bold}>
-            El tacho de {BINS.find(b => b.percent >= 85)?.name} está lleno
-          </Text>
-
-          <Text style={styles.gray}>
-            Ve a {bestBin.name} ({bestBin.percent}% disponible)
-          </Text>
-
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() =>
-              openDirections(bestBin.latitude, bestBin.longitude)
-            }
-          >
-            <Text style={styles.buttonText}>Cómo llegar</Text>
-          </TouchableOpacity>
-        </View>
-
-        <Text style={styles.section}>En tu cuadra</Text>
+        <Text style={styles.section}>Contenedores cercanos</Text>
         <Text style={styles.sub}>
-          {BINS.length} contenedores cercanos
+          {loading ? "Cargando..." : `${containers.length} contenedores`}
         </Text>
 
-        {BINS.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            style={styles.card}
-            onPress={() =>
-              openDirections(item.latitude, item.longitude)
-            }
-          >
-            <View>
-              <Text style={styles.bold}>{item.name}</Text>
-              <Text style={styles.gray}>{item.type}</Text>
-            </View>
-
-            <View style={{ alignItems: "flex-end" }}>
-              <Text style={styles.bold}>{item.percent}%</Text>
-              <Text style={{ color: getColor(item.percent) }}>
-                {item.status}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        ))}
-
+        {loading ? (
+          <ActivityIndicator style={{ margin: 20 }} color="#2e7d32" />
+        ) : (
+          containers.map((c) => (
+            <TouchableOpacity
+              key={c.id}
+              style={styles.card}
+              onPress={() => openDirections(c.latitude, c.longitude)}
+            >
+              <View>
+                <Text style={styles.bold}>{c.name}</Text>
+                <Text style={styles.gray}>{c.address_name || ""}</Text>
+              </View>
+            </TouchableOpacity>
+          ))
+        )}
       </ScrollView>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f2f2f2" },
-  search: {
-    margin: 16,
-    backgroundColor: "#fff",
-    padding: 12,
-    borderRadius: 20,
-  },
-  map: {
-    height: 300,
-    marginHorizontal: 16,
-    borderRadius: 20,
-  },
+  search: { margin: 16, backgroundColor: "#fff", padding: 12, borderRadius: 20 },
+  map: { height: 300, marginHorizontal: 16, borderRadius: 20 },
   marker: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
+    width: 40, height: 40, borderRadius: 20,
+    justifyContent: "center", alignItems: "center",
   },
-  markerText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  suggestion: {
-    margin: 16,
-    backgroundColor: "#f6efe6",
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#f0c28b",
-  },
-  suggestTitle: {
-    color: "#f57c00",
-    marginBottom: 5,
-  },
-  section: {
-    marginHorizontal: 16,
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  sub: {
-    marginHorizontal: 16,
-    color: "#777",
-    marginBottom: 10,
-  },
+  markerText: { color: "#fff", fontWeight: "bold" },
+  section: { marginHorizontal: 16, fontSize: 16, fontWeight: "bold" },
+  sub: { marginHorizontal: 16, color: "#777", marginBottom: 10 },
   card: {
-    backgroundColor: "#fff",
-    marginHorizontal: 16,
-    marginBottom: 10,
-    padding: 16,
-    borderRadius: 16,
-    flexDirection: "row",
+    backgroundColor: "#fff", marginHorizontal: 16, marginBottom: 10,
+    padding: 16, borderRadius: 16, flexDirection: "row",
     justifyContent: "space-between",
   },
   bold: { fontWeight: "bold" },
   gray: { color: "#777" },
-  button: {
-    marginTop: 10,
-    backgroundColor: "#111",
-    padding: 10,
-    borderRadius: 20,
-    alignSelf: "flex-start",
-  },
-  buttonText: { color: "#fff" },
 });

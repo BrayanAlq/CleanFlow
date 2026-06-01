@@ -1,11 +1,15 @@
-import { createContext, useState } from "react";
+import { useContext } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { ActivityIndicator, View } from "react-native";
 
-import RoleSelectionScreen from "./screens/RoleSelectionScreen";
+import { AuthProvider, AuthContext } from "./context/AuthContext";
+import LoginScreen from "./screens/LoginScreen";
+import RegisterCitizenScreen from "./screens/RegisterCitizenScreen";
+import RegisterDriverScreen from "./screens/RegisterDriverScreen";
 import HomeScreen from "./screens/HomeScreen";
 import CercanosScreen from "./screens/CercanosScreen";
 import ReportarScreen from "./screens/ReportarScreen";
@@ -13,11 +17,6 @@ import PerfilCiudadano from "./screens/PerfilCiudadano";
 import RutaScreen from "./screens/RutaScreen";
 import RecojosScreen from "./screens/RecojosScreen";
 import PerfilConductor from "./screens/PerfilConductor";
-
-export const AppContext = createContext({
-  role: null,
-  setRole: () => {},
-});
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -100,30 +99,43 @@ function DriverTabs() {
   );
 }
 
-export default function App() {
-  const [role, setRole] = useState(null);
+function RootNavigator() {
+  const { user, isLoading } = useContext(AuthContext);
 
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#2e7d32" />
+      </View>
+    );
+  }
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {!user ? (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="RegisterCitizen" component={RegisterCitizenScreen} />
+            <Stack.Screen name="RegisterDriver" component={RegisterDriverScreen} />
+          </>
+        ) : user.role === "DRIVER" ? (
+          <Stack.Screen name="DriverTabs" component={DriverTabs} />
+        ) : (
+          <Stack.Screen name="CitizenTabs" component={CitizenTabs} />
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+export default function App() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1 }}>
-        <AppContext.Provider value={{ role, setRole }}>
-          <NavigationContainer>
-            <Stack.Navigator screenOptions={{ headerShown: false }}>
-              {!role && (
-                <Stack.Screen
-                  name="RoleSelection"
-                  component={RoleSelectionScreen}
-                />
-              )}
-              {role === "citizen" && (
-                <Stack.Screen name="CitizenTabs" component={CitizenTabs} />
-              )}
-              {role === "driver" && (
-                <Stack.Screen name="DriverTabs" component={DriverTabs} />
-              )}
-            </Stack.Navigator>
-          </NavigationContainer>
-        </AppContext.Provider>
+        <AuthProvider>
+          <RootNavigator />
+        </AuthProvider>
       </SafeAreaView>
     </SafeAreaProvider>
   );
