@@ -10,13 +10,12 @@ http:
     type: json
     data: |-
       {
-        "container_id": 1,
-        "content": "El contenedor está caído",
-        "image_ids": [1, 2]
+        "container_id": 33,
+        "content": "Pasó el caminó de basura, pero no ha recogido de este contenedor"
       }
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiJ9.eyJsYXN0X25hbWUiOiJMaW1hIiwiZmlyc3RfbmFtZSI6IkFkbWluIiwiaWQiOjEsInJvbGUiOiJBRE1JTiIsInVzZXJuYW1lIjoiYWRtaW4xIiwiZXhwIjoxNzc4ODUzNzY3fQ._zEboIHmwI-VHuRqiC88aPdFfhouSV-vEW3Aj5PYSY8
+    token: eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiUkVTSURFTlQiLCJpZCI6MTAsImZpcnN0X25hbWUiOiJSZXNpZGVudCIsImxhc3RfbmFtZSI6IkNhcmxvcyIsInVzZXJuYW1lIjoicmVzaWRlbnQ0IiwiZXhwIjoxNzgwOTM0OTk2fQ.JLdTwHr_W3OfFWOx10aUskvMuCVpIPArUMVWuOo8yaE
 
 settings:
   encodeUrl: true

@@ -10,11 +10,11 @@ http:
     type: json
     data: |-
       {
-        "username": "resident4",
+        "username": "resident5",
         "password": "password",
-        "email": "resident4@example.com",
+        "email": "resident5@example.com",
         "first_name": "Resident",
-        "last_name": "Carlos",
+        "last_name": "Aldair",
         "latitude": -12.088844,
         "longitude": -77.019180
       }

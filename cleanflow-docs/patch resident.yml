@@ -1,11 +1,19 @@
 info:
-  name: resident info
+  name: patch resident
   type: http
-  seq: 3
+  seq: 26
 
 http:
-  method: GET
+  method: PATCH
   url: "{{actual_url}}/resident"
+  body:
+    type: json
+    data: |-
+      {
+        "first_name": "Resident",
+        "last_name": "Jhon",
+        "address": "Urbanización Malla"
+      }
   auth:
     type: bearer
     token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InJlc2lkZW50NCIsInJvbGUiOiJSRVNJREVOVCIsImlkIjoxMCwiZmlyc3RfbmFtZSI6IlJlc2lkZW50IiwibGFzdF9uYW1lIjoiQ2FybG9zIiwiZXhwIjoxNzgwOTM1MzY1fQ.U3EQ2DrGJM-zm57nOGnmpW_wJUjXqOmBAEuaO5lgFwM
