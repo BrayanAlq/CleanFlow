@@ -18,7 +18,7 @@ public class MetricEntity {
     private Long id;
 
     @Column(nullable = false)
-    private boolean isAlive;
+    private Boolean isAlive;
 
     @Column(nullable = false)
     private String airQualityLevel;

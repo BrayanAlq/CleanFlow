@@ -12,7 +12,7 @@ import java.util.List;
 public interface MetricRepository extends JpaRepository<MetricEntity, Long> {
     @Query("""
         SELECT m FROM MetricEntity m
-        WHERE m.id IN :containerIds
+        WHERE m.container.id IN :containerIds
         AND m.timestamp = (
             SELECT max(m2.timestamp) FROM MetricEntity m2
             WHERE m2.container.id = m.container.id

@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -93,6 +92,7 @@ public class ContainerServiceImpl implements ContainerService {
                     container.getId(),
                     container.getName(),
                     container.getAddressName(),
+                    container.getType().name(),
                     container.getLatitude(),
                     container.getLongitude(),
                     containerImageMapper.fromEntityToDTO(container.getContainerImage()),
@@ -120,7 +120,20 @@ public class ContainerServiceImpl implements ContainerService {
         ContainerEntity containerEntity = containerRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException(("container not found")));
 
-        return containerMapper.fromEntityDTO(containerEntity);
+        List<Long> containerIds = List.of(containerEntity.getId());
+
+        List<MetricEntity> lastMetric = metricRepository.findLatestByContainerIds(containerIds);
+
+        return new ContainerResponseDTO(
+            containerEntity.getId(),
+            containerEntity.getName(),
+            containerEntity.getAddressName(),
+            containerEntity.getType().name(),
+            containerEntity.getLatitude(),
+            containerEntity.getLongitude(),
+            containerImageMapper.fromEntityToDTO(containerEntity.getContainerImage()),
+            metricMapper.fromEntityToDTO(lastMetric.stream().findFirst().orElse(null))
+        );
     }
 
     @Override

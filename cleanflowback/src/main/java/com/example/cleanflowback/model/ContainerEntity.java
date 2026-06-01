@@ -33,6 +33,10 @@ public class ContainerEntity {
     @Column(nullable = false)
     private String addressName;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ContainerTypeEnum type;
+
     @Column(columnDefinition = "geography(Point, 4326)", nullable = false)
     private Point location;
 

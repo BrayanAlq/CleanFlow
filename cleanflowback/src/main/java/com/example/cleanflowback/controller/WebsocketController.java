@@ -1,6 +1,7 @@
 package com.example.cleanflowback.controller;
 
 import com.example.cleanflowback.dto.in.ContainerInfoRequestDTO;
+import com.example.cleanflowback.dto.in.CreateMetricRequestDTO;
 import com.example.cleanflowback.dto.in.DriverLocationRequestDTO;
 import com.example.cleanflowback.dto.in.ViewportRequestDTO;
 import com.example.cleanflowback.dto.out.MetricResponseDTO;
@@ -9,6 +10,7 @@ import com.example.cleanflowback.model.ContainerEntity;
 import com.example.cleanflowback.model.UserEntity;
 import com.example.cleanflowback.model.ViewportEntity;
 import com.example.cleanflowback.repository.ViewportRepository;
+import com.example.cleanflowback.service.MetricService;
 import com.example.cleanflowback.service.ViewportService;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -31,6 +33,7 @@ public class WebsocketController {
     private final ViewportRepository viewportRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final SimpUserRegistry simpUserRegistry;
+    private final MetricService metricService;
 
     @MessageMapping("/viewport.update")
     public void createOrUpdateViewPort(
@@ -93,12 +96,14 @@ public class WebsocketController {
             return;
         }
 
-        List<ViewportEntity> visibleUsers = viewportRepository.findVisibleUsers(
-            containerEntity.getLatitude(), containerEntity.getLongitude()
+        CreateMetricRequestDTO metricToSave = new CreateMetricRequestDTO(
+            containerEntity.getId(), requestDTO.isAlive(), requestDTO.airQualityLevel(), requestDTO.ppm(), requestDTO.fillingLevel()
         );
 
-        MetricResponseDTO responseDTO = new MetricResponseDTO(
-            containerEntity.getId(), requestDTO.isAlive(), requestDTO.airQualityLevel(), requestDTO.ppm(), requestDTO.fillingLevel()
+        MetricResponseDTO responseDTO = metricService.createMetric(metricToSave);
+
+        List<ViewportEntity> visibleUsers = viewportRepository.findVisibleUsers(
+            containerEntity.getLatitude(), containerEntity.getLongitude()
         );
 
         for (ViewportEntity viewport: visibleUsers) {

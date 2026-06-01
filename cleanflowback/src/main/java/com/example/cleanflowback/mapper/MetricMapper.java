@@ -1,5 +1,6 @@
 package com.example.cleanflowback.mapper;
 
+import com.example.cleanflowback.dto.in.CreateMetricRequestDTO;
 import com.example.cleanflowback.dto.out.MetricResponseDTO;
 import com.example.cleanflowback.model.MetricEntity;
 import org.mapstruct.Mapper;
@@ -13,4 +14,5 @@ public interface MetricMapper {
         expression = "java(entity.getContainer().getId())"
     )
     MetricResponseDTO fromEntityToDTO(MetricEntity entity);
+    MetricEntity fromDTOToEntity(CreateMetricRequestDTO dto);
 }

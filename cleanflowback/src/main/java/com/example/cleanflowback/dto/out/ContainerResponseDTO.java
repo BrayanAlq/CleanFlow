@@ -4,6 +4,7 @@ public record ContainerResponseDTO(
     Long id,
     String name,
     String addressName,
+    String type,
 //    String apiKey,
     double latitude,
     double longitude,
