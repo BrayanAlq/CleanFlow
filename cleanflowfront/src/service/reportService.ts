@@ -3,7 +3,7 @@ import type { CursorPageResponse } from "../models/page.model"
 import type { ImageType } from "../models/image.model"
 import axiosInstance from "../api/axiosInstance"
 
-export async function getReportsByContainerId(containerId: number, cursor: number | null) {
+export async function getReportsByContainerId(containerId: number, cursor: string | null) {
   const response = await axiosInstance.get<CursorPageResponse<ReportType>>(
     `/report/container/${containerId}`,
     {
@@ -14,6 +14,7 @@ export async function getReportsByContainerId(containerId: number, cursor: numbe
     }
   )
 
+  console.log(response.data)
   return response.data
 }
 

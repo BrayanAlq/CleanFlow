@@ -1,5 +1,5 @@
 export interface CursorPageResponse<T> {
   content: T[],
-  cursor: number,
+  cursor: string,
   has_next: boolean
-} 
+}

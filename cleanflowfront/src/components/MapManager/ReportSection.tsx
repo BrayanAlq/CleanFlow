@@ -17,7 +17,7 @@ export const ReportSection = ({ liveReports }: { liveReports: ReportType[]} ) =>
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ['reports', 'container', selectedId],
-    queryFn: ({ pageParam  }: { pageParam: number | null}) => getReportsByContainerId(selectedId!, pageParam),
+    queryFn: ({ pageParam  }: { pageParam: string | null}) => getReportsByContainerId(selectedId!, pageParam),
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.has_next ? lastPage.cursor : undefined,
     enabled: selectedId !== null,

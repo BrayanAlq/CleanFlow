@@ -99,8 +99,6 @@ export const MapManageScreen = () => {
     })
   }
 
-  console.log(containers)
-
   return (
     <div
       className="h-[96vh] rounded-xl w-[97%] border-[0.1px] border-border-accent relative overflow-hidden"
