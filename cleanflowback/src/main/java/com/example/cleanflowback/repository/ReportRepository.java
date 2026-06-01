@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ReportRepository extends JpaRepository<ReportEntity, Long> {
+public interface ReportRepository extends JpaRepository<ReportEntity, Long>, ReportRepositoryCustom {
     List<ReportEntity> findAllByContainer_Id(Long id);
     Page<ReportEntity> findAllByContainer_Id(Long containerId, Pageable pageable);
 

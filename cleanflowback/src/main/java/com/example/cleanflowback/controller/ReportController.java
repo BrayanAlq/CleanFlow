@@ -2,6 +2,7 @@ package com.example.cleanflowback.controller;
 
 import com.example.cleanflowback.dto.in.CreateReportRequestDTO;
 import com.example.cleanflowback.dto.out.CursorPageResponseDTO;
+import com.example.cleanflowback.dto.out.CursorPageWithEncodedResponseDTO;
 import com.example.cleanflowback.dto.out.ReportResponseDTO;
 import com.example.cleanflowback.model.*;
 import com.example.cleanflowback.service.ReportService;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,11 +50,21 @@ public class ReportController {
     }
 
     @GetMapping("/container/{containerId}")
-    public ResponseEntity<CursorPageResponseDTO<ReportResponseDTO>> getReportsByContainerId(
+    public ResponseEntity<CursorPageWithEncodedResponseDTO<ReportResponseDTO>> getReportsByContainerId(
         @PathVariable Long containerId,
-        @RequestParam(value = "cursor", required = false) Long cursor,
+        @RequestParam(value = "cursor", required = false) String cursor,
         @RequestParam(value = "size", defaultValue = "5") int size
     ) {
         return ResponseEntity.ok(reportService.getReportsByContainerIdWithCursor(containerId, cursor, size));
+    }
+
+    @GetMapping("/mine")
+    @PreAuthorize("hasRole('RESIDENT')")
+    public ResponseEntity<CursorPageWithEncodedResponseDTO<ReportResponseDTO>> getMyReports(
+        @AuthenticationPrincipal ResidentEntity resident,
+        @RequestParam(value = "cursor", required = false) String cursor,
+        @RequestParam(value = "size", defaultValue = "15") int size
+    ) {
+        return ResponseEntity.ok(reportService.getReportsByResident(resident, cursor, size));
     }
 }

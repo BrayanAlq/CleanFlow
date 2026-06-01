@@ -1,7 +1,9 @@
 package com.example.cleanflowback.service.implement;
 
+import com.example.cleanflowback.dto.GeneratedCursorInternalDTO;
 import com.example.cleanflowback.dto.in.CreateReportRequestDTO;
 import com.example.cleanflowback.dto.out.CursorPageResponseDTO;
+import com.example.cleanflowback.dto.out.CursorPageWithEncodedResponseDTO;
 import com.example.cleanflowback.dto.out.ReportResponseDTO;
 import com.example.cleanflowback.exception.ReportImageAlreadyAsignedException;
 import com.example.cleanflowback.exception.ResourceNotFoundException;
@@ -12,6 +14,7 @@ import com.example.cleanflowback.repository.ReportImageRepository;
 import com.example.cleanflowback.repository.ReportRepository;
 import com.example.cleanflowback.repository.ResidentRepository;
 import com.example.cleanflowback.service.ReportService;
+import com.example.cleanflowback.utils.CursorUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
@@ -28,6 +31,7 @@ public class ReportServiceImpl implements ReportService {
     private final ContainerRepository containerRepository;
     private final ReportImageRepository reportImageRepository;
     private final ResidentRepository residentRepository;
+    private final CursorUtil cursorUtil;
 
     @Override
     public Page<ReportResponseDTO> getReportsByContainerId(Long containerId, Pageable pageable) {
@@ -77,16 +81,14 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public CursorPageResponseDTO<ReportResponseDTO> getReportsByContainerIdWithCursor(Long containerId, Long cursor, int size) {
-        List<ReportEntity> reportEntities;
+    public CursorPageWithEncodedResponseDTO<ReportResponseDTO> getReportsByContainerIdWithCursor(
+        Long containerId, String cursor, int size
+    ) {
+        GeneratedCursorInternalDTO cursorInternal = cursor == null ? null : cursorUtil.decode(cursor);
 
-        if (cursor == null) {
-            reportEntities = reportRepository.findAllByContainer_IdOrderByIdDesc(containerId, Limit.of(size + 1));
-        } else {
-            reportEntities = reportRepository.findAllByContainer_IdAndIdLessThanOrderByIdDesc(
-                containerId, cursor, Limit.of(size + 1)
-            );
-        }
+        List<ReportEntity> reportEntities = reportRepository.getReportsByContainerWithCursor(
+            containerId, cursorInternal, size + 1
+        );
 
         boolean hasNext = reportEntities.size() > size;
 
@@ -94,15 +96,46 @@ public class ReportServiceImpl implements ReportService {
             reportEntities.removeLast();
         }
 
-        Long nextCursor = reportEntities.isEmpty()
-            ? null
-            : reportEntities.getLast().getId();
+        String nextCursor = hasNext
+            ? cursorUtil.encode(new GeneratedCursorInternalDTO(
+                reportEntities.getLast().getTimestamp(), reportEntities.getLast().getId()
+            ))
+            : null;
 
 
-        return new CursorPageResponseDTO<ReportResponseDTO>(
+        return new CursorPageWithEncodedResponseDTO<>(
             reportEntities.stream().map(reportMapper::fromEntityToDTO).toList(),
-            nextCursor,
-            hasNext
+            hasNext,
+            nextCursor
+        );
+    }
+
+    @Override
+    public CursorPageWithEncodedResponseDTO<ReportResponseDTO> getReportsByResident(
+        ResidentEntity resident, String cursor, int size
+    ) {
+        GeneratedCursorInternalDTO decodedCursor = cursor == null ? null : cursorUtil.decode(cursor);
+
+        List<ReportEntity> reportEntities = reportRepository.getReportsByResidentWithCursor(
+            resident, decodedCursor, size + 1
+        );
+
+        boolean hasNext = reportEntities.size() > size;
+
+        if (hasNext) {
+            reportEntities.removeLast();
+        }
+
+        String nextCursor = hasNext
+            ? cursorUtil.encode(new GeneratedCursorInternalDTO(
+                reportEntities.getLast().getTimestamp(), reportEntities.getLast().getId()
+            ))
+            : null;
+
+        return new CursorPageWithEncodedResponseDTO<>(
+            reportEntities.stream().map(reportMapper::fromEntityToDTO).toList(),
+            hasNext,
+            nextCursor
         );
     }
 

@@ -34,15 +34,7 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
     public CursorPageWithEncodedResponseDTO<GeneratedRouteResponseDTO> getGeneratedRoutes(
         Long driverId, LocalDate date, String cursor, Integer size
     ) {
-        GeneratedRouteCursorDTO cursorPass = cursor != null ? cursorUtil.decode(cursor) : null;
-
-        GeneratedCursorInternalDTO cursorInternal = null;
-
-        if (cursorPass != null) {
-            cursorInternal = new GeneratedCursorInternalDTO(
-                Instant.parse(cursorPass.createdAt()), cursorPass.id()
-            );
-        }
+        GeneratedCursorInternalDTO cursorInternal = cursorUtil.decode(cursor);
 
         if (size == null) {
             size = 10;
@@ -62,12 +54,11 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
             ? null
             : routes.getLast().getId();
 
-        GeneratedRouteCursorDTO nextCursorDto = routes.isEmpty()
+        GeneratedCursorInternalDTO nextCursorDto = routes.isEmpty()
             ? null
-            : new GeneratedRouteCursorDTO(routes.getLast().getId(), routes.getLast().getCreatedAt().toString());
+            : new GeneratedCursorInternalDTO(routes.getLast().getCreatedAt(), routes.getLast().getId());
 
         return new CursorPageWithEncodedResponseDTO<>(
-            cursorUtil.encode(nextCursorDto),
             routes.stream()
                 .map(r ->
                     new GeneratedRouteResponseDTO(
@@ -77,7 +68,8 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
                         r.getCreatedAt()
                     )
                 ).toList(),
-            hasNext
+            hasNext,
+            cursorUtil.encode(nextCursorDto)
         );
     }
 

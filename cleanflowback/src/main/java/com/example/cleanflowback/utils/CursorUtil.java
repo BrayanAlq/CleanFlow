@@ -1,6 +1,6 @@
 package com.example.cleanflowback.utils;
 
-import com.example.cleanflowback.dto.GeneratedRouteCursorDTO;
+import com.example.cleanflowback.dto.GeneratedCursorInternalDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -13,7 +13,7 @@ import java.util.Base64;
 public class CursorUtil {
     private final ObjectMapper mapper;
 
-    public String encode(GeneratedRouteCursorDTO dto) {
+    public String encode(GeneratedCursorInternalDTO dto) {
         try {
             String json = mapper.writeValueAsString(dto);
             return Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
@@ -22,12 +22,12 @@ public class CursorUtil {
         }
     }
 
-    public GeneratedRouteCursorDTO decode(String encodedCursor) {
+    public GeneratedCursorInternalDTO decode(String encodedCursor) {
         try {
             byte[] decodedBytes = Base64.getUrlDecoder().decode(encodedCursor);
             String jsonString = new String(decodedBytes, StandardCharsets.UTF_8);
 
-            return mapper.readValue(jsonString, GeneratedRouteCursorDTO.class);
+            return mapper.readValue(jsonString, GeneratedCursorInternalDTO.class);
         } catch (Exception e) {
             throw new RuntimeException("Invalid cursor: " + e.getMessage());
         }
