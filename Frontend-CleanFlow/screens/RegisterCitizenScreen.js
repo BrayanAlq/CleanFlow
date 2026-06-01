@@ -3,7 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, ScrollView, Alert,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker } from "../components/MapView";
 import { AuthContext } from "../context/AuthContext";
 
 export default function RegisterCitizenScreen({ navigation }) {

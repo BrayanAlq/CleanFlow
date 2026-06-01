@@ -1,12 +1,10 @@
 # CleanFlow — AGENTS.md
 
-Two independent subprojects. No shared tooling, no CI, no testing/lint infrastructure.
-
 ## Frontend-CleanFlow (Expo / React Native)
 
 - **Entrypoint**: `Frontend-CleanFlow/index.js` → `App.js`
 - **Framework**: Expo SDK 54, React Native 0.81.5, React 19.1.0
-- **All data is hardcoded/mocked** — no backend, no API calls, no real server
+- **Real API calls** to `https://cleanflow.deyvigo.online` (not mocked)
 - **Plain JavaScript** — no TypeScript anywhere
 - **Commands** (from `Frontend-CleanFlow/`):
   ```
@@ -18,18 +16,11 @@ Two independent subprojects. No shared tooling, no CI, no testing/lint infrastru
 - **No lint, test, or typecheck scripts exist** — do not attempt to run them
 - UI language: Spanish
 - 4 bottom tabs: `Inicio` (Home), `Cercanos` (Map), `Reportar` (Report), `Perfil` (Profile)
-- `CercanosScreen` uses `expo-location` (permission required) and `react-native-maps` with simulated truck movement
-
-## Driver-CleanFlow (Expo / React Native — Conductor App)
-
-- **Entrypoint**: `Driver-CleanFlow/index.js` → `App.js`
-- **Same stack** as Frontend-CleanFlow (Expo SDK 54, RN 0.81.5, React 19.1.0)
-- **All data is hardcoded/mocked** — no backend
-- **No lint, test, or typecheck scripts**
-- **Auth flow**: LoginScreen → RegisterScreen (register mock, no real API) → MainTabs
-- **3 bottom tabs**: `Ruta` (map + assigned bins), `Recojos` (list + mark collected), `Perfil` (driver info + logout)
-- Mock credentials: `driver1` / `password`
-- Commands identical to Frontend-CleanFlow from `Driver-CleanFlow/`
+- `CercanosScreen` uses `expo-location` (permission required) and `react-native-maps` with real container data from backend
+- `@react-native-async-storage/async-storage` must be **v1.23.1** (v3 breaks on Expo SDK 54)
+- Web map: `components/MapView.web.js` mocks `react-native-maps` (native-only module)
+- WebSocket (`services/websocket.js`) connects to `wss://cleanflow.deyvigo.online/ws-device` — fails gracefully if server doesn't accept WS
+- Login clears `global.jwtToken` before request to prevent stale-token rejection
 
 ## Firmware-CleanFlow (ESP32 / Arduino)
 

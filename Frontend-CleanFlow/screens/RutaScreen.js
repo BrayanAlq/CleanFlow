@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   Linking, ActivityIndicator, Alert,
 } from "react-native";
-import MapView, { Marker, Polyline } from "react-native-maps";
+import MapView, { Marker, Polyline } from "../components/MapView";
 import * as Location from "expo-location";
 import { AuthContext } from "../context/AuthContext";
 import { connect, disconnect, publish, isConnected } from "../services/websocket";

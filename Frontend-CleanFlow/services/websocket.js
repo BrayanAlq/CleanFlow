@@ -17,7 +17,6 @@ export function connect(token, onConnect, onError) {
     onStompError: (frame) => {
       if (onError) onError(frame);
     },
-    onWebSocketClose: () => {},
   });
 
   client.activate();
@@ -32,15 +31,28 @@ export function disconnect() {
 
 export function subscribe(destination, callback) {
   if (!client || !client.active) return null;
-  return client.subscribe(destination, (message) => {
-    const body = JSON.parse(message.body);
-    callback(body);
-  });
+  try {
+    return client.subscribe(destination, (message) => {
+      try {
+        const body = JSON.parse(message.body);
+        callback(body);
+      } catch (e) {
+        console.log("Error parseando mensaje WS:", e?.message);
+      }
+    });
+  } catch (e) {
+    console.log("Error en subscribe WS:", e?.message);
+    return null;
+  }
 }
 
 export function publish(destination, body) {
   if (!client || !client.active) return;
-  client.publish({ destination, body: JSON.stringify(body) });
+  try {
+    client.publish({ destination, body: JSON.stringify(body) });
+  } catch (e) {
+    console.log("Error en publish WS:", e?.message);
+  }
 }
 
 export function isConnected() {

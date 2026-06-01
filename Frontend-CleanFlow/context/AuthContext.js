@@ -31,6 +31,7 @@ export function AuthProvider({ children }) {
           setUser(JSON.parse(savedUser));
         }
       } catch (e) {
+        console.log("Error leyendo AsyncStorage:", e?.message);
       } finally {
         setIsLoading(false);
       }
@@ -38,10 +39,16 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback(async (username, password) => {
+    global.jwtToken = null;
     const res = await api.post("/auth/login", { username, password });
     const { token: jwt } = res.data;
 
-    const payload = JSON.parse(atob(jwt.split(".")[1]));
+    let payload;
+    try {
+      payload = JSON.parse(atob(jwt.split(".")[1]));
+    } catch {
+      throw new Error("Error al decodificar el token recibido del servidor");
+    }
     const userData = {
       id: payload.id,
       username: payload.username,

@@ -22,7 +22,8 @@ export default function LoginScreen({ navigation }) {
     try {
       await login(username, password);
     } catch (e) {
-      const msg = e.response?.data?.message || "Credenciales inválidas";
+      console.log("ERROR LOGIN:", e?.response?.status, e?.response?.data, e?.message);
+      const msg = e.response?.data?.message || e.message || "Credenciales inválidas";
       setError(msg);
     } finally {
       setLoading(false);

@@ -2,7 +2,7 @@ import {
   View, Text, StyleSheet, TextInput, ScrollView,
   TouchableOpacity, Linking, ActivityIndicator,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker } from "../components/MapView";
 import * as Location from "expo-location";
 import { useEffect, useState, useRef, useContext } from "react";
 import api from "../services/api";
@@ -48,7 +48,9 @@ export default function CercanosScreen() {
           },
         });
         setContainers(res.data);
+        console.log("Contenedores recibidos:", res.data?.length);
       } catch (e) {
+        console.log("Error fetching containers:", e?.response?.status, e?.response?.data, e?.message);
       } finally {
         setLoading(false);
       }
@@ -174,10 +176,10 @@ const styles = StyleSheet.create({
   search: { margin: 16, backgroundColor: "#fff", padding: 12, borderRadius: 20 },
   map: { height: 300, marginHorizontal: 16, borderRadius: 20 },
   marker: {
-    width: 40, height: 40, borderRadius: 20,
+    width: 24, height: 24, borderRadius: 12,
     justifyContent: "center", alignItems: "center",
   },
-  markerText: { color: "#fff", fontWeight: "bold" },
+  markerText: { color: "#fff", fontWeight: "bold", fontSize: 12 },
   section: { marginHorizontal: 16, fontSize: 16, fontWeight: "bold" },
   sub: { marginHorizontal: 16, color: "#777", marginBottom: 10 },
   card: {
