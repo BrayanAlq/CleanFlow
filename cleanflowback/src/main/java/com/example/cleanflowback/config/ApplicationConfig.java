@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 @AllArgsConstructor
@@ -24,5 +25,10 @@ public class ApplicationConfig {
     UserDetailsService userDetailsService() {
         return username -> userRepository.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("username not found"));
+    }
+
+    @Bean
+    RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }

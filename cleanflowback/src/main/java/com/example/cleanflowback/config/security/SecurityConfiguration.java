@@ -39,7 +39,8 @@ public class SecurityConfiguration {
                     "/ws/**",
                     "/ws-device/**",
                     "/container/device/**",
-                    "/helloworld/**"
+                    "/helloworld/**",
+                    "/test-notify/**"
                 ).permitAll()
                 .requestMatchers(request -> "OPTIONS".equalsIgnoreCase(request.getMethod())).permitAll()
                 .requestMatchers(
