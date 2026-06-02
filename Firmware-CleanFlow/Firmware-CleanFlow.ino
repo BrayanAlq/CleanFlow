@@ -12,6 +12,7 @@
 // --- Configuración del Backend ---
 const char* wsPath = "/ws-device";
 const unsigned long METRIC_INTERVAL_MS = 3000;
+const unsigned long CHECK_CONTAINER_INTERVAL_MS = 6000;
 
 // --- Pines Hardware ---
 const int trigPin        = 22;
@@ -54,6 +55,7 @@ bool      stompConnected  = false;
 bool      wsConectado     = false;
 uint32_t  ultimoEnvio     = 0;
 uint32_t  wsUltimoIntento = 0;
+uint32_t  ultimoCheckContainer = 0;
 
 // Instancias
 Preferences    preferences;
@@ -68,6 +70,7 @@ void   reconectarWiFi();
 void   enviarDatos(float nivel, float gas, bool inclinado);
 void   logSerial(const char* nivel, const String& msg);
 void   obtenerCredenciales();
+void   verificarCambioContenedor();
 void   wsConectar();
 void   wsLoop();
 bool   wsEnviarFrame(const String& data);
@@ -161,6 +164,12 @@ void loop() {
   if (!mqCalentado && (ahora - tiempoEncendido >= MQ135_WARMUP_MS)) {
     mqCalentado = true;
     logSerial("INFO", "MQ-135 precalentado. Lecturas de gas ahora son confiables.");
+  }
+
+  // ── Verificar si el contenedor fue reasignado ──────────────
+  if (modoProduccion && WiFi.status() == WL_CONNECTED && ahora - ultimoCheckContainer >= CHECK_CONTAINER_INTERVAL_MS) {
+    ultimoCheckContainer = ahora;
+    verificarCambioContenedor();
   }
 
   // ── Comandos por Serial ─────────────────────────────────────
@@ -455,6 +464,23 @@ void obtenerCredenciales() {
     logSerial("ERROR", "Fallo al obtener credenciales. HTTP " + String(httpCode));
   }
   http.end();
+}
+
+/**
+ * Verifica si el contenedor asignado cambió en el backend.
+ * Si el api_key es diferente, reconecta el WebSocket con las nuevas credenciales.
+ */
+void verificarCambioContenedor() {
+  String oldKey = deviceApiKey;
+  obtenerCredenciales();
+  if (deviceApiKey != oldKey && oldKey.length() > 0) {
+    logSerial("INFO", "Contenedor reasignado (apiKey cambió). Reconectando WebSocket...");
+    wsClient.stop();
+    wsConectado = false;
+    stompConnected = false;
+    delay(1000);
+    wsConectar();
+  }
 }
 
 /**
