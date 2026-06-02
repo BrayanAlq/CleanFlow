@@ -7,10 +7,7 @@ import com.example.cleanflowback.repository.DeviceTokenRepository;
 import com.example.cleanflowback.repository.UserRepository;
 import com.example.cleanflowback.service.PushNotificationService;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,7 +19,7 @@ public class TestNotificationController {
     private final UserRepository userRepository;
     private final PushNotificationService pushNotificationService;
 
-    @GetMapping("/{idUser}")
+    @PostMapping("/{idUser}")
     public void sendToUser(@PathVariable Long idUser) {
         UserEntity user = userRepository.findById(idUser)
             .orElseThrow(() -> new ResourceNotFoundException("user id not found"));
