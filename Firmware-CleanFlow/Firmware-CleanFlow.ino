@@ -4,7 +4,6 @@
 
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include <WebSocketsClient.h>
 #include <ArduinoJson.h>
 #include <Preferences.h>
 #include <MQUnifiedsensor.h>
@@ -13,6 +12,7 @@
 // --- Configuración del Backend ---
 const char* wsPath = "/ws-device";
 const unsigned long METRIC_INTERVAL_MS = 3000;
+const unsigned long CHECK_CONTAINER_INTERVAL_MS = 6000;
 
 // --- Pines Hardware ---
 const int trigPin        = 22;
@@ -23,7 +23,7 @@ const int inclinacionPin = 15;
 // --- Configuración MQ-135 ---
 #define placa                 "ESP-32"
 #define Voltage_Resolution    3.3
-#define type                  "MQ-135"
+#define TIPO_MQ135            "MQ-135"
 #define ADC_Bit_Resolution    12
 #define RatioMQ135CleanAir    3.6
 #define MQ135_WARMUP_MS       20000UL   // 20 seg demo | cambiar a 1200000UL (20 min) en producción real
@@ -48,15 +48,18 @@ bool     wifiEnBackoff   = false;
 uint32_t wifiBackoffInicio = 0;
 
 // --- WebSocket / STOMP ---
-WebSocketsClient webSocket;
+WiFiClientSecure wsClient;
 String    deviceApiKey    = "";
 String    deviceSecret    = "";
 bool      stompConnected  = false;
+bool      wsConectado     = false;
 uint32_t  ultimoEnvio     = 0;
+uint32_t  wsUltimoIntento = 0;
+uint32_t  ultimoCheckContainer = 0;
 
 // Instancias
 Preferences    preferences;
-MQUnifiedsensor MQ135(placa, Voltage_Resolution, ADC_Bit_Resolution, pinMQ, type);
+MQUnifiedsensor MQ135(placa, Voltage_Resolution, ADC_Bit_Resolution, pinMQ, TIPO_MQ135);
 
 // --- Prototipos ---
 float  calcularDistanciaCm();
@@ -67,8 +70,11 @@ void   reconectarWiFi();
 void   enviarDatos(float nivel, float gas, bool inclinado);
 void   logSerial(const char* nivel, const String& msg);
 void   obtenerCredenciales();
-void   conectarWebSocket();
-void   webSocketEvent(WStype_t type, uint8_t* payload, size_t length);
+void   verificarCambioContenedor();
+void   wsConectar();
+void   wsLoop();
+bool   wsEnviarFrame(const String& data);
+String wsGenerarKey();
 void   enviarFrameStompConnect();
 void   enviarFrameStompSend(const String& body);
 
@@ -102,11 +108,25 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
+  //if (WiFi.status() == WL_CONNECTED) {
+  //  logSerial("INFO", "WiFi conectado. IP: " + WiFi.localIP().toString());
+  //  wifiIntentos = 0;
+  //  obtenerCredenciales();
+  //  conectarWebSocket();
+  //} else {
+    //logSerial("WARN", "No se pudo conectar al WiFi. Se reintentará en el loop.");
+  //}
   if (WiFi.status() == WL_CONNECTED) {
     logSerial("INFO", "WiFi conectado. IP: " + WiFi.localIP().toString());
     wifiIntentos = 0;
+    logSerial("INFO", "Obteniendo credenciales del backend...");
     obtenerCredenciales();
-    conectarWebSocket();
+    if (deviceApiKey.length() > 0) {
+      logSerial("INFO", "Credenciales OK. Conectando WebSocket...");
+      wsConectar();
+    } else {
+      logSerial("ERROR", "No se obtuvieron credenciales. ¿Backend encendido?");
+    }
   } else {
     logSerial("WARN", "No se pudo conectar al WiFi. Se reintentará en el loop.");
   }
@@ -129,12 +149,27 @@ void loop() {
   uint32_t ahora = millis();
 
   // ── Mantener WebSocket vivo ─────────────────────────────────
-  webSocket.loop();
+  wsLoop();
+
+  // ── Reconectar si se perdió ─────────────────────────────────
+  if (!wsClient.connected() && deviceApiKey.length() > 0 && WiFi.status() == WL_CONNECTED) {
+    if (ahora - wsUltimoIntento > 5000) {
+      wsUltimoIntento = ahora;
+      logSerial("INFO", "Reconectando WebSocket...");
+      wsConectar();
+    }
+  }
 
   // ── Verificar precalentamiento MQ-135 ──────────────────────
   if (!mqCalentado && (ahora - tiempoEncendido >= MQ135_WARMUP_MS)) {
     mqCalentado = true;
     logSerial("INFO", "MQ-135 precalentado. Lecturas de gas ahora son confiables.");
+  }
+
+  // ── Verificar si el contenedor fue reasignado ──────────────
+  if (modoProduccion && WiFi.status() == WL_CONNECTED && ahora - ultimoCheckContainer >= CHECK_CONTAINER_INTERVAL_MS) {
+    ultimoCheckContainer = ahora;
+    verificarCambioContenedor();
   }
 
   // ── Comandos por Serial ─────────────────────────────────────
@@ -366,6 +401,18 @@ void reconectarWiFi() {
 }
 
 /**
+ * Convierte PPM de gas a nivel de calidad de aire cualitativo.
+ */
+String calcularNivelAire(float ppm) {
+  if (ppm < 0) return "\"sin_dato\"";
+  if (ppm < 25) return "\"muy_bueno\"";
+  if (ppm < 50) return "\"bueno\"";
+  if (ppm < 100) return "\"regular\"";
+  if (ppm < 200) return "\"malo\"";
+  return "\"muy_malo\"";
+}
+
+/**
  * Envía datos al servidor vía STOMP SEND sobre WebSocket.
  */
 void enviarDatos(float nivel, float gas, bool inclinado) {
@@ -375,27 +422,34 @@ void enviarDatos(float nivel, float gas, bool inclinado) {
   }
 
   String body = String("{") +
-    "\"is_alive\":" +String(inclinado ? "true" : "false")+","+
-    "\"air_quality_level\":\"good\"," +
+    "\"is_alive\":" + String(inclinado ? "false" : "true") + "," +
+    "\"air_quality_level\":" + calcularNivelAire(gas) + "," +
     "\"ppm\":" + String(gas, 2) + "," +
     "\"filling_level\":" + String(nivel / 100.0, 4) +
     "}";
 
   enviarFrameStompSend(body);
+  logSerial("INFO", "[ENVIO] Datos: " + body);
 }
 
 /**
  * Obtiene credenciales del backend vía HTTP GET /container/device.
  */
 void obtenerCredenciales() {
+  WiFiClientSecure client;
+  client.setInsecure();
   HTTPClient http;
-  String url = "http://" + String(backendHost) + ":" + String(backendPort) + "/container/device";
-  http.begin(url);
+  String url = "https://" + String(backendHost) + "/container/device";
+  http.begin(client, url);
   http.setTimeout(8000);
 
   int httpCode = http.GET();
+  Serial.print("[httpCode] ");
+  Serial.println(httpCode);
   if (httpCode == 200) {
     String payload = http.getString();
+    Serial.print("[PAYLOAD] ");
+    Serial.println(payload);
     StaticJsonDocument<200> doc;
     DeserializationError error = deserializeJson(doc, payload);
     if (error) {
@@ -403,7 +457,7 @@ void obtenerCredenciales() {
       http.end();
       return;
     }
-    deviceApiKey = doc["apiKey"].as<String>();
+    deviceApiKey = doc["api_key"].as<String>();
     deviceSecret = doc["secret"].as<String>();
     logSerial("INFO", "Credenciales obtenidas. apiKey: " + deviceApiKey);
   } else {
@@ -413,41 +467,266 @@ void obtenerCredenciales() {
 }
 
 /**
- * Inicia conexión WebSocket con el backend.
+ * Verifica si el contenedor asignado cambió en el backend.
+ * Si el api_key es diferente, reconecta el WebSocket con las nuevas credenciales.
  */
-void conectarWebSocket() {
-  webSocket.begin(backendHost, backendPort, wsPath);
-  webSocket.onEvent(webSocketEvent);
-  webSocket.setReconnectInterval(5000);
-  logSerial("INFO", "Conectando WebSocket a ws://" + String(backendHost) + ":" + String(backendPort) + wsPath);
+void verificarCambioContenedor() {
+  String oldKey = deviceApiKey;
+  obtenerCredenciales();
+  if (deviceApiKey != oldKey && oldKey.length() > 0) {
+    logSerial("INFO", "Contenedor reasignado (apiKey cambió). Reconectando WebSocket...");
+    wsClient.stop();
+    wsConectado = false;
+    stompConnected = false;
+    delay(1000);
+    wsConectar();
+  }
 }
 
 /**
- * Callback de eventos WebSocket.
+ * Genera un Sec-WebSocket-Key válido (base64 de 16 bytes aleatorios).
  */
-void webSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
-  switch (type) {
-    case WStype_DISCONNECTED:
+String wsGenerarKey() {
+  const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  String key = "";
+  for (int i = 0; i < 22; i++) {
+    key += charset[random(64)];
+  }
+  key += "==";
+  return key;
+}
+
+/**
+ * Envía un frame WebSocket de texto (enmascarado) al servidor.
+ */
+bool wsEnviarFrame(const String& data) {
+  if (!wsClient.connected()) return false;
+
+  size_t len = data.length();
+  uint8_t maskKey[4];
+  for (int i = 0; i < 4; i++) maskKey[i] = random(0xFF);
+
+  uint8_t header[14];
+  uint8_t hLen = 0;
+
+  header[0] = 0x81; // FIN + opcode text
+
+  if (len < 126) {
+    header[1] = 0x80 | len;
+    hLen = 2;
+  } else if (len < 0xFFFF) {
+    header[1] = 0x80 | 126;
+    header[2] = (len >> 8) & 0xFF;
+    header[3] = len & 0xFF;
+    hLen = 4;
+  } else {
+    header[1] = 0x80 | 127;
+    uint64_t l = len;
+    for (int i = 8; i > 0; i--) {
+      header[1 + i] = l & 0xFF;
+      l >>= 8;
+    }
+    hLen = 10;
+  }
+
+  header[hLen++] = maskKey[0];
+  header[hLen++] = maskKey[1];
+  header[hLen++] = maskKey[2];
+  header[hLen++] = maskKey[3];
+
+  wsClient.write(header, hLen);
+
+  for (size_t i = 0; i < len; i++) {
+    wsClient.write(data[i] ^ maskKey[i % 4]);
+  }
+
+  return true;
+}
+
+/**
+ * Procesa frames WebSocket entrantes (no bloqueante).
+ */
+void wsLoop() {
+  if (!wsClient.connected()) {
+    if (wsConectado) {
+      wsConectado = false;
       stompConnected = false;
-      logSerial("WARN", "WebSocket desconectado. Reintentando...");
-      break;
+      logSerial("WARN", "WebSocket desconectado.");
+    }
+    return;
+  }
 
-    case WStype_CONNECTED:
-      logSerial("INFO", "WebSocket conectado. Enviando STOMP CONNECT...");
-      enviarFrameStompConnect();
-      break;
+  if (!wsClient.available()) return;
 
-    case WStype_TEXT: {
-      String msg = String((char*)payload);
-      if (msg.indexOf("CONNECTED") >= 0) {
-        stompConnected = true;
-        logSerial("INFO", "STOMP CONNECTED. Listo para enviar métricas.");
-      }
-      break;
+  uint8_t header[2];
+  if (wsClient.read(header, 2) != 2) {
+    logSerial("WARN", "wsLoop: solo leyó " + String(wsClient.read(header, 2)) + " bytes de header");
+    return;
+  }
+
+  uint8_t opcode = header[0] & 0x0F;
+  uint64_t payloadLen = header[1] & 0x7F;
+
+  if (payloadLen == 126) {
+    uint8_t ext[2];
+    if (wsClient.read(ext, 2) != 2) return;
+    payloadLen = ((uint16_t)ext[0] << 8) | ext[1];
+  } else if (payloadLen == 127) {
+    uint8_t ext[8];
+    if (wsClient.read(ext, 8) != 8) return;
+    payloadLen = 0;
+    for (int i = 0; i < 8; i++) payloadLen = (payloadLen << 8) | ext[i];
+  }
+
+  uint8_t maskKey[4];
+  bool masked = header[1] & 0x80;
+  if (masked) {
+    wsClient.read(maskKey, 4);
+  }
+
+  if (payloadLen > 0) {
+    uint8_t* payload = (uint8_t*)malloc(payloadLen + 1);
+    if (!payload) return;
+
+    size_t read = 0;
+    while (read < payloadLen) {
+      int r = wsClient.read(payload + read, payloadLen - read);
+      if (r > 0) read += r;
+      else delay(1);
     }
 
-    default:
-      break;
+    if (masked) {
+      for (size_t i = 0; i < payloadLen; i++) {
+        payload[i] ^= maskKey[i % 4];
+      }
+    }
+
+    payload[payloadLen] = 0;
+
+    logSerial("DEBUG", "wsLoop: frame opcode=0x" + String(opcode, HEX) + " len=" + String(payloadLen));
+
+    switch (opcode) {
+      case 0x01: {
+        String msg = String((char*)payload);
+        logSerial("DEBUG", "wsLoop: TXT frame: " + msg.substring(0, 100));
+        if (msg.indexOf("CONNECTED") >= 0) {
+          stompConnected = true;
+          logSerial("INFO", "STOMP CONNECTED. Listo para enviar métricas.");
+        } else if (msg.indexOf("ERROR") >= 0) {
+          logSerial("ERROR", "STOMP ERROR: " + msg.substring(0, 150));
+        } else if (msg.indexOf("RECEIPT") >= 0) {
+          logSerial("DEBUG", "STOMP RECEIPT recibido");
+        }
+        break;
+      }
+      case 0x09:
+        Serial.println("[WS PING]");
+        {
+          uint8_t pong[2] = {0x8A, 0x00};
+          wsClient.write(pong, 2);
+        }
+        break;
+      case 0x0A:
+        Serial.println("[WS PONG]");
+        break;
+      case 0x08:
+        logSerial("WARN", "WebSocket cerrado por el servidor");
+        wsClient.stop();
+        wsConectado = false;
+        stompConnected = false;
+        break;
+    }
+
+    free(payload);
+  } else {
+    logSerial("DEBUG", "wsLoop: frame sin payload opcode=0x" + String(opcode, HEX));
+    switch (opcode) {
+      case 0x09:
+        {
+          uint8_t pong[2] = {0x8A, 0x00};
+          wsClient.write(pong, 2);
+        }
+        break;
+      case 0x08:
+        logSerial("WARN", "WebSocket cerrado por el servidor");
+        wsClient.stop();
+        wsConectado = false;
+        stompConnected = false;
+        break;
+    }
+  }
+}
+
+/**
+ * Conecta al servidor vía WSS, hace handshake HTTP Upgrade,
+ * y envía STOMP CONNECT.
+ */
+void wsConectar() {
+  wsClient.setInsecure();
+  wsConectado = false;
+  stompConnected = false;
+
+  logSerial("INFO", "Conectando a wss://" + String(backendHost) + ":" + String(backendPort) + wsPath);
+
+  if (!wsClient.connect(backendHost, backendPort)) {
+    logSerial("ERROR", "Fallo conexión TCP/SSL");
+    return;
+  }
+  logSerial("DEBUG", "TCP/SSL conectado exitosamente");
+
+  String wsKey = wsGenerarKey();
+  String request = "GET " + String(wsPath) + " HTTP/1.1\r\n";
+  request += "Host: " + String(backendHost) + "\r\n";
+  request += "Upgrade: websocket\r\n";
+  request += "Connection: Upgrade\r\n";
+  request += "Sec-WebSocket-Key: " + wsKey + "\r\n";
+  request += "Sec-WebSocket-Version: 13\r\n";
+  request += "\r\n";
+
+  wsClient.print(request);
+  logSerial("DEBUG", "HTTP Upgrade request enviado");
+
+  unsigned long timeout = millis() + 8000;
+  bool upgradeOk = false;
+
+  while (millis() < timeout && wsClient.connected()) {
+    if (wsClient.available()) {
+      String line = wsClient.readStringUntil('\n');
+      line.trim();
+
+      logSerial("DEBUG", "RX línea: " + line.substring(0, 60));
+
+      if (line.startsWith("HTTP/")) {
+        if (line.indexOf("101") >= 0) {
+          upgradeOk = true;
+          logSerial("DEBUG", "HTTP 101 Switching Protocols OK");
+        } else {
+          logSerial("ERROR", "HTTP " + line.substring(9, 12));
+          wsClient.stop();
+          return;
+        }
+      }
+
+      if (line.length() == 0) {
+        logSerial("DEBUG", "Fin de headers HTTP");
+        if (upgradeOk) {
+          logSerial("INFO", "WebSocket conectado. Enviando STOMP CONNECT...");
+          wsConectado = true;
+          enviarFrameStompConnect();
+        } else {
+          logSerial("ERROR", "Handshake HTTP incompleto");
+          wsClient.stop();
+        }
+        return;
+      }
+    }
+  }
+
+  if (!wsClient.connected()) {
+    logSerial("WARN", "Conexión perdida durante handshake");
+  } else if (!upgradeOk) {
+    logSerial("ERROR", "Timeout en handshake WebSocket");
+    wsClient.stop();
   }
 }
 
@@ -462,7 +741,7 @@ void enviarFrameStompConnect() {
   frame += "X-Secret:" + deviceSecret + "\n";
   frame += "\n";
   frame += '\0';
-  webSocket.sendTXT(frame);
+  wsEnviarFrame(frame);
   logSerial("DEBUG", "STOMP CONNECT enviado.");
 }
 
@@ -476,7 +755,11 @@ void enviarFrameStompSend(const String& body) {
   frame += "\n";
   frame += body;
   frame += '\0';
-  webSocket.sendTXT(frame);
+  if (!wsEnviarFrame(frame)) {
+    logSerial("ERROR", "STOMP SEND: wsEnviarFrame falló");
+  } else {
+    logSerial("INFO", "STOMP SEND enviado (" + String(frame.length()) + " bytes)");
+  }
 }
 
 /**
