@@ -52,7 +52,7 @@ export const LoginScreen = () => {
 
   return (
     <div className="relative h-dvh w-dvw flex flex-col items-center justify-center bg-sky-900">
-      <Wave className="absolute bottom-0 text-sky-200 w-full stroke-transparent shadow-xl" />
+      <Wave className="absolute bottom-0 text-sky-200 w-full stroke-transparent shadow-xl pointer-events-none" />
       <div className="flex flex-col w-[80dvw] h-[80dvh] rounded-2xl py-20 px-40 gap-5 transition-all duration-300 ease-in-out">
         <div className="text-8xl text-white font-main-title">Cleanflow</div>
         <div

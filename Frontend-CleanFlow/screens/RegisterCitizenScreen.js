@@ -14,6 +14,7 @@ export default function RegisterCitizenScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [address, setAddress] = useState("");
   const [latitude, setLatitude] = useState(-12.0464);
   const [longitude, setLongitude] = useState(-77.0428);
   const [loading, setLoading] = useState(false);
@@ -36,6 +37,7 @@ export default function RegisterCitizenScreen({ navigation }) {
         email: email.trim(),
         first_name: firstName.trim(),
         last_name: lastName.trim(),
+        address: address.trim(),
         latitude,
         longitude,
       });
@@ -69,6 +71,8 @@ export default function RegisterCitizenScreen({ navigation }) {
           onChangeText={setFirstName} />
         <TextInput style={styles.input} placeholder="Apellidos" value={lastName}
           onChangeText={setLastName} />
+        <TextInput style={styles.input} placeholder="Dirección" value={address}
+          onChangeText={setAddress} />
         <TextInput style={styles.input} placeholder="Contraseña" value={password}
           onChangeText={setPassword} secureTextEntry />
         <TextInput style={styles.input} placeholder="Confirmar contraseña" value={confirm}
