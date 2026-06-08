@@ -5,6 +5,7 @@ import { PrivateRoute } from '@/auth/PrivateRoute'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { RouteViewerScreen } from '@/pages/RouteViewerScreen'
 import { GeneratedRoutesScreen } from '@/pages/GeneratedRoutesScreen'
+import { DriversScreen } from '@/pages/DriversScreen'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="map" element={<MapManageScreen />} />
           <Route path="routes" element={<RouteViewerScreen />} />
           <Route path="generated-routes" element={<GeneratedRoutesScreen />} />
+          <Route path="drivers" element={<DriversScreen />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" replace />} />

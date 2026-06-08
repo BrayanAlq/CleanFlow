@@ -7,6 +7,7 @@ import com.example.cleanflowback.dto.in.CreateResidentRequestDTO;
 import com.example.cleanflowback.dto.in.LoginRequestDTO;
 import com.example.cleanflowback.dto.out.LoginResponseDTO;
 import com.example.cleanflowback.exception.CredentialsAlreadyUsedException;
+import com.example.cleanflowback.exception.ResourceNotFoundException;
 import com.example.cleanflowback.exception.UserDisabledException;
 import com.example.cleanflowback.exception.UserInvalidCredentialsException;
 import com.example.cleanflowback.mapper.AdminMapper;
@@ -98,6 +99,14 @@ public class AuthServiceImpl implements AuthService {
             "last_name", user.getLastName(),
             "role", user.getRole().name()
         );
+    }
+
+    @Override
+    public void updateUserStatus(long userId, boolean enabled) {
+        UserEntity user = userRepository.findById(userId)
+            .orElseThrow(() -> new ResourceNotFoundException("user not found with id: " + userId));
+        user.setEnabled(enabled);
+        userRepository.save(user);
     }
 
     private void checkUsernameAndEmail(String username, String email) {

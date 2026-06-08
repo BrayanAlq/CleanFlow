@@ -50,6 +50,7 @@ public class SecurityConfiguration {
                     "/driver/**"
                 ).hasRole("DRIVER")
                 .requestMatchers(
+                    "/admin/**",
                     "/actual-container/**",
                     "/edge/**"
                 ).hasRole("ADMIN")
