@@ -11,4 +11,5 @@ public interface AuthService {
     void createDriver(CreateDriverRequestDTO createDriverRequestDTO);
     void createAdmin(CreateAdminRequestDTO createAdminRequestDTO);
     LoginResponseDTO login(LoginRequestDTO loginRequestDTO);
+    void updateUserStatus(long userId, boolean enabled);
 }
