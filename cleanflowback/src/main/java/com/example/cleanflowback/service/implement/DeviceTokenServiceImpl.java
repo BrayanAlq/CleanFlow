@@ -7,6 +7,7 @@ import com.example.cleanflowback.repository.DeviceTokenRepository;
 import com.example.cleanflowback.service.DeviceTokenService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
@@ -30,6 +31,7 @@ public class DeviceTokenServiceImpl implements DeviceTokenService {
     }
 
     @Override
+    @Transactional
     public void deleteToken(UserEntity user, String token) {
         DeviceTokenEntity deviceToken = deviceTokenRepository.findByToken(token)
             .orElseThrow(() -> new ResourceNotFoundException("Device token not found"));
