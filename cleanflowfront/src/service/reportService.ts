@@ -14,7 +14,6 @@ export async function getReportsByContainerId(containerId: number, cursor: strin
     }
   )
 
-  console.log(response.data)
   return response.data
 }
 
