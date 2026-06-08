@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { RouteViewerScreen } from '@/pages/RouteViewerScreen'
 import { GeneratedRoutesScreen } from '@/pages/GeneratedRoutesScreen'
 import { DriversScreen } from '@/pages/DriversScreen'
+import { ResidentsScreen } from '@/pages/ResidentsScreen'
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="routes" element={<RouteViewerScreen />} />
           <Route path="generated-routes" element={<GeneratedRoutesScreen />} />
           <Route path="drivers" element={<DriversScreen />} />
+          <Route path="residents" element={<ResidentsScreen />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" replace />} />
