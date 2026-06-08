@@ -1,6 +1,6 @@
 import { useAuth } from "@/auth/AuthContext"
-import { IconAddress } from "@/icons/IconAddress"
 import { IconDriver } from "@/icons/IconDriver"
+import { IconHouse } from "@/icons/IconHouse"
 import { IconLogOut } from "@/icons/IconLogOut"
 import { IconMap } from "@/icons/IconMap"
 import { IconRoute } from "@/icons/IconRoute"
@@ -32,7 +32,7 @@ const routes = [
   {
     name: 'Residentes',
     path: '/residents',
-    icon: <IconAddress className="w-5 h-5" />
+    icon: <IconHouse className="w-5 h-5" />
   }
 ]
 
