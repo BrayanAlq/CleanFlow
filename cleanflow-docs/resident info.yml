@@ -8,7 +8,7 @@ http:
   url: "{{actual_url}}/resident"
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InJlc2lkZW50NCIsInJvbGUiOiJSRVNJREVOVCIsImlkIjoxMCwiZmlyc3RfbmFtZSI6IlJlc2lkZW50IiwibGFzdF9uYW1lIjoiQ2FybG9zIiwiZXhwIjoxNzgwOTM1MzY1fQ.U3EQ2DrGJM-zm57nOGnmpW_wJUjXqOmBAEuaO5lgFwM
+    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InJlc2lkZW50NCIsInJvbGUiOiJSRVNJREVOVCIsImlkIjoxMCwiZmlyc3RfbmFtZSI6Ikpob24iLCJsYXN0X25hbWUiOiJSZXNpZGVudCIsImV4cCI6MTc4MTM2NjkyNX0.z0kEzVVJ1XhukyWHc7mOmdZUvdstTIaSf4yx7jIDFM8
 
 settings:
   encodeUrl: true
