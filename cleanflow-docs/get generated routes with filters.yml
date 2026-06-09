@@ -20,7 +20,7 @@ http:
       disabled: true
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQURNSU4iLCJpZCI6MSwiZmlyc3RfbmFtZSI6IkFkbWluIiwibGFzdF9uYW1lIjoiU2FuIElzaWRybyIsInVzZXJuYW1lIjoiYWRtaW4xIiwiZXhwIjoxNzc5OTE1MjY3fQ.00Fc__oXO--LGWCHlV6kvf1AvPYsgUA321kqRPvgz3U
+    token: eyJhbGciOiJIUzI1NiJ9.eyJsYXN0X25hbWUiOiJBZG1pbiIsImZpcnN0X25hbWUiOiJTYW4gSXNpZHJvIiwiaWQiOjEsInJvbGUiOiJBRE1JTiIsInVzZXJuYW1lIjoiYWRtaW4xIiwiZXhwIjoxNzgxNjIxNzAxfQ.XOg3XGAw4YhpBCv7HhusNIvGGx_rJQuo1IsaN5YGIGo
 
 settings:
   encodeUrl: true
