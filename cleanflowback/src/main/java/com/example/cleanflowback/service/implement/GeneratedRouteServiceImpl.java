@@ -3,6 +3,7 @@ package com.example.cleanflowback.service.implement;
 import com.example.cleanflowback.dto.GeneratedCursorInternalDTO;
 import com.example.cleanflowback.dto.GeneratedRouteCursorDTO;
 import com.example.cleanflowback.dto.out.CursorPageWithEncodedResponseDTO;
+import com.example.cleanflowback.dto.out.GeneratedContainerResponseDTO;
 import com.example.cleanflowback.dto.out.GeneratedRouteResponseDTO;
 import com.example.cleanflowback.exception.ResourceNotFoundException;
 import com.example.cleanflowback.mapper.DriverMapper;
@@ -66,6 +67,7 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
                         r.getId(),
                         driverMapper.toInfoDTO(r.getDriver()),
                         r.getPolylines().stream().map(polylineMapper::fromEntityToDTO).toList(),
+                        mapContainers(r),
                         r.getCreatedAt()
                     )
                 ).toList(),
@@ -90,7 +92,25 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
                 gr.getId(),
                 driverMapper.toInfoDTO(gr.getDriver()),
                 gr.getPolylines().stream().map(polylineMapper::fromEntityToDTO).toList(),
+                mapContainers(gr),
                 gr.getCreatedAt()
             ));
+    }
+
+    private List<GeneratedContainerResponseDTO> mapContainers(GeneratedRouteEntity route) {
+        if (route.getGeneratedContainers() == null) return List.of();
+        return route.getGeneratedContainers().stream()
+            .map(gc -> {
+                var c = gc.getContainer();
+                return new GeneratedContainerResponseDTO(
+                    c.getId(),
+                    c.getName(),
+                    c.getAddressName(),
+                    c.getLatitude(),
+                    c.getLongitude(),
+                    gc.getVisitOrder()
+                );
+            })
+            .toList();
     }
 }
