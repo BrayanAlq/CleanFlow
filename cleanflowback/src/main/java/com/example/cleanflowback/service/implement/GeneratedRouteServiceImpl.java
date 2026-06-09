@@ -6,12 +6,16 @@ import com.example.cleanflowback.dto.out.CursorPageWithEncodedResponseDTO;
 import com.example.cleanflowback.dto.out.GeneratedContainerResponseDTO;
 import com.example.cleanflowback.dto.out.GeneratedRouteResponseDTO;
 import com.example.cleanflowback.exception.ResourceNotFoundException;
+import com.example.cleanflowback.mapper.ContainerImageMapper;
 import com.example.cleanflowback.mapper.DriverMapper;
+import com.example.cleanflowback.mapper.MetricMapper;
 import com.example.cleanflowback.mapper.PolylineMapper;
 import com.example.cleanflowback.model.DriverEntity;
 import com.example.cleanflowback.model.GeneratedRouteEntity;
+import com.example.cleanflowback.model.MetricEntity;
 import com.example.cleanflowback.repository.DriverRepository;
 import com.example.cleanflowback.repository.GeneratedRouteRepository;
+import com.example.cleanflowback.repository.MetricRepository;
 import com.example.cleanflowback.service.GeneratedRouteService;
 import com.example.cleanflowback.utils.CursorUtil;
 import lombok.AllArgsConstructor;
@@ -21,7 +25,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -31,6 +37,9 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
     private final DriverMapper driverMapper;
     private final CursorUtil cursorUtil;
     private final DriverRepository driverRepository;
+    private final ContainerImageMapper containerImageMapper;
+    private final MetricRepository metricRepository;
+    private final MetricMapper metricMapper;
 
     @Override
     public CursorPageWithEncodedResponseDTO<GeneratedRouteResponseDTO> getGeneratedRoutes(
@@ -87,14 +96,47 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
         Instant from = today.atStartOfDay(zoneId).toInstant();
         Instant to = today.atStartOfDay(zoneId).plusDays(1).toInstant();
 
+        GeneratedRouteEntity generatedRoute = generatedRouteRepository.getByDriverIdAndDate(driverId, from, to)
+            .orElseThrow(() -> new ResourceNotFoundException("generated route not found"));
+
+        // last metrics
+        List<Long> containerIds = generatedRoute.getGeneratedContainers()
+            .stream()
+            .map(gc -> gc.getContainer().getId())
+            .toList();
+
+        Map<Long, MetricEntity> latestMetrics = metricRepository
+            .findLatestByContainerIds(containerIds)
+            .stream()
+            .collect(Collectors.toMap(m -> m.getContainer().getId(), m -> m));
+
         return generatedRouteRepository.getByDriverIdAndDate(driverId, from, to)
             .map(gr -> new GeneratedRouteResponseDTO(
                 gr.getId(),
                 driverMapper.toInfoDTO(gr.getDriver()),
                 gr.getPolylines().stream().map(polylineMapper::fromEntityToDTO).toList(),
-                mapContainers(gr),
+                mapContainersWithLastMetric(gr, latestMetrics),
                 gr.getCreatedAt()
             ));
+    }
+
+    private List<GeneratedContainerResponseDTO> mapContainersWithLastMetric(GeneratedRouteEntity route, Map<Long, MetricEntity> lastMetrics) {
+        if (route.getGeneratedContainers() == null) return List.of();
+        return route.getGeneratedContainers().stream()
+            .map(gc -> {
+                var c = gc.getContainer();
+                return new GeneratedContainerResponseDTO(
+                    c.getId(),
+                    c.getName(),
+                    c.getAddressName(),
+                    c.getLatitude(),
+                    c.getLongitude(),
+                    containerImageMapper.fromEntityToDTO(c.getContainerImage()),
+                    metricMapper.fromEntityToDTO(lastMetrics.get(c.getId())),
+                    gc.getVisitOrder()
+                );
+            })
+            .toList();
     }
 
     private List<GeneratedContainerResponseDTO> mapContainers(GeneratedRouteEntity route) {
@@ -108,6 +150,8 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
                     c.getAddressName(),
                     c.getLatitude(),
                     c.getLongitude(),
+                    containerImageMapper.fromEntityToDTO(c.getContainerImage()),
+                    null,
                     gc.getVisitOrder()
                 );
             })

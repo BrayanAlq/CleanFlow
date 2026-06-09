@@ -6,5 +6,7 @@ public record GeneratedContainerResponseDTO(
     String addressName,
     double latitude,
     double longitude,
+    ContainerImageResponseDTO image,
+    MetricResponseDTO lastMetric,
     int visitOrder
 ) {}

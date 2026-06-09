@@ -134,7 +134,6 @@ public class RouterServiceImpl implements RouterService {
 
     private List<ContainerEntity> nearestNeighbour(List<ContainerEntity> containerEntities, double[][] durationMatrix) {
         int size = containerEntities.size();
-        System.out.println("Nearest Neighbour: " + size);
 
         boolean[] visited = new boolean[size];
         List<ContainerEntity> orderedRoute = new ArrayList<>();
