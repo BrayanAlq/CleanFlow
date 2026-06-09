@@ -8,8 +8,9 @@ import { formatDateToString } from '@/utils/date-formatter'
 import { IMessage } from '@stomp/stompjs'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { StyleSheet } from 'react-native'
+import { Image, Pressable, StyleSheet } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler'
+import { ImageViewer } from '../ui/image-viewer'
 
 interface IReportContainerProps {
   containerId: number
@@ -17,6 +18,7 @@ interface IReportContainerProps {
 
 export const ReportsContainer = ({ containerId }: IReportContainerProps) => {
   const [liveReports, setLiveReports] = useState<IReport[]>([])
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
   const { connected, subscribe } = useStompContext()
   const { data, fetchNextPage, hasNextPage } = useGetReports({ containerId, size: 12 })
@@ -58,22 +60,35 @@ export const ReportsContainer = ({ containerId }: IReportContainerProps) => {
           style={styles.reportsContainer}
           renderItem={({ item }) => (
             <ThemedView style={styles.reportContainer}>
-              <ThemedView style={styles.imageContainer}>
-                <Avatar firstName={item.user.first_name} lastName={item.user.last_name} />
-              </ThemedView>
-              <ThemedView style={styles.infoContainer}>
-                <ThemedView style={styles.nameContainer}>
-                  <ThemedText>
-                    {item.user.first_name} {item.user.last_name}
-                  </ThemedText>
+              <ThemedView style={styles.textPartContainer}>
+                <ThemedView style={styles.avatarContainer}>
+                  <Avatar firstName={item.user.first_name} lastName={item.user.last_name} />
+                </ThemedView>
+                <ThemedView style={styles.infoContainer}>
+                  <ThemedView style={styles.nameContainer}>
+                    <ThemedText>
+                      {item.user.first_name} {item.user.last_name}
+                    </ThemedText>
+                    <ThemedText type="small" themeColor="textSecondary">
+                      {formatDateToString(item.timestamp)}
+                    </ThemedText>
+                  </ThemedView>
                   <ThemedText type="small" themeColor="textSecondary">
-                    {formatDateToString(item.timestamp)}
+                    {item.content}
                   </ThemedText>
                 </ThemedView>
-                <ThemedText type="small" themeColor="textSecondary">
-                  {item.content}
-                </ThemedText>
               </ThemedView>
+              {item.images.length > 0 && (
+                <ThemedView style={styles.imagePartContainer}>
+                  {item.images?.map(({ id, path }) => (
+                    <Pressable key={id} onPress={() => setSelectedImage(path)}>
+                      <ThemedView style={styles.imagesWrapper}>
+                        <Image source={{ uri: path }} style={styles.imageContainer} />
+                      </ThemedView>
+                    </Pressable>
+                  ))}
+                </ThemedView>
+              )}
             </ThemedView>
           )}
           ItemSeparatorComponent={() => <ThemedView type="textSecondary" style={styles.separator}></ThemedView>}
@@ -82,6 +97,7 @@ export const ReportsContainer = ({ containerId }: IReportContainerProps) => {
       ) : (
         <ThemedText>No hay reportes</ThemedText>
       )}
+      <ImageViewer uri={selectedImage} onClose={() => setSelectedImage(null)} />
     </ThemedView>
   )
 }
@@ -103,15 +119,30 @@ const styles = StyleSheet.create({
   },
   reportContainer: {
     display: 'flex',
-    flexDirection: 'row',
+    flexDirection: 'column',
     gap: 4,
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: 50,
+    height: 'auto',
   },
   separator: {
     marginVertical: 4,
     height: 1,
+  },
+  textPartContainer: {
+    width: 'auto',
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 4,
+    alignItems: 'center',
+    height: 50,
+  },
+  imagePartContainer: {
+    height: 50,
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 4,
   },
   nameContainer: {
     display: 'flex',
@@ -121,10 +152,20 @@ const styles = StyleSheet.create({
   infoContainer: {
     flex: 1,
   },
-  imageContainer: {
+  avatarContainer: {
     width: 40,
     height: 40,
     borderRadius: '100%',
     overflow: 'hidden',
+  },
+  imagesWrapper: {
+    width: 50,
+    height: 50,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  imageContainer: {
+    width: '100%',
+    height: '100%',
   },
 })

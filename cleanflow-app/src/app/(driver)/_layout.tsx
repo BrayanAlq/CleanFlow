@@ -1,16 +1,15 @@
 import { ThemedText } from '@/components/themed-text'
 import { useTheme } from '@/hooks/use-theme'
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 import { Tabs } from 'expo-router'
 import { BottomTabNavigationOptions } from 'expo-router/build/react-navigation/bottom-tabs'
+import { ReactElement } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
-type IoniconsName = keyof typeof Ionicons.glyphMap
 
 interface ICreateTabOptionProps {
   theme: ReturnType<typeof useTheme>
-  iconNameActive: IoniconsName
-  iconNameInactive: IoniconsName
+  iconNameActive: ReactElement
+  iconNameInactive: ReactElement
   label: string
 }
 
@@ -20,13 +19,7 @@ const createTabOption = ({
   iconNameInactive,
   label,
 }: ICreateTabOptionProps): BottomTabNavigationOptions => ({
-  tabBarIcon: ({ size, focused }) => (
-    <Ionicons
-      name={focused ? iconNameActive : iconNameInactive}
-      color={focused ? theme.greenAccent : theme.textSecondary}
-      size={size}
-    />
-  ),
+  tabBarIcon: ({ size, focused }) => (focused ? iconNameActive : iconNameInactive),
   tabBarLabel: ({ focused }) => (
     <ThemedText style={{ fontSize: 12 }} themeColor={focused ? 'greenAccent' : 'textSecondary'}>
       {label}
@@ -41,20 +34,26 @@ type IConstructedTabs = Omit<ICreateTabOptionProps, 'theme'> & {
 const tabs: IConstructedTabs[] = [
   {
     label: 'Inicio',
-    iconNameActive: 'home',
-    iconNameInactive: 'home-outline',
+    iconNameActive: <Ionicons name="home" size={20} color="#2e7d32" />,
+    iconNameInactive: <Ionicons name="home-outline" size={20} color="#000" />,
     name: 'inicio',
   },
   {
     label: 'Explora',
-    iconNameActive: 'map',
-    iconNameInactive: 'map-outline',
+    iconNameActive: <Ionicons name="map" size={20} color="#2e7d32" />,
+    iconNameInactive: <Ionicons name="map-outline" size={20} color="#000" />,
     name: 'explore',
   },
   {
+    label: 'Objetivos',
+    iconNameActive: <MaterialIcons name="check-circle" size={20} color="#2e7d32" />,
+    iconNameInactive: <MaterialIcons name="check-circle-outline" size={20} color="#000" />,
+    name: 'goals',
+  },
+  {
     label: 'Mi perfil',
-    iconNameActive: 'person',
-    iconNameInactive: 'person-outline',
+    iconNameActive: <Ionicons name="person" size={20} color="#2e7d32" />,
+    iconNameInactive: <Ionicons name="person-outline" size={20} color="#000" />,
     name: 'profile',
   },
 ]

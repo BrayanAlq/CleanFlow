@@ -2,12 +2,13 @@ import { ThemedView } from '@/components/themed-view'
 import { Avatar } from '@/components/ui/avatar'
 import { useAuthContext } from '@/context/auth-context'
 import { useStompContext } from '@/context/stomp-context'
+import { useImagePicker } from '@/hooks/use-gallery'
+import { useSaveImage } from '@/hooks/use-reports'
 import { useTheme } from '@/hooks/use-theme'
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet'
-import { useEffect, useState } from 'react'
-import { Keyboard, Pressable, StyleSheet } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useState } from 'react'
+import { ActivityIndicator, Pressable, StyleSheet } from 'react-native'
 
 export interface SubmitProps {
   containerId: number
@@ -15,38 +16,32 @@ export interface SubmitProps {
 
 export const Submit = ({ containerId }: SubmitProps) => {
   const [text, setText] = useState('')
+  const [imageUris, setImageUris] = useState<string[]>([])
 
   const theme = useTheme()
   const { user } = useAuthContext()
-  const { bottom: bottomSafeArea } = useSafeAreaInsets()
   const { publish, connected } = useStompContext()
+  const { imageMutation } = useSaveImage()
 
-  const [insetBottom, setInsetBottom] = useState(bottomSafeArea)
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false)
-
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!connected || !text.trim()) return
-    const report = { container_id: containerId, content: text.trim(), image_ids: [] }
+    const imageIds: number[] = []
+
+    if (imageUris.length > 0) {
+      const responde = await imageMutation.mutateAsync(imageUris)
+      imageIds.push(...responde.map(i => i.id))
+    }
+
+    const report = { container_id: containerId, content: text.trim(), image_ids: imageIds }
     publish('/app/reports.create', report)
     setText('')
   }
 
-  useEffect(() => {
-    const showSub = Keyboard.addListener('keyboardDidShow', () => {
-      setInsetBottom(0)
-      setIsKeyboardOpen(true)
-    })
+  const handleImage = async (uris: string[]) => {
+    setImageUris(uris)
+  }
 
-    const hideSub = Keyboard.addListener('keyboardDidHide', () => {
-      setInsetBottom(0)
-      setIsKeyboardOpen(false)
-    })
-
-    return () => {
-      showSub.remove()
-      hideSub.remove()
-    }
-  }, [bottomSafeArea])
+  const { openGallery } = useImagePicker(handleImage)
 
   return (
     <ThemedView
@@ -66,9 +61,16 @@ export const Submit = ({ containerId }: SubmitProps) => {
         }}
         style={styles.textInput}
       />
+      <Pressable style={styles.cameraButton} onPress={openGallery}>
+        <MaterialIcons name="photo-library" size={20} color="#000" />
+      </Pressable>
       <ThemedView style={[styles.iconSendContainer, { backgroundColor: theme.greenBackground }]}>
-        <Pressable onPress={handleSubmit}>
-          <Ionicons name="send-outline" size={20} color="#2e7d32" />
+        <Pressable onPress={handleSubmit} disabled={imageMutation.isPending}>
+          {imageMutation.isPending ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Ionicons name="send-outline" size={20} color="#2e7d32" />
+          )}
         </Pressable>
       </ThemedView>
     </ThemedView>
@@ -105,5 +107,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#000',
+  },
+  cameraButton: {
+    position: 'absolute',
+    right: 80,
   },
 })

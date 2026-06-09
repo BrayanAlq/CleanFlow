@@ -3,21 +3,27 @@ import { ThemedText } from '@/components/themed-text'
 import { ThemedView } from '@/components/themed-view'
 import { IContainerType } from '@/types/container'
 import { EvilIcons, Feather, Fontisto, MaterialIcons } from '@expo/vector-icons'
-import { Image, StyleSheet } from 'react-native'
+import { useState } from 'react'
+import { Image, Pressable, StyleSheet } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
+import { ImageViewer } from '../ui/image-viewer'
 
 interface IContainerInfoProps {
   container: IContainerType
 }
 
 export const ContainerInfo = ({ container }: IContainerInfoProps) => {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+
   const { name, address_name, container_image, last_metric } = container
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedView style={styles.imageContainer}>
-        <Image style={styles.imageWrapper} source={{ uri: container_image.url }} />
-      </ThemedView>
+      <Pressable onPress={() => setSelectedImage(container_image.url)}>
+        <ThemedView style={styles.imageContainer}>
+          <Image style={styles.imageWrapper} source={{ uri: container_image.url }} />
+        </ThemedView>
+      </Pressable>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <ThemedView style={styles.textContainer}>
           <ThemedText>{name}</ThemedText>
@@ -48,6 +54,7 @@ export const ContainerInfo = ({ container }: IContainerInfoProps) => {
           </ThemedView>
         </ThemedView>
       </ScrollView>
+      <ImageViewer uri={selectedImage} onClose={() => setSelectedImage(null)} />
     </ThemedView>
   )
 }

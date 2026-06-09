@@ -2,22 +2,25 @@ import { ContainerInfo } from '@/components/map-screen/container-info'
 import { ReportsContainer } from '@/components/map-screen/reports-container'
 import { Submit } from '@/components/map-screen/submit'
 import { MapView } from '@/components/register/map-view'
+import { ThemedText } from '@/components/themed-text'
 import { ThemedView } from '@/components/themed-view'
 import { MarkerContainer } from '@/components/ui/marker-container'
 import { DEFAULT_LOCATION } from '@/constants/location'
 import { useStompContext } from '@/context/stomp-context'
 import { useContainerInViewport } from '@/hooks/use-container'
+import { useDriverRoute } from '@/hooks/use-route'
 import { useTheme } from '@/hooks/use-theme'
 import { getCurrentLocation } from '@/services/location'
 import { IBound } from '@/types/bound'
 import { IContainerMetric } from '@/types/container'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
-import { ViewAnnotation, ViewStateChangeEvent } from '@maplibre/maplibre-react-native'
+import polyline from '@mapbox/polyline'
+import { GeoJSONSource, Layer, ViewAnnotation, ViewStateChangeEvent } from '@maplibre/maplibre-react-native'
 import { IMessage } from '@stomp/stompjs'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigation } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Dimensions, NativeSyntheticEvent, StyleSheet, View } from 'react-native'
+import { Dimensions, NativeSyntheticEvent, Pressable, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const { height } = Dimensions.get('window')
@@ -33,12 +36,14 @@ export const ExploreContentDriver = () => {
   const [bounds, setBounds] = useState<IBound | null>(null)
   const [containerSelectedId, setContainerSelectedId] = useState<number | null>(null)
   const [liveMetric, setLiveMetric] = useState<IContainerMetric | null>(null)
+  const [visibility, setVisibility] = useState(false)
 
   const theme = useTheme()
   const { data: containers } = useContainerInViewport(bounds)
   const bottomSheetRef = useRef<BottomSheet>(null)
   const navigation = useNavigation()
   const { connected, subscribe, publish } = useStompContext()
+  const { data: myRoutes } = useDriverRoute()
   const queryClient = useQueryClient()
 
   const mapHeight = height - insets.top - insets.bottom - 32 - 68
@@ -92,7 +97,6 @@ export const ExploreContentDriver = () => {
   const handleSheetChanges = useCallback(
     (index: number) => {
       const isOpen = index !== -1
-      // bottomSheetRef.current?.snapToIndex(index)
       navigation.setOptions({
         tabBarStyle: {
           backgroundColor: theme.backgroundElement,
@@ -117,6 +121,27 @@ export const ExploreContentDriver = () => {
     return updatedContainers.find(c => c.id === containerSelectedId)
   }, [containerSelectedId, updatedContainers])
 
+  const handleOverlayPress = () => {
+    setVisibility(prev => !prev)
+  }
+
+  const completeRoute = myRoutes?.polylines?.flatMap(p => polyline.decode(p.polyline)).map(([lat, lng]) => [lng, lat])
+  const route = {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: completeRoute ?? [],
+        },
+      },
+    ],
+  } as const satisfies GeoJSON.GeoJSON
+
+  console.log(completeRoute?.length)
+
   return (
     <ThemedView type="backgroundElement" style={styles.container}>
       <ThemedView style={[styles.mapContainer, { height: mapHeight }]}>
@@ -138,7 +163,23 @@ export const ExploreContentDriver = () => {
               onTap={handleContainerTap}
             />
           ))}
+          {completeRoute && (
+            <GeoJSONSource id="routeSource" data={route}>
+              <Layer
+                id="routeLine"
+                type="line"
+                paint={{ 'line-color': 'red', 'line-width': 3 }}
+                layout={{ visibility: visibility ? 'visible' : 'none' }}
+              />
+            </GeoJSONSource>
+          )}
         </MapView>
+        <Pressable
+          onPress={handleOverlayPress}
+          style={[styles.overlayContainer, { backgroundColor: theme.background, borderColor: theme.borderTabColor }]}
+        >
+          <ThemedText>Mi ruta</ThemedText>
+        </Pressable>
       </ThemedView>
 
       <BottomSheet
@@ -170,6 +211,14 @@ const styles = StyleSheet.create({
   mapContainer: {
     borderRadius: 16,
     overflow: 'hidden',
+  },
+  overlayContainer: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    padding: 6,
+    borderRadius: 8,
+    borderWidth: 1,
   },
   myLocationMarker: {
     width: 16,

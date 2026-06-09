@@ -30,14 +30,7 @@ export default function DriverProfile() {
     }
   }
   return (
-    <ThemedView
-      style={[
-        styles.container,
-        {
-          backgroundColor: theme.backgroundElement,
-        },
-      ]}
-    >
+    <ThemedView style={styles.container} type="backgroundElement">
       <ThemedView type="backgroundElement" style={{ flex: 1 }}>
         <ThemedText style={styles.title}>Mi perfil</ThemedText>
 

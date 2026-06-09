@@ -1,5 +1,5 @@
-import { getReportsByContainerId } from '@/services/report'
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { getReportsByContainerId, saveImage } from '@/services/report'
+import { useInfiniteQuery, useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner-native'
 
 interface IUseReportsHookProps {
@@ -30,5 +30,15 @@ export const useGetReports = ({ containerId, size }: IUseReportsHookProps) => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+  }
+}
+
+export const useSaveImage = () => {
+  const mutation = useMutation({
+    mutationFn: saveImage,
+  })
+
+  return {
+    imageMutation: mutation,
   }
 }

@@ -45,6 +45,13 @@
         {
           "locationWhenInUsePermission": "Necesitamos tu ubicación para registrar tu posición."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "CleanFlow necesita acceso a tu cámara para reportar contenedores.",
+          "photoLibraryPermission": "CleanFlow necesita acceso a tus fotos."
+        }
       ]
     ],
     "experiments": {

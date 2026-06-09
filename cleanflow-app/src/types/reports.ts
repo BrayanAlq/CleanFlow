@@ -15,6 +15,6 @@ export interface IReport {
   id: number
   content: string
   timestamp: string
-  image: IImageReport[]
+  images: IImageReport[]
   user: IUserReport
 }
