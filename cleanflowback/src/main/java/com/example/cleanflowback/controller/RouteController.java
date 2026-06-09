@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 
 @RestController
-@RequestMapping("route")
+@RequestMapping("/route")
 @AllArgsConstructor
 public class RouteController {
     private final RouteService routeService;

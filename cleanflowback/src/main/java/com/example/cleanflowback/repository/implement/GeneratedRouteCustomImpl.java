@@ -11,6 +11,7 @@ import jakarta.persistence.criteria.Root;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -67,7 +68,7 @@ public class GeneratedRouteCustomImpl implements GeneratedRouteCustom {
     }
 
     @Override
-    public Optional<GeneratedRouteEntity> getByDriverIdAndDate(Long driverId, LocalDate date) {
+    public Optional<GeneratedRouteEntity> getByDriverIdAndDate(Long driverId, Instant from, Instant to) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<GeneratedRouteEntity> cq = cb.createQuery(GeneratedRouteEntity.class);
         Root<GeneratedRouteEntity> root = cq.from(GeneratedRouteEntity.class);
@@ -78,11 +79,9 @@ public class GeneratedRouteCustomImpl implements GeneratedRouteCustom {
             predicates.add(cb.equal(root.get("driver").get("id"), driverId));
         }
 
-        if (date != null) {
-            LocalDateTime startDate = date.atStartOfDay();
-            LocalDateTime endDate = date.atStartOfDay().plusDays(1);
-            predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), startDate));
-            predicates.add(cb.lessThan(root.get("createdAt"), endDate));
+        if (from != null && to != null) {
+            predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), from));
+            predicates.add(cb.lessThan(root.get("createdAt"), to));
         }
 
         cq.where(predicates.toArray(new Predicate[0]));
