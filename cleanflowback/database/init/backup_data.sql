@@ -3952,6 +3952,56 @@ COPY public.generated_containers (id, visit_order, container_id, generated_route
 748	5	28	75
 749	6	29	75
 750	7	30	75
+751	0	27	76
+752	1	26	76
+753	2	36	76
+754	3	35	76
+755	4	34	76
+756	5	33	76
+757	6	32	76
+758	7	40	76
+759	8	31	76
+760	9	25	76
+761	0	12	77
+762	1	13	77
+763	2	15	77
+764	3	14	77
+765	4	11	77
+766	5	6	77
+767	6	7	77
+768	7	8	77
+769	8	9	77
+770	9	10	77
+771	10	37	77
+772	11	50	77
+773	12	39	77
+774	0	19	78
+775	1	3	78
+776	2	20	78
+777	3	5	78
+778	4	18	78
+779	5	17	78
+780	6	16	78
+781	7	1	78
+782	8	2	78
+783	0	45	79
+784	1	44	79
+785	2	47	79
+786	3	49	79
+787	4	48	79
+788	5	46	79
+789	6	42	79
+790	7	43	79
+791	8	38	79
+792	9	41	79
+793	0	4	80
+794	1	22	80
+795	2	23	80
+796	3	21	80
+797	4	24	80
+798	5	28	80
+799	6	29	80
+800	7	30	80
 \.
 
 
@@ -4035,6 +4085,11 @@ COPY public.generated_routes (id, created_at, driver_id) FROM stdin;
 73	2026-06-08 22:37:32.443813	4
 74	2026-06-08 22:37:32.782687	5
 75	2026-06-08 22:37:33.029755	6
+76	2026-06-09 15:02:45.623463	2
+77	2026-06-09 15:02:45.751588	3
+78	2026-06-09 15:02:45.806409	4
+79	2026-06-09 15:02:45.879291	5
+80	2026-06-09 15:02:45.926541	6
 \.
 
 
@@ -4043,6 +4098,10 @@ COPY public.generated_routes (id, created_at, driver_id) FROM stdin;
 --
 
 COPY public.metrics (id, air_quality_level, filling_level, is_alive, ppm, "timestamp", container_id) FROM stdin;
+3465	good	0.6	f	0.2	2026-06-09 15:45:40.60003	5
+3466	bad	1	f	0.2	2026-06-09 15:45:43.590526	5
+3467	bad	0.6	f	0.7	2026-06-09 15:45:46.58563	5
+3468	good	0.5	t	0.7	2026-06-09 15:45:49.591175	5
 3	muy_bueno	0.45	t	0.3	2026-06-01 17:56:48.539356	1
 4	bueno	0.2	t	0.2	2026-06-01 17:57:19.489198	2
 1	muy_bueno	0.3	f	0.7	2026-06-01 17:47:37.289033	1
@@ -4738,6 +4797,51 @@ COPY public.polylines (id, polyline, segment_order, generated_route_id) FROM std
 673	f`vhAfwbuMyA\\wAH}AOcBk@aAzA_Cj@	4	75
 674	pnuhAzzbuM]TGXt@~CdGgBBJ	5	75
 675	jwuhAn~buMrBjHmA^l@tB	6	75
+676	bvuhAz`buMfAvD}@l@_@n@UjAFdA	0	76
+677	~tuhAbnbuM@DgD~@SoB@cAL_A}Aa@	1	76
+678	vluhArgbuMv@oFw@Cs@Du@}J	2	76
+679	liuhAftauMxDe@z@[YgAAwA]I	3	76
+680	houhAzlauMF@@bBrA`FfBe@~BDClA	4	76
+681	jyuhApxauMHsEd@}AhJzD_@|@AV	5	76
+682	bevhApwauM@Wh@mAuCmAl@_B	6	76
+683	fcvhA|nauMi@lAEb@|IzDlDd@GzCNtD_BR	7	76
+684	jovhAvdbuMgHnBTxACfBqDe@CiA]aAFE	8	76
+685	|uwhA~wauMk@mIHc@t@uBHB	0	77
+686	zvwhAzhauMxBbAb@r@Hv@jBO@H	1	77
+687	p_xhAdnauMZ`FiMz@aBMwA_@bBsEHB	2	77
+688	vowhAdoauMiC_AyA`E	3	77
+689	rhwhAfsauMoAxDQv@iBWMhAAxA	4	77
+690	vawhAd_buMHpAsBNI}CNsBPcA	5	77
+691	d_whApwauM^uAsEcBc@xA	6	77
+692	lxvhAptauMEVsBc@|AgFhCsHnBp@{@dC	7	77
+693	n}vhA`iauMjCwHtHjC	8	77
+694	pkwhAtcauMcBk@mEjMaOaFb@kIDc@Vy@	9	77
+695	~svhAh|`uMf@{AwAg@l@gBlIxC	10	77
+696	j~vhAvy`uMPFcGvPaC{@_CSNgCaBMUrE	11	77
+697	ngwhAh_cuMs@uJaCPWkD	0	78
+698	`awhAxnbuMOmByIp@	1	78
+699	vuvhA|lbuMM@w@gHhF_@?I	2	78
+700	zzvhAlbbuMIuBF{BnBNEzBH~AfKw@	3	78
+701	tjwhAn`buMrGe@JlB	4	78
+702	tswhAvbbuM@F{DZBZdS_B@N	5	78
+703	fbxhAfbbuMZhDiDX[SYAoBHp@zIZK	6	78
+704	`{whAnrbuMj@QV`DuLrDMMOqCjAa@]oGQ@	7	78
+705	xpuhAhj`uMbCO^@~Ez@tAl@qAdDOC	0	79
+706	p|uhAfr`uMuBq@_Fo@_@rE	1	79
+707	zpuhAxu`uMOnBq@jCvA`@m@vB@P	2	79
+708	dpuhA`cauMJZ{ACs@MTgAKWkASwBE	3	79
+709	ffuhAp_auMBaBkAFwAiI	4	79
+710	fauhAlr`uMe@sCPYr@I~ACvSlC`Bj@sBdFhGfCEH	5	79
+711	pavhAb~`uMn@}ArAh@l@uAZY	6	79
+712	~gvhA~x`uMUNQZqB`FdCdAJWRM`@??H	7	79
+713	livhAvbauM?IUA_@N_@hBsKSiAS	8	79
+714	~yvhA|_cuMUHc@iDSGMNb@fDqD^DjA	0	80
+715	zrvhAxccuMN|BgJnCq@cC	1	80
+716	pfvhAbhcuMkBmGhHuBb@Wf@i@Zu@_B_@	2	80
+717	vlvhAfwbuM~A^n@uFqIgAYzAo@rAaAbAaAh@	3	80
+718	f`vhAfwbuMyA\\wAH}AOcBk@aAzA_Cj@	4	80
+719	pnuhAzzbuM]TGXt@~CdGgBBJ	5	80
+720	jwuhAn~buMrBjHmA^l@tB	6	80
 \.
 
 
@@ -4924,6 +5028,9 @@ COPY public.spatial_ref_sys (srid, auth_name, auth_srid, srtext, proj4text) FROM
 --
 
 COPY public.user_viewports (id, active, last_seen, viewport, user_id) FROM stdin;
+11	t	2026-06-09 15:46:37.850002	0103000020E6100000010000000500000092ECB03A7F4153C028942C5E902C28C0B221839CFB4053C028942C5E902C28C0B221839CFB4053C0D8895CC0C92428C092ECB03A7F4153C0D8895CC0C92428C092ECB03A7F4153C028942C5E902C28C0	2
+10	t	2026-06-09 16:11:31.286734	0103000020E610000001000000050000000100000A834153C0933DDE34B42B28C000000058084153C0933DDE34B42B28C000000058084153C039102C78F32828C00100000A834153C039102C78F32828C00100000A834153C0933DDE34B42B28C0	1
+12	t	2026-06-09 16:16:10.406546	0103000020E610000001000000050000002DCCD94A8C4153C0886AB17FA72D28C00CE167B82B4153C0886AB17FA72D28C00CE167B82B4153C088490FF2F22728C02DCCD94A8C4153C088490FF2F22728C02DCCD94A8C4153C0886AB17FA72D28C0	4
 \.
 
 
@@ -5032,21 +5139,21 @@ SELECT pg_catalog.setval('public.device_token_id_seq', 10, true);
 -- Name: generated_containers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dbuser
 --
 
-SELECT pg_catalog.setval('public.generated_containers_id_seq', 750, true);
+SELECT pg_catalog.setval('public.generated_containers_id_seq', 800, true);
 
 
 --
 -- Name: generated_routes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dbuser
 --
 
-SELECT pg_catalog.setval('public.generated_routes_id_seq', 75, true);
+SELECT pg_catalog.setval('public.generated_routes_id_seq', 80, true);
 
 
 --
 -- Name: metrics_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dbuser
 --
 
-SELECT pg_catalog.setval('public.metrics_id_seq', 3464, true);
+SELECT pg_catalog.setval('public.metrics_id_seq', 3468, true);
 
 
 --
@@ -5060,7 +5167,7 @@ SELECT pg_catalog.setval('public.points_id_seq', 1, false);
 -- Name: polylines_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dbuser
 --
 
-SELECT pg_catalog.setval('public.polylines_id_seq', 675, true);
+SELECT pg_catalog.setval('public.polylines_id_seq', 720, true);
 
 
 --
@@ -5088,7 +5195,7 @@ SELECT pg_catalog.setval('public.routes_id_seq', 40, true);
 -- Name: user_viewports_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dbuser
 --
 
-SELECT pg_catalog.setval('public.user_viewports_id_seq', 9, true);
+SELECT pg_catalog.setval('public.user_viewports_id_seq', 12, true);
 
 
 --
