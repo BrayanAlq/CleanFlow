@@ -8,7 +8,7 @@ http:
   url: "{{actual_url}}/router"
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImFkbWluMSIsImxhc3RfbmFtZSI6IkxpbWEiLCJmaXJzdF9uYW1lIjoiQWRtaW4iLCJpZCI6MSwicm9sZSI6IkFETUlOIiwiZXhwIjoxNzc5ODE2NDg3fQ.uRFgEpPVAJp4o5JuDdpxDUaDVDzfz8XB4DnSaO-iCL8
+    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGUiOiJBRE1JTiIsImlkIjoxLCJmaXJzdF9uYW1lIjoiU2FuIElzaWRybyIsImxhc3RfbmFtZSI6IkFkbWluIiwiZXhwIjoxNzgxNTYzMDQxfQ.FrklWMxffLofmBjv8vV4GyJoIBsVosZgzQHkFKkHx9E
 
 settings:
   encodeUrl: true

@@ -2,11 +2,32 @@ import { Client } from "@stomp/stompjs"
 import axios from "axios"
 import SockJS from "sockjs-client"
 
-const API_URL = "https://domain"
+const API_URL = "http://localhost:8080"
 
 const getCredentials = async () => {
   const response = await axios.get(`${API_URL}/container/device`)
   return response.data // { api_key, secret }
+}
+
+const fillingLevelArray = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+const isAliveArray = [true, false]
+const airQualityLevelArray = ["good", "medium", "bad"]
+const ppmArray = [0.2, 10.3, 5.4, 2.5, 12.6, 0.7]
+
+const getRandomFillingLevel = () => {
+  return fillingLevelArray[Math.floor(Math.random() * fillingLevelArray.length)]
+}
+
+const getRandomIsAlive = () => {
+  return isAliveArray[Math.floor(Math.random() * isAliveArray.length)]
+}
+
+const getRandomAirQualityLevel = () => {
+  return airQualityLevelArray[Math.floor(Math.random() * airQualityLevelArray.length)]
+}
+
+const getRandomPpm = () => {
+  return ppmArray[Math.floor(Math.random() * ppmArray.length)]
 }
 
 getCredentials().then(({ api_key, secret }) => {
@@ -21,12 +42,11 @@ getCredentials().then(({ api_key, secret }) => {
     onConnect: () => {
       console.log("Connected")
   
-      let isAlive = true
-      let airQualityLevel = "good"
-      let ppm = 10.2
-      let fillingLevel = 0.5
-  
       setInterval(() => {
+        const fillingLevel = getRandomFillingLevel()
+        const isAlive = getRandomIsAlive()
+        const airQualityLevel = getRandomAirQualityLevel()
+        const ppm = getRandomPpm()
   
         client.publish({
           destination: "/app/container.metrics",
@@ -45,7 +65,7 @@ getCredentials().then(({ api_key, secret }) => {
           fillingLevel
         })
   
-      }, 2000)
+      }, 3000)
     },
     onStompError: (frame) => {
       console.error('STOMP error: ', frame)

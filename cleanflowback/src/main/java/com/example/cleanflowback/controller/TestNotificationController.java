@@ -27,6 +27,6 @@ public class TestNotificationController {
 
         List<String> deviceTokens = deviceTokenEntity.stream().map(DeviceTokenEntity::getToken).toList();
 
-        pushNotificationService.sendBatch(deviceTokens, "Test Title", "Test Body");
+        pushNotificationService.sendBatch(deviceTokens, "Hello", "Este mensaje es una prueba");
     }
 }

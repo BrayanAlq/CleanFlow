@@ -26,6 +26,7 @@ export const SendReport = () => {
         imageIds = images.map(i => i.id)
       }
   
+      console.log({ container_id: selectedId, content: value.trim(), image_ids: imageIds })
       publish('/app/reports.create', {
         container_id: selectedId,
         content: value.trim(),

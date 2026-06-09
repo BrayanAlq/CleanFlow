@@ -5,21 +5,18 @@ info:
 
 http:
   method: GET
-  url: "{{actual_url}}/report/container/10?size=2&cursor="
+  url: "{{actual_url}}/report/container/5?size=12"
   params:
     - name: size
-      value: "2"
+      value: "12"
       type: query
     - name: cursor
-      value: ""
-      type: query
-    - name: cursor
-      value: ""
+      value: eyJjcmVhdGVkX2F0IjoxNzgwODgyNjU4LjgwOTg0MjAwMCwiaWQiOjI3fQ==
       type: query
       disabled: true
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiJ9.eyJsYXN0X25hbWUiOiJTYW4gSXNpZHJvIiwiZmlyc3RfbmFtZSI6IkFkbWluIiwiaWQiOjEsInJvbGUiOiJBRE1JTiIsInVzZXJuYW1lIjoiYWRtaW4xIiwiZXhwIjoxNzgwNzcyMjczfQ.ZpubHH6yQGq843KAUooYrDiKaPBcj5PW3kTuEldnFo0
+    token: eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQURNSU4iLCJpZCI6MSwiZmlyc3RfbmFtZSI6IlNhbiBJc2lkcm8iLCJsYXN0X25hbWUiOiJBZG1pbiIsInVzZXJuYW1lIjoiYWRtaW4xIiwiZXhwIjoxNzgxNDk1NzA3fQ.Hc_81kdn77sbWyOTzOXBIsVD1WhF8R0cMXi3mieL6_w
 
 settings:
   encodeUrl: true

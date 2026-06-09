@@ -19,7 +19,8 @@ export function useContainerInViewport(bounds: BoundType | null) {
           description: error.message,
         })
       }
-    }
+    },
+    placeholderData: prev => prev,
   })
 }
 

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,7 +80,12 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
             () -> new ResourceNotFoundException("driver not found")
         );
 
-        return generatedRouteRepository.getByDriverIdAndDate(driverId, LocalDate.now())
+        ZoneId zoneId = ZoneId.of("America/Lima");
+        LocalDate today = LocalDate.now(zoneId);
+        Instant from = today.atStartOfDay(zoneId).toInstant();
+        Instant to = today.atStartOfDay(zoneId).plusDays(1).toInstant();
+
+        return generatedRouteRepository.getByDriverIdAndDate(driverId, from, to)
             .map(gr -> new GeneratedRouteResponseDTO(
                 gr.getId(),
                 driverMapper.toInfoDTO(gr.getDriver()),

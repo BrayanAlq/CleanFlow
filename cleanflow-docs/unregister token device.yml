@@ -1,0 +1,23 @@
+info:
+  name: unregister token device
+  type: http
+  seq: 30
+
+http:
+  method: POST
+  url: "{{actual_url}}/notification-token/unregister-token"
+  body:
+    type: json
+    data: |-
+      {
+        "token": "ExponentPushToken[qg9Sj_NQeF89aK99Z4Gor6]"
+      }
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiUkVTSURFTlQiLCJ1c2VybmFtZSI6InJlc2lkZW50NCIsImxhc3RfbmFtZSI6IlJlc2lkZW50IiwiZmlyc3RfbmFtZSI6Ikpob24iLCJpZCI6MTAsImV4cCI6MTc4MTUwOTkyOX0.TI-hAXwDqPTGx541Bhif9ndf9MPiac8NIsfR3UZXFKE
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
