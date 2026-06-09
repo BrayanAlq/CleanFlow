@@ -1,30 +1,42 @@
-import { BadgeInfo } from '@/components/map-screen/badge-info'
+import { GoalContainer } from '@/components/goals/goal-container'
 import { ThemedText } from '@/components/themed-text'
 import { ThemedView } from '@/components/themed-view'
+import { useDriverRoute } from '@/hooks/use-route'
 import { useTheme } from '@/hooks/use-theme'
-import { Ionicons } from '@expo/vector-icons'
-import { StyleSheet } from 'react-native'
+import { Dimensions, FlatList, StyleSheet } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+const { height } = Dimensions.get('window')
 
 export default function Goals() {
   const theme = useTheme()
+  const { data } = useDriverRoute()
+
+  const insets = useSafeAreaInsets()
+
+  const contentHeight = height - insets.top - insets.bottom - 32 - 68
+  console.log(data)
+
   return (
-    <ThemedView style={styles.container} type="backgroundElement">
+    <ThemedView style={[styles.container, { height: contentHeight }]} type="backgroundElement">
       <ThemedText style={styles.title}>Contenedores objetivos</ThemedText>
       <ThemedView type="backgroundElement" style={styles.containersContainer}>
-        <ThemedView style={styles.infoContainer}>
-          <ThemedView style={styles.imageContainer}></ThemedView>
-          <ThemedView style={styles.nameContainer}>
-            <ThemedText>Contenedor</ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.badgeContainer}>
-            <BadgeInfo data="Inactivo">
-              <Ionicons name="accessibility" size={18} />
-            </BadgeInfo>
-            <BadgeInfo data="Inactivo">
-              <Ionicons name="accessibility" size={18} />
-            </BadgeInfo>
-          </ThemedView>
-        </ThemedView>
+        <FlatList
+          data={data?.containers}
+          keyExtractor={item => item.container_id.toString()}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <GoalContainer
+              key={item.container_id}
+              id={item.container_id}
+              name={item.name}
+              image={item.image.url}
+              visitOrder={item.visit_order + 1}
+              lastMetric={item.last_metric}
+            />
+          )}
+          ItemSeparatorComponent={() => <ThemedView style={styles.separator} type="backgroundElement" />}
+        />
       </ThemedView>
     </ThemedView>
   )
@@ -33,35 +45,11 @@ export default function Goals() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
   title: { fontSize: 22, fontWeight: 'bold', marginBottom: 16 },
+  separator: { height: 1 },
   containersContainer: {
-    height: 'auto',
+    flex: 1,
     borderRadius: 24,
     overflow: 'hidden',
-  },
-  infoContainer: {
-    height: 100,
-    padding: 12,
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  nameContainer: {
-    flex: 1,
-    height: '100%',
-    display: 'flex',
-    justifyContent: 'center',
-  },
-  imageContainer: {
-    width: 76,
-    height: 76,
-    backgroundColor: '#ddd',
-    borderRadius: 12,
-  },
-  badgeContainer: {
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-around',
+    elevation: 2,
   },
 })

@@ -13,11 +13,11 @@ export const BadgeInfo = ({ data, children }: IBadgeInfoProps) => {
   const theme = useTheme()
 
   return (
-    <ThemedView
-      style={[styles.container, { borderColor: theme.badgeInfoBorder }]}
-    >
+    <ThemedView style={[styles.container, { borderColor: theme.badgeInfoBorder }]}>
       {children}
-      <ThemedText>{data}</ThemedText>
+      <ThemedText type="small" themeColor="textSecondary">
+        {data}
+      </ThemedText>
     </ThemedView>
   )
 }
