@@ -19,6 +19,7 @@ export default function RutaScreen() {
   const [routeId, setRouteId] = useState(null);
   const [routeStarted, setRouteStarted] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const wsConnected = useRef(false);
   const watchRef = useRef(null);
@@ -29,6 +30,7 @@ export default function RutaScreen() {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         setLoading(false);
+        setError("Permiso de ubicación no concedido. Actívalo en ajustes.");
         return;
       }
       let loc = await Location.getCurrentPositionAsync({});
@@ -39,10 +41,23 @@ export default function RutaScreen() {
 
       try {
         const res = await api.get("/driver/scheduled-route");
-        if (res.data && res.data.generated_containers) {
-          setContainers(res.data.generated_containers.map((gc) => gc.container));
+        if (res.data && res.data.containers) {
+          const bins = res.data.containers.map((c) => ({
+            id: c.container_id,
+            name: c.name,
+            address_name: c.address_name,
+            latitude: c.latitude,
+            longitude: c.longitude,
+            filling_level: c.filling_level ?? 0,
+          }));
+          setContainers(bins);
+        } else {
+          setContainers([]);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error("Error al cargar ruta:", e?.response?.data || e.message);
+        setError("No se pudieron cargar los contenedores de la ruta.");
+      }
       setLoading(false);
     })();
   }, []);
@@ -153,14 +168,18 @@ export default function RutaScreen() {
               coordinate={{ latitude: bin.latitude, longitude: bin.longitude }}
               title={bin.name}
             >
-              <View style={[styles.binMarker, { backgroundColor: getColor(bin.filling_level || 50) }]}>
-                <Text style={styles.binMarkerText}>{bin.filling_level || "?"}</Text>
+              <View style={[styles.binMarker, { backgroundColor: getColor(bin.filling_level ?? 0) }]}>
+                <Text style={styles.binMarkerText}>{bin.filling_level ?? "?"}</Text>
               </View>
             </Marker>
           ))}
         </MapView>
 
-        {!routeStarted ? (
+        {error ? (
+          <View style={styles.errorCard}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : !routeStarted ? (
           <TouchableOpacity
             style={[styles.startButton, actionLoading && { opacity: 0.6 }]}
             onPress={startRoute} disabled={actionLoading}
@@ -187,20 +206,32 @@ export default function RutaScreen() {
         )}
 
         <Text style={styles.section}>Tachos asignados</Text>
-        <Text style={styles.sub}>{containers.length} contenedores</Text>
+        <Text style={styles.sub}>
+          {containers.length > 0
+            ? `${containers.length} contenedores`
+            : "Sin contenedores asignados para hoy"}
+        </Text>
 
-        {containers.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            style={styles.card}
-            onPress={() => openDirections(item.latitude, item.longitude)}
-          >
-            <View style={{ flex: 1 }}>
-              <Text style={styles.bold}>{item.name}</Text>
-              <Text style={styles.gray}>{item.address_name || ""}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+        {containers.length === 0 && !error ? (
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyText}>
+              No tienes contenedores asignados para hoy. Solicita al administrador que genere una ruta.
+            </Text>
+          </View>
+        ) : (
+          containers.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.card}
+              onPress={() => openDirections(item.latitude, item.longitude)}
+            >
+              <View style={{ flex: 1 }}>
+                <Text style={styles.bold}>{item.name}</Text>
+                <Text style={styles.gray}>{item.address_name || ""}</Text>
+              </View>
+            </TouchableOpacity>
+          ))
+        )}
       </ScrollView>
     </View>
   );
@@ -233,6 +264,16 @@ const styles = StyleSheet.create({
   statusText: { color: "#2e7d32", fontWeight: "600" },
   section: { marginHorizontal: 16, fontSize: 16, fontWeight: "bold" },
   sub: { marginHorizontal: 16, color: "#777", marginBottom: 10 },
+  errorCard: {
+    margin: 16, marginTop: 0, backgroundColor: "#ffebee",
+    padding: 16, borderRadius: 16, alignItems: "center",
+  },
+  errorText: { color: "#c62828", textAlign: "center" },
+  emptyCard: {
+    marginHorizontal: 16, backgroundColor: "#fff", padding: 20,
+    borderRadius: 16, alignItems: "center",
+  },
+  emptyText: { color: "#999", textAlign: "center", lineHeight: 20 },
   card: {
     backgroundColor: "#fff", marginHorizontal: 16, marginBottom: 10,
     padding: 16, borderRadius: 16, flexDirection: "row",

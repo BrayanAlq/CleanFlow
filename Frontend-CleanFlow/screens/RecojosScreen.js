@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Linking, ActivityIndicator,
+  Linking, ActivityIndicator, RefreshControl,
 } from "react-native";
 import api from "../services/api";
 import { getColor } from "../data/mock";
@@ -10,19 +10,40 @@ export default function RecojosScreen() {
   const [containers, setContainers] = useState([]);
   const [collected, setCollected] = useState({});
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
+
+  const fetchRoute = useCallback(async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
+    setError("");
+
+    try {
+      const res = await api.get("/driver/scheduled-route");
+      if (res.data && res.data.containers) {
+        const bins = res.data.containers.map((c) => ({
+          id: c.container_id,
+          name: c.name,
+          address_name: c.address_name,
+          latitude: c.latitude,
+          longitude: c.longitude,
+          filling_level: c.filling_level ?? 0,
+        }));
+        setContainers(bins);
+      } else {
+        setContainers([]);
+      }
+    } catch (e) {
+      console.error("Error al cargar ruta:", e?.response?.data || e.message);
+      setError("No se pudieron cargar los contenedores. Verifica tu conexión.");
+    }
+    setLoading(false);
+    setRefreshing(false);
+  }, []);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await api.get("/driver/scheduled-route");
-        if (res.data && res.data.generated_containers) {
-          const bins = res.data.generated_containers.map((gc) => gc.container);
-          setContainers(bins);
-        }
-      } catch (e) {}
-      setLoading(false);
-    })();
-  }, []);
+    fetchRoute();
+  }, [fetchRoute]);
 
   const toggleCollected = (id) => {
     setCollected((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -47,55 +68,77 @@ export default function RecojosScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={() => fetchRoute(true)} />
+        }
+      >
         <Text style={styles.title}>Recolección</Text>
 
-        <View style={styles.progressCard}>
-          <Text style={styles.progressNumber}>{collectedCount}/{total}</Text>
-          <Text style={styles.progressLabel}>tachos recolectados</Text>
-          <View style={styles.barBg}>
-            <View style={[styles.barFill, { width: `${progress}%` }]} />
+        {error ? (
+          <View style={styles.errorCard}>
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity style={styles.retryButton} onPress={() => fetchRoute()}>
+              <Text style={styles.retryText}>Reintentar</Text>
+            </TouchableOpacity>
           </View>
-          <Text style={styles.progressPercent}>{progress}% completado</Text>
-        </View>
-
-        {containers.map((item) => {
-          const isCollected = collected[item.id];
-          const fillPercent = item.filling_level || 50;
-          return (
-            <View key={item.id} style={styles.card}>
-              <TouchableOpacity
-                style={styles.cardLeft}
-                onPress={() => openDirections(item.latitude, item.longitude)}
-              >
-                <Text style={styles.bold}>{item.name}</Text>
-                <Text style={styles.gray}>
-                  {item.address_name || ""} · {fillPercent}% lleno
-                </Text>
-                <Text
-                  style={{
-                    color: isCollected ? "#999" : getColor(fillPercent),
-                    fontWeight: "600",
-                  }}
-                >
-                  {isCollected ? "Recolectado" : "Pendiente"}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.actionButton,
-                  { backgroundColor: isCollected ? "#e0e0e0" : "#2e7d32" },
-                ]}
-                onPress={() => toggleCollected(item.id)}
-              >
-                <Text style={styles.actionText}>
-                  {isCollected ? "✓" : "Recolectar"}
-                </Text>
-              </TouchableOpacity>
+        ) : total === 0 ? (
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>Sin contenedores asignados</Text>
+            <Text style={styles.emptySub}>
+              No tienes contenedores asignados para hoy. Solicita al administrador que te asigne una ruta.
+            </Text>
+          </View>
+        ) : (
+          <>
+            <View style={styles.progressCard}>
+              <Text style={styles.progressNumber}>{collectedCount}/{total}</Text>
+              <Text style={styles.progressLabel}>tachos recolectados</Text>
+              <View style={styles.barBg}>
+                <View style={[styles.barFill, { width: `${progress}%` }]} />
+              </View>
+              <Text style={styles.progressPercent}>{progress}% completado</Text>
             </View>
-          );
-        })}
+
+            {containers.map((item) => {
+              const isCollected = collected[item.id];
+              const fillPercent = item.filling_level ?? 0;
+              return (
+                <View key={item.id} style={styles.card}>
+                  <TouchableOpacity
+                    style={styles.cardLeft}
+                    onPress={() => openDirections(item.latitude, item.longitude)}
+                  >
+                    <Text style={styles.bold}>{item.name}</Text>
+                    <Text style={styles.gray}>
+                      {item.address_name || ""} · {fillPercent}% lleno
+                    </Text>
+                    <Text
+                      style={{
+                        color: isCollected ? "#999" : getColor(fillPercent),
+                        fontWeight: "600",
+                      }}
+                    >
+                      {isCollected ? "Recolectado" : "Pendiente"}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.actionButton,
+                      { backgroundColor: isCollected ? "#e0e0e0" : "#2e7d32" },
+                    ]}
+                    onPress={() => toggleCollected(item.id)}
+                  >
+                    <Text style={styles.actionText}>
+                      {isCollected ? "✓" : "Recolectar"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              );
+            })}
+          </>
+        )}
       </ScrollView>
     </View>
   );
@@ -104,6 +147,22 @@ export default function RecojosScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f5f5" },
   title: { fontSize: 22, fontWeight: "bold", margin: 16, marginBottom: 0 },
+  errorCard: {
+    margin: 16, backgroundColor: "#ffebee", padding: 20,
+    borderRadius: 20, alignItems: "center",
+  },
+  errorText: { color: "#c62828", textAlign: "center", marginBottom: 12 },
+  retryButton: {
+    backgroundColor: "#2e7d32", paddingHorizontal: 24, paddingVertical: 10,
+    borderRadius: 20,
+  },
+  retryText: { color: "#fff", fontWeight: "bold" },
+  emptyCard: {
+    margin: 16, backgroundColor: "#fff", padding: 32,
+    borderRadius: 20, alignItems: "center",
+  },
+  emptyTitle: { fontSize: 18, fontWeight: "bold", color: "#555", marginBottom: 8 },
+  emptySub: { color: "#999", textAlign: "center", lineHeight: 20 },
   progressCard: {
     margin: 16, backgroundColor: "#fff", padding: 20,
     borderRadius: 20, alignItems: "center",

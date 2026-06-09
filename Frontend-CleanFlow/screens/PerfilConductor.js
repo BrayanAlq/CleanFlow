@@ -32,7 +32,7 @@ export default function PerfilConductor() {
     .toUpperCase()
     .slice(0, 2);
 
-  const containerCount = scheduledRoute?.generated_containers?.length || 0;
+  const containerCount = scheduledRoute?.containers?.length || 0;
 
   return (
     <View style={styles.container}>
