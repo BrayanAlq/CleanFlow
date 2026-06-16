@@ -21,6 +21,12 @@ export const Colors = {
     textError: '#e53935',
     borderTabColor: '#E0E1E6',
     badgeInfoBorder: '#2e7d32',
+    borderDriverMarker: '#FFFFFF',
+    paddingColorDriverMarker: '#4285F4',
+    backgroundDriverMarker: '#1A73E8',
+    transparent: 'transparent',
+    backgroundMineMarker: '#2e7d32',
+    overlayActive: '#258EA6',
   },
   dark: {
     text: '#fff',
@@ -35,6 +41,12 @@ export const Colors = {
     textError: '#e53935',
     borderTabColor: '#E0E1E6',
     badgeInfoBorder: '#fff',
+    borderDriverMarker: '#FFFFFF',
+    paddingColorDriverMarker: '#4285F4',
+    backgroundDriverMarker: '#1A73E8',
+    transparent: 'transparent',
+    backgroundMineMarker: '#2e7d32',
+    overlayActive: '#258EA6',
   },
 } as const
 

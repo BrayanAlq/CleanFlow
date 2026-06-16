@@ -10,7 +10,7 @@ interface IGoalContainerProps {
   name: string
   image: string
   visitOrder: number
-  lastMetric: IContainerMetric
+  lastMetric?: IContainerMetric
 }
 
 export const GoalContainer = ({ id, name, image, visitOrder, lastMetric }: IGoalContainerProps) => {

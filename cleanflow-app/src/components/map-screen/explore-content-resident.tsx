@@ -1,24 +1,31 @@
+import { ContainerInfo } from '@/components/map-screen/container-info'
+import { ReportsContainer } from '@/components/map-screen/reports-container'
 import { Submit } from '@/components/map-screen/submit'
 import { MapView } from '@/components/register/map-view'
 import { ThemedView } from '@/components/themed-view'
 import { MarkerContainer } from '@/components/ui/marker-container'
+import { MarkerDriver } from '@/components/ui/marker-driver'
 import { DEFAULT_LOCATION } from '@/constants/location'
+import { useAuthContext } from '@/context/auth-context'
 import { useStompContext } from '@/context/stomp-context'
 import { useContainerInViewport } from '@/hooks/use-container'
+import { useResident } from '@/hooks/use-resident'
 import { useTheme } from '@/hooks/use-theme'
 import { getCurrentLocation } from '@/services/location'
 import { IBound } from '@/types/bound'
 import { IContainerMetric } from '@/types/container'
+import { IDriverPosition } from '@/types/driver'
+import { Entypo, Ionicons } from '@expo/vector-icons'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
-import { ViewAnnotation, ViewStateChangeEvent } from '@maplibre/maplibre-react-native'
+import { ViewStateChangeEvent } from '@maplibre/maplibre-react-native'
 import { IMessage } from '@stomp/stompjs'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigation } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Dimensions, NativeSyntheticEvent, StyleSheet, View } from 'react-native'
+import { Dimensions, NativeSyntheticEvent, Pressable, StyleSheet } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { ContainerInfo } from './container-info'
-import { ReportsContainer } from './reports-container'
+import { MarkerHome } from '../ui/marker-home'
+import { MarkerMyPosition } from '../ui/marker-my-position'
 
 const { height } = Dimensions.get('window')
 
@@ -33,6 +40,9 @@ export const ExploreContentResident = () => {
   const [bounds, setBounds] = useState<IBound | null>(null)
   const [containerSelectedId, setContainerSelectedId] = useState<number | null>(null)
   const [liveMetric, setLiveMetric] = useState<IContainerMetric | null>(null)
+  const [drivers, setDrivers] = useState<IDriverPosition[]>([])
+  const [containerIconsVisible, setContainerIconsVisible] = useState(true)
+  const [containerTooltipVisible, setContainerTooltipVisible] = useState(true)
 
   const theme = useTheme()
   const { data: containers } = useContainerInViewport(bounds)
@@ -40,6 +50,8 @@ export const ExploreContentResident = () => {
   const navigation = useNavigation()
   const { connected, subscribe, publish } = useStompContext()
   const queryClient = useQueryClient()
+  const { data: resident } = useResident()
+  const { user } = useAuthContext()
 
   const mapHeight = height - insets.top - insets.bottom - 32 - 68
 
@@ -59,6 +71,17 @@ export const ExploreContentResident = () => {
 
   useEffect(() => {
     if (!connected) return
+    const driversSub = subscribe('/user/queue/drivers', (message: IMessage) => {
+      const newDriver = JSON.parse(message.body) as IDriverPosition
+      console.log('new driver', newDriver)
+      setDrivers(prev => {
+        const existingDriver = prev.find(d => d.driver_id === newDriver.driver_id)
+        return existingDriver
+          ? prev.map(d => (d.driver_id === newDriver.driver_id ? newDriver : d))
+          : [...prev, newDriver]
+      })
+    })
+
     const metricSub = subscribe('/user/queue/metrics', (message: IMessage) => {
       const newContainerMetric = JSON.parse(message.body) as IContainerMetric
       setLiveMetric(newContainerMetric)
@@ -66,6 +89,7 @@ export const ExploreContentResident = () => {
 
     return () => {
       metricSub?.unsubscribe()
+      driversSub?.unsubscribe()
     }
   }, [connected, queryClient])
 
@@ -125,9 +149,10 @@ export const ExploreContentResident = () => {
           shouldCenter={hasRealLocation}
           onBoundsChange={handleMapMove}
         >
-          <ViewAnnotation lngLat={[location.longitude, location.latitude]}>
-            <View style={styles.myLocationMarker} />
-          </ViewAnnotation>
+          {/* TODO: render my position marker only if user is active the position service */}
+          <MarkerMyPosition id={user?.id!} longitude={location.longitude} latitude={location.latitude} />
+          {resident && <MarkerHome latitude={resident.latitude} longitude={resident.longitude} />}
+
           {updatedContainers?.map(({ id, latitude, longitude, last_metric }) => (
             <MarkerContainer
               key={id}
@@ -136,9 +161,37 @@ export const ExploreContentResident = () => {
               fillingLevel={last_metric?.filling_level ?? 0}
               containerId={id}
               onTap={handleContainerTap}
+              iconVisible={containerIconsVisible}
+              tolTipVisible={containerTooltipVisible}
             />
           ))}
+
+          {drivers?.map(({ driver_id, longitude, latitude }) => (
+            <MarkerDriver key={driver_id} id={driver_id} longitude={longitude} latitude={latitude} />
+          ))}
         </MapView>
+        <ThemedView style={[styles.overlayContainer, { backgroundColor: theme.transparent }]}>
+          <Pressable
+            onPress={() => setContainerTooltipVisible(prev => !prev)}
+            style={[styles.overlayButtom, { backgroundColor: theme.background }]}
+          >
+            <Entypo
+              name="info-with-circle"
+              size={18}
+              color={containerTooltipVisible ? theme.overlayActive : theme.textSecondary}
+            />
+          </Pressable>
+          <Pressable
+            onPress={() => setContainerIconsVisible(prev => !prev)}
+            style={[styles.overlayButtom, { backgroundColor: theme.background }]}
+          >
+            <Ionicons
+              name="trash-sharp"
+              size={18}
+              color={containerIconsVisible ? theme.overlayActive : theme.textSecondary}
+            />
+          </Pressable>
+        </ThemedView>
       </ThemedView>
 
       <BottomSheet
@@ -180,5 +233,17 @@ const styles = StyleSheet.create({
   mainBottomSheetContainer: {
     height: '100%',
     justifyContent: 'space-between',
+  },
+  overlayContainer: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 4,
+  },
+  overlayButtom: {
+    padding: 6,
+    borderRadius: 8,
   },
 })
