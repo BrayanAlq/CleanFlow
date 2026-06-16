@@ -404,12 +404,12 @@ void reconectarWiFi() {
  * Convierte PPM de gas a nivel de calidad de aire cualitativo.
  */
 String calcularNivelAire(float ppm) {
-  if (ppm < 0) return "\"sin_dato\"";
-  if (ppm < 25) return "\"muy_bueno\"";
-  if (ppm < 50) return "\"bueno\"";
-  if (ppm < 100) return "\"regular\"";
-  if (ppm < 200) return "\"malo\"";
-  return "\"muy_malo\"";
+  if (ppm < 0) return "\"NO_DATA\"";
+  if (ppm < 5) return "\"VERY_GOOD\"";
+  if (ppm < 25) return "\"GOOD\"";
+  if (ppm < 50) return "\"REGULAR\"";
+  if (ppm < 300) return "\"BAD\"";
+  return "\"VERY_BAD\"";
 }
 
 /**
