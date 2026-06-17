@@ -11,24 +11,24 @@ interface IMarkerContainerProps {
   containerId: number
   fillingLevel: number
   onTap: (conatinerId: number) => void
-  tolTipVisible?: boolean
+  tooltipVisible?: boolean
   iconVisible?: boolean
 }
 
 export const MarkerContainer = memo(
-  ({ longitude, latitude, containerId, fillingLevel, onTap, tolTipVisible, iconVisible }: IMarkerContainerProps) => {
+  ({ longitude, latitude, containerId, fillingLevel, onTap, tooltipVisible, iconVisible }: IMarkerContainerProps) => {
     const value = `${Math.round(fillingLevel * 100)}%`
     const theme = useTheme()
 
     return (
       <ViewAnnotation
-        key={`${containerId}-${Math.round(fillingLevel * 100)}-${iconVisible}-${tolTipVisible}`}
+        key={`${containerId}-${fillingLevel}-${iconVisible}-${tooltipVisible}`}
         lngLat={[longitude, latitude]}
         onPress={() => onTap(containerId)}
       >
         <View style={styles.container}>
           <View
-            style={[styles.fillingLevelBack, { backgroundColor: theme.background, opacity: tolTipVisible ? 1 : 0 }]}
+            style={[styles.fillingLevelBack, { backgroundColor: theme.background, opacity: tooltipVisible ? 1 : 0 }]}
           >
             <ThemedText>{value}</ThemedText>
           </View>
@@ -39,14 +39,11 @@ export const MarkerContainer = memo(
       </ViewAnnotation>
     )
   },
-  (prev, next) => {
-    return (
-      prev.fillingLevel === next.fillingLevel &&
-      prev.onTap === next.onTap &&
-      prev.iconVisible === next.iconVisible &&
-      prev.tolTipVisible === next.tolTipVisible
-    )
-  },
+  (prev, next) =>
+    prev.fillingLevel === next.fillingLevel &&
+    prev.onTap === next.onTap &&
+    prev.iconVisible === next.iconVisible &&
+    prev.tooltipVisible === next.tooltipVisible,
 )
 
 const styles = StyleSheet.create({

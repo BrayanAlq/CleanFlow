@@ -1,4 +1,4 @@
-import { GoalContainer } from '@/components/goals/goal-container'
+import { NearContainer } from '@/components/home/near-container'
 import { ThemedText } from '@/components/themed-text'
 import { ThemedView } from '@/components/themed-view'
 import { useAuthContext } from '@/context/auth-context'
@@ -17,18 +17,15 @@ export default function ResidentHome() {
         </ThemedText>
       </ThemedView>
       <ThemedText style={styles.titleText}>Contenedores cercanos</ThemedText>
-      <ThemedView type="backgroundElement">
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          style={[styles.elevatedWrapper, styles.containerWrapper, { backgroundColor: theme.background }]}
-        >
-          <GoalContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" visitOrder={1} />
-          <GoalContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" visitOrder={2} />
-          <GoalContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" visitOrder={3} />
-          <GoalContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" visitOrder={4} />
-          <GoalContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" visitOrder={5} />
-          <GoalContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" visitOrder={6} />
-          <GoalContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" visitOrder={7} />
+      <ThemedView style={[styles.elevatedWrapper, styles.containerWrapper, { backgroundColor: theme.background }]}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <NearContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" />
+          <NearContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" />
+          <NearContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" />
+          <NearContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" />
+          <NearContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" />
+          <NearContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" />
+          <NearContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" />
         </ScrollView>
       </ThemedView>
       <ThemedText style={styles.titleText}>Logros</ThemedText>
@@ -42,6 +39,7 @@ export default function ResidentHome() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, display: 'flex', flexDirection: 'column', gap: 16 },
   elevatedWrapper: {
+    width: 'auto',
     padding: 16,
     borderRadius: 16,
     elevation: 1,
@@ -55,6 +53,6 @@ const styles = StyleSheet.create({
     fontWeight: 'semibold',
   },
   containerWrapper: {
-    height: 450,
+    flex: 1,
   },
 })

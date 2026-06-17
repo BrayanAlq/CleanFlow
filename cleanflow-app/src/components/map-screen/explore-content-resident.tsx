@@ -108,10 +108,10 @@ export const ExploreContentResident = () => {
     })
   }
 
-  const handleContainerTap = (containerId: number) => {
+  const handleContainerTap = useCallback((containerId: number) => {
     bottomSheetRef.current?.snapToIndex(0)
     setContainerSelectedId(containerId)
-  }
+  }, [])
 
   const handleSheetChanges = useCallback(
     (index: number) => {
@@ -161,8 +161,8 @@ export const ExploreContentResident = () => {
               fillingLevel={last_metric?.filling_level ?? 0}
               containerId={id}
               onTap={handleContainerTap}
+              tooltipVisible={containerTooltipVisible}
               iconVisible={containerIconsVisible}
-              tolTipVisible={containerTooltipVisible}
             />
           ))}
 

@@ -1,6 +1,7 @@
 import { BadgeInfo } from '@/components/map-screen/badge-info'
 import { ThemedText } from '@/components/themed-text'
 import { ThemedView } from '@/components/themed-view'
+import { CONTAINER_TYPES } from '@/constants/container'
 import { IContainerType } from '@/types/container'
 import { EvilIcons, Feather, Fontisto, MaterialIcons } from '@expo/vector-icons'
 import { useState } from 'react'
@@ -38,7 +39,7 @@ export const ContainerInfo = ({ container }: IContainerInfoProps) => {
                 <BadgeInfo data={last_metric.is_alive ? 'Trabajando' : 'Inactivo'}>
                   <Feather name="activity" size={18} />
                 </BadgeInfo>
-                <BadgeInfo data={last_metric.air_quality_level}>
+                <BadgeInfo data={CONTAINER_TYPES[last_metric.air_quality_level] ?? 'No hay datos'}>
                   <MaterialIcons name="air" size={18} />
                 </BadgeInfo>
                 <BadgeInfo data={last_metric.ppm}>
