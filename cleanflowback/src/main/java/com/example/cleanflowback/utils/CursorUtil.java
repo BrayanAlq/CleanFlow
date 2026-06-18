@@ -1,5 +1,6 @@
 package com.example.cleanflowback.utils;
 
+import com.example.cleanflowback.dto.DistanceIdCursorDTO;
 import com.example.cleanflowback.dto.GeneratedCursorInternalDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,26 @@ public class CursorUtil {
             String jsonString = new String(decodedBytes, StandardCharsets.UTF_8);
 
             return mapper.readValue(jsonString, GeneratedCursorInternalDTO.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid cursor: " + e.getMessage());
+        }
+    }
+
+    public String encodeDistanceId(DistanceIdCursorDTO dto) {
+        try {
+            String json = mapper.writeValueAsString(dto);
+            return Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new RuntimeException("Error when encoding distance-id cursor: " + e.getMessage());
+        }
+    }
+
+    public DistanceIdCursorDTO decodeDistanceId(String encodedCursor) {
+        try {
+            byte[] decodedBytes = Base64.getUrlDecoder().decode(encodedCursor);
+            String jsonString = new String(decodedBytes, StandardCharsets.UTF_8);
+
+            return mapper.readValue(jsonString, DistanceIdCursorDTO.class);
         } catch (Exception e) {
             throw new RuntimeException("Invalid cursor: " + e.getMessage());
         }

@@ -1,5 +1,6 @@
 package com.example.cleanflowback.repository;
 
+import com.example.cleanflowback.dto.ContainerNearByPointRawDTO;
 import com.example.cleanflowback.model.ContainerEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,4 +28,32 @@ public interface ContainerRepository extends JpaRepository<ContainerEntity, Long
 
     ContainerEntity findByApiKey(String apiKey);
     boolean existsByApiKey(String apiKey);
+
+    @Query(value = """
+        WITH distances AS (
+            SELECT 
+                c.id,
+                c.name,
+                c.address_name,
+                ci.url,
+                ST_Distance(c.location::geography, ST_Point(:longitude, :latitude)::geography) as distance
+            FROM containers c
+            JOIN container_images ci ON ci.id = c.container_image_id
+        )
+        SELECT * FROM distances
+        WHERE (
+            :cursor_distance IS NULL
+            OR distance > :cursor_distance
+            OR (distance = :cursor_distance AND id > :cursor_id)
+        )
+        ORDER BY distance ASC, id ASC
+        LIMIT :size
+    """, nativeQuery = true)
+    List<ContainerNearByPointRawDTO> findAllOrderedByPointDistance(
+        @Param("latitude") double latitude,
+        @Param("longitude") double longitude,
+        @Param("cursor_distance") Double cursorDistance,
+        @Param("cursor_id") Long cursorId,
+        @Param("size") int size
+    );
 }

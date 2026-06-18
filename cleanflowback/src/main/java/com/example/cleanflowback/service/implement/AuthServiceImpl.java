@@ -42,8 +42,15 @@ public class AuthServiceImpl implements AuthService {
     public void createResident(CreateResidentRequestDTO dto) {
         checkUsernameAndEmail(dto.username(), dto.email());
 
-        ResidentEntity residentEntity = residentMapper.toEntity(dto);
+        ResidentEntity residentEntity = new ResidentEntity();
+
+        residentEntity.setUsername(dto.username());
+        residentEntity.setFirstName(dto.firstName());
+        residentEntity.setLastName(dto.lastName());
+        residentEntity.setAddress(dto.address());
+        residentEntity.setEmail(dto.email());
         residentEntity.setRole(RoleEnum.RESIDENT);
+        residentEntity.setLocation(dto.latitude(), dto.longitude());
         residentEntity.setPassword(bCryptPasswordEncoder.encode(dto.password()));
 
         residentRepository.save(residentEntity);
