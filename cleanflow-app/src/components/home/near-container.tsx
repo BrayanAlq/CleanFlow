@@ -5,20 +5,16 @@ import { IContainerMetric } from '@/types/container'
 import { EvilIcons, Feather } from '@expo/vector-icons'
 import { Image, StyleSheet } from 'react-native'
 
-interface IGoalContainerProps {
+interface INearContainerProps {
   id: number
   name: string
   image: string
-  visitOrder: number
   lastMetric?: IContainerMetric
 }
 
-export const GoalContainer = ({ id, name, image, visitOrder, lastMetric }: IGoalContainerProps) => {
+export const NearContainer = ({ id, name, image, lastMetric }: INearContainerProps) => {
   return (
     <ThemedView key={id} style={styles.infoContainer}>
-      <ThemedView style={styles.cardinalContainer}>
-        <ThemedText style={styles.cardinalText}>{visitOrder}</ThemedText>
-      </ThemedView>
       <ThemedView style={styles.imageContainer}>
         <Image source={{ uri: image }} style={{ width: '100%', height: '100%' }} />
       </ThemedView>
@@ -53,16 +49,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 12,
-  },
-  cardinalContainer: {
-    height: '100%',
-    width: 30,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cardinalText: {
-    fontSize: 30,
   },
   nameContainer: {
     flex: 1,

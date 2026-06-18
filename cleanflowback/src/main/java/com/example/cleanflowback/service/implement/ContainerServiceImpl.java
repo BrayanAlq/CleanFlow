@@ -1,9 +1,9 @@
 package com.example.cleanflowback.service.implement;
 
+import com.example.cleanflowback.dto.ContainerNearByPointRawDTO;
+import com.example.cleanflowback.dto.DistanceIdCursorDTO;
 import com.example.cleanflowback.dto.in.CreateContainerRequestDTO;
-import com.example.cleanflowback.dto.out.ContainerResponseDTO;
-import com.example.cleanflowback.dto.out.ContainerResponseForDeviceDTO;
-import com.example.cleanflowback.dto.out.MetricResponseDTO;
+import com.example.cleanflowback.dto.out.*;
 import com.example.cleanflowback.exception.ContainerConflictException;
 import com.example.cleanflowback.exception.CredentialsAlreadyUsedException;
 import com.example.cleanflowback.exception.ResourceNotFoundException;
@@ -17,6 +17,7 @@ import com.example.cleanflowback.repository.MetricRepository;
 import com.example.cleanflowback.repository.ReportRepository;
 import com.example.cleanflowback.service.CloudinaryService;
 import com.example.cleanflowback.service.ContainerService;
+import com.example.cleanflowback.utils.CursorUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,7 @@ public class ContainerServiceImpl implements ContainerService {
     private final MetricRepository metricRepository;
     private final ContainerImageMapper containerImageMapper;
     private final MetricMapper metricMapper;
+    private final CursorUtil cursorUtil;
 
     @Override
     @Transactional
@@ -150,6 +152,40 @@ public class ContainerServiceImpl implements ContainerService {
 
         return new ContainerResponseForDeviceDTO(
             response.id(), response.apiKey(), "password"
+        );
+    }
+
+    @Override
+    public CursorPageWithEncodedResponseDTO<ContainerNearByPointDTO> getContainerNearToResident(
+        ResidentEntity resident, String cursor, int size
+    ) {
+        DistanceIdCursorDTO cursorDecoded = cursor == null
+            ? new DistanceIdCursorDTO(null, null)
+            : cursorUtil.decodeDistanceId(cursor);
+
+        List<ContainerNearByPointRawDTO> nearContainers = containerRepository.findAllOrderedByPointDistance(
+            resident.getLatitude(), resident.getLongitude(), cursorDecoded.distance(), cursorDecoded.id(), size + 1
+        );
+
+        boolean hasNext = nearContainers.size() > size;
+
+        nearContainers.removeLast();
+
+        String nextCursor = hasNext
+            ? cursorUtil.encodeDistanceId(new DistanceIdCursorDTO(nearContainers.getLast().id(), nearContainers.getLast().distance()))
+            : null;
+
+        List<Long> containerIds = nearContainers.stream().map(ContainerNearByPointRawDTO::id).toList();
+        Map<Long, MetricEntity> lastMetrics = metricRepository.findLatestByContainerIds(containerIds)
+            .stream()
+            .collect(Collectors.toMap(m -> m.getContainer().getId(), m -> m));
+
+        return new CursorPageWithEncodedResponseDTO<>(
+            nearContainers.stream().map(c -> new ContainerNearByPointDTO(
+                c.id(), c.name(), c.addressName(), c.distance(), c.url(), metricMapper.fromEntityToDTO(lastMetrics.get(c.id()))
+            )).toList(),
+            hasNext,
+            nextCursor
         );
     }
 }

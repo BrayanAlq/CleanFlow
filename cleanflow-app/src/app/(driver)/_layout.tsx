@@ -36,7 +36,7 @@ const tabs: IConstructedTabs[] = [
     label: 'Inicio',
     iconNameActive: <Ionicons name="home" size={20} color="#2e7d32" />,
     iconNameInactive: <Ionicons name="home-outline" size={20} color="#000" />,
-    name: 'inicio',
+    name: 'home',
   },
   {
     label: 'Explora',

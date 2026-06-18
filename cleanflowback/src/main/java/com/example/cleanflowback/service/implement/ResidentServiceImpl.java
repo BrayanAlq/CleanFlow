@@ -1,6 +1,7 @@
 package com.example.cleanflowback.service.implement;
 
 import com.example.cleanflowback.dto.in.PatchResidentRequestDTO;
+import com.example.cleanflowback.dto.out.ReportGoalDTO;
 import com.example.cleanflowback.dto.out.ResidentInfoDTO;
 import com.example.cleanflowback.exception.ResourceNotFoundException;
 import com.example.cleanflowback.mapper.ResidentMapper;
@@ -38,5 +39,16 @@ public class ResidentServiceImpl implements ResidentService {
         resident.setAddress(requestDTO.address());
 
         residentRepository.save(resident);
+    }
+
+    @Override
+    public ReportGoalDTO getRemaining(ResidentEntity resident) {
+        int[] thresholds = {10, 30, 70, 120};
+        int badge = resident.getBadgeCount();
+        int reports = resident.getReportCount();
+
+        return new ReportGoalDTO(
+            thresholds[badge] - reports
+        );
     }
 }

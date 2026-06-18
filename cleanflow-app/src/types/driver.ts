@@ -5,3 +5,9 @@ export interface IDriverProfile {
   last_name: string
   email: string
 }
+
+export interface IDriverPosition {
+  driver_id: number
+  longitude: number
+  latitude: number
+}

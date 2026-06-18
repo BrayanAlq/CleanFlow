@@ -8,7 +8,7 @@ http:
   url: "{{actual_url}}/driver"
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImRyaXZlcjEiLCJsYXN0X25hbWUiOiJEcml2ZXIiLCJmaXJzdF9uYW1lIjoiSnVhbiIsImlkIjoyLCJyb2xlIjoiRFJJVkVSIiwiZXhwIjoxNzgxNTM0NTU5fQ.figR4rnqZ3scZ4u9PhpJwdiwusT28tciJ6RhdM57cD8
+    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImRyaXZlcjEiLCJsYXN0X25hbWUiOiJEcml2ZXIiLCJmaXJzdF9uYW1lIjoiSnVhbiIsImlkIjoyLCJyb2xlIjoiRFJJVkVSIiwiZXhwIjoxNzgyMjI5ODE3fQ.33a2__x7WXcr8t5lrmneLd4FwrXJ4DeEZAZpwUBsvHs
 
 settings:
   encodeUrl: true

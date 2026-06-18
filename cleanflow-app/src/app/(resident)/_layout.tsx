@@ -43,7 +43,7 @@ const tabs: IConstructedTabs[] = [
     label: 'Inicio',
     iconNameActive: 'home',
     iconNameInactive: 'home-outline',
-    name: 'inicio',
+    name: 'home',
   },
   {
     label: 'Explora',

@@ -142,8 +142,8 @@ public class ReportServiceImpl implements ReportService {
     public int getBadgeLevel(int reportCount) {
         int[] thresholds = {10, 30, 70, 120};
         for (int i = 0; i < thresholds.length; i++) {
-            if (reportCount < thresholds[i]) return i + 1;
+            if (reportCount < thresholds[i]) return i;
         }
-        return thresholds.length + 1;
+        return thresholds.length;
     }
 }

@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 
 @Entity
 @Table(name = "residents")
@@ -12,11 +15,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ResidentEntity extends UserEntity {
-    @Column(nullable = false)
-    private Double longitude;
-
-    @Column(nullable = false)
-    private Double latitude;
+    @Column(columnDefinition = "geography(Point, 4326)", nullable = true)
+    private Point location;
 
     @Column(nullable = false)
     private int reportCount;
@@ -26,6 +26,17 @@ public class ResidentEntity extends UserEntity {
 
     @Column(nullable = false)
     private String address;
+
+    public void setLocation(double latitude, double longitude) {
+        GeometryFactory gf = new GeometryFactory();
+        Coordinate coordinate = new Coordinate(longitude, latitude);
+
+        this.location = gf.createPoint(coordinate);
+    }
+
+    public double getLatitude() { return location.getCoordinate().getY(); }
+
+    public double getLongitude() { return location.getCoordinate().getX(); }
 
     @Override
     @PrePersist

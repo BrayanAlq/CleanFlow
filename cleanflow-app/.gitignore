@@ -43,8 +43,9 @@ example
 /android
 
 cleanflowapp-12b4b-firebase-adminsdk-fbsvc-42c871829b.json
-google-services.json
 
 build*.apk
 
+# this is required for build
 .env
+google-services.json

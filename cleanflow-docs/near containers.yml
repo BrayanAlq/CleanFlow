@@ -1,0 +1,24 @@
+info:
+  name: near containers
+  type: http
+  seq: 32
+
+http:
+  method: GET
+  url: "{{actual_url}}/resident/container/near?size=10&cursor=eyJpZCI6MjUsImRpc3RhbmNlIjo3NTkuMjg3ODg4MDd9"
+  params:
+    - name: size
+      value: "10"
+      type: query
+    - name: cursor
+      value: eyJpZCI6MjUsImRpc3RhbmNlIjo3NTkuMjg3ODg4MDd9
+      type: query
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiJ9.eyJsYXN0X25hbWUiOiJSZXNpZGVudCIsImZpcnN0X25hbWUiOiJKaG9uIiwiaWQiOjEwLCJyb2xlIjoiUkVTSURFTlQiLCJ1c2VybmFtZSI6InJlc2lkZW50NCIsImV4cCI6MTc4MjQyMzUyNX0.c2XO5jav0Z7cqacRcfijcNV2FfGWfIEoJqPsu_8wQaA
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
