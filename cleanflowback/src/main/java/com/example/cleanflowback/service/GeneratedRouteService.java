@@ -4,11 +4,11 @@ import com.example.cleanflowback.dto.out.CursorPageWithEncodedResponseDTO;
 import com.example.cleanflowback.dto.out.GeneratedRouteResponseDTO;
 
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.List;
 
 public interface GeneratedRouteService {
     CursorPageWithEncodedResponseDTO<GeneratedRouteResponseDTO> getGeneratedRoutes(
         Long driverId, LocalDate date, String cursor, Integer size
     );
-    Optional<GeneratedRouteResponseDTO> getGeneratedRouteByDriver(Long driverId);
+    GeneratedRouteResponseDTO getGeneratedRouteByDriver(Long driverId);
 }
