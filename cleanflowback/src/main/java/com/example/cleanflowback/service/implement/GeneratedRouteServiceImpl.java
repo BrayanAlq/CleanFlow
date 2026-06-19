@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -86,7 +87,7 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
     }
 
     @Override
-    public Optional<GeneratedRouteResponseDTO> getGeneratedRouteByDriver(Long driverId) {
+    public GeneratedRouteResponseDTO getGeneratedRouteByDriver(Long driverId) {
         DriverEntity driver = driverRepository.findById(driverId).orElseThrow(
             () -> new ResourceNotFoundException("driver not found")
         );
@@ -110,14 +111,15 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
             .stream()
             .collect(Collectors.toMap(m -> m.getContainer().getId(), m -> m));
 
-        return generatedRouteRepository.getByDriverIdAndDate(driverId, from, to)
-            .map(gr -> new GeneratedRouteResponseDTO(
-                gr.getId(),
-                driverMapper.toInfoDTO(gr.getDriver()),
-                gr.getPolylines().stream().map(polylineMapper::fromEntityToDTO).toList(),
-                mapContainersWithLastMetric(gr, latestMetrics),
-                gr.getCreatedAt()
-            ));
+        return new GeneratedRouteResponseDTO(
+            generatedRoute.getId(),
+            driverMapper.toInfoDTO(generatedRoute.getDriver()),
+            generatedRoute.getPolylines().stream().map(polylineMapper::fromEntityToDTO).toList(),
+            mapContainersWithLastMetric(generatedRoute, latestMetrics)
+                .stream()
+                .sorted((a, b) -> a.visitOrder() - b.visitOrder()).toList(),
+            generatedRoute.getCreatedAt()
+        );
     }
 
     private List<GeneratedContainerResponseDTO> mapContainersWithLastMetric(GeneratedRouteEntity route, Map<Long, MetricEntity> lastMetrics) {
