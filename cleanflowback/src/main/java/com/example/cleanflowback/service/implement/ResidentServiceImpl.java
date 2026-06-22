@@ -13,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class ResidentServiceImpl implements ResidentService {
@@ -50,5 +52,12 @@ public class ResidentServiceImpl implements ResidentService {
         return new ReportGoalDTO(
             thresholds[badge] - reports
         );
+    }
+
+    @Override
+    public List<ResidentInfoDTO> getResidentsInViewport(double north, double south, double east, double west) {
+        List<Long> idResidents = residentRepository.findAllInViewport(north, south, east, west);
+        List<ResidentEntity> residents = residentRepository.findAllById(idResidents);
+        return residents.stream().map(residentMapper::toInfoDTO).toList();
     }
 }
