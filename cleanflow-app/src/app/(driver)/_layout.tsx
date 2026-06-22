@@ -2,61 +2,7 @@ import { ThemedText } from '@/components/themed-text'
 import { useTheme } from '@/hooks/use-theme'
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 import { Tabs } from 'expo-router'
-import { BottomTabNavigationOptions } from 'expo-router/build/react-navigation/bottom-tabs'
-import { ReactElement } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
-interface ICreateTabOptionProps {
-  theme: ReturnType<typeof useTheme>
-  iconNameActive: ReactElement
-  iconNameInactive: ReactElement
-  label: string
-}
-
-const createTabOption = ({
-  theme,
-  iconNameActive,
-  iconNameInactive,
-  label,
-}: ICreateTabOptionProps): BottomTabNavigationOptions => ({
-  tabBarIcon: ({ size, focused }) => (focused ? iconNameActive : iconNameInactive),
-  tabBarLabel: ({ focused }) => (
-    <ThemedText style={{ fontSize: 12 }} themeColor={focused ? 'greenAccent' : 'textSecondary'}>
-      {label}
-    </ThemedText>
-  ),
-})
-
-type IConstructedTabs = Omit<ICreateTabOptionProps, 'theme'> & {
-  name: string
-}
-
-const tabs: IConstructedTabs[] = [
-  {
-    label: 'Inicio',
-    iconNameActive: <Ionicons name="home" size={20} color="#2e7d32" />,
-    iconNameInactive: <Ionicons name="home-outline" size={20} color="#000" />,
-    name: 'home',
-  },
-  {
-    label: 'Explora',
-    iconNameActive: <Ionicons name="map" size={20} color="#2e7d32" />,
-    iconNameInactive: <Ionicons name="map-outline" size={20} color="#000" />,
-    name: 'explore',
-  },
-  {
-    label: 'Objetivos',
-    iconNameActive: <MaterialIcons name="check-circle" size={20} color="#2e7d32" />,
-    iconNameInactive: <MaterialIcons name="check-circle-outline" size={20} color="#000" />,
-    name: 'goals',
-  },
-  {
-    label: 'Mi perfil',
-    iconNameActive: <Ionicons name="person" size={20} color="#2e7d32" />,
-    iconNameInactive: <Ionicons name="person-outline" size={20} color="#000" />,
-    name: 'profile',
-  },
-]
 
 export default function DriverLayout() {
   const theme = useTheme()
@@ -75,17 +21,70 @@ export default function DriverLayout() {
           },
         }}
       >
-        {tabs.map(({ name, label, iconNameActive, iconNameInactive }) => (
-          <Tabs.Screen
-            name={name}
-            options={createTabOption({
-              theme,
-              iconNameActive,
-              iconNameInactive,
-              label,
-            })}
-          />
-        ))}
+        <Tabs.Screen
+          name="home"
+          options={{
+            tabBarIcon: ({ size, focused }) =>
+              focused ? (
+                <Ionicons name="home" size={20} color={theme.greenAccent} />
+              ) : (
+                <Ionicons name="home-outline" size={20} color={theme.textSecondary} />
+              ),
+            tabBarLabel: ({ focused }) => (
+              <ThemedText style={{ fontSize: 12 }} themeColor={focused ? 'greenAccent' : 'textSecondary'}>
+                Inicio
+              </ThemedText>
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="explore"
+          options={{
+            tabBarIcon: ({ size, focused }) =>
+              focused ? (
+                <Ionicons name="map" size={20} color={theme.greenAccent} />
+              ) : (
+                <Ionicons name="map-outline" size={20} color={theme.textSecondary} />
+              ),
+            tabBarLabel: ({ focused }) => (
+              <ThemedText style={{ fontSize: 12 }} themeColor={focused ? 'greenAccent' : 'textSecondary'}>
+                Explora
+              </ThemedText>
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="goals"
+          options={{
+            tabBarIcon: ({ size, focused }) =>
+              focused ? (
+                <MaterialIcons name="check-circle" size={20} color={theme.greenAccent} />
+              ) : (
+                <MaterialIcons name="check-circle-outline" size={20} color={theme.textSecondary} />
+              ),
+            tabBarLabel: ({ focused }) => (
+              <ThemedText style={{ fontSize: 12 }} themeColor={focused ? 'greenAccent' : 'textSecondary'}>
+                Objetivos
+              </ThemedText>
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            tabBarIcon: ({ size, focused }) =>
+              focused ? (
+                <Ionicons name="person" size={20} color={theme.greenAccent} />
+              ) : (
+                <Ionicons name="person-outline" size={20} color={theme.textSecondary} />
+              ),
+            tabBarLabel: ({ focused }) => (
+              <ThemedText style={{ fontSize: 12 }} themeColor={focused ? 'greenAccent' : 'textSecondary'}>
+                Mi perfil
+              </ThemedText>
+            ),
+          }}
+        />
       </Tabs>
     </SafeAreaView>
   )

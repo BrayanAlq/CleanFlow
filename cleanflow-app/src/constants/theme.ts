@@ -30,8 +30,8 @@ export const Colors = {
   },
   dark: {
     text: '#fff',
-    background: '#000',
-    backgroundElement: '#212225',
+    background: '#212225',
+    backgroundElement: '#000000',
     backgroundSelected: '#2E3135',
     textSecondary: '#B0B4BA',
     borderError: '#e53935',

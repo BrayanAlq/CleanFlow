@@ -1,7 +1,9 @@
 import { useStompContext } from '@/context/stomp-context'
 import { useCurrentPosition } from '@/hooks/use-current-position'
+import { useLocalNotification } from '@/hooks/use-local-notification'
 import { useCreateRoute, useFinishRoute, useGetPointsByRoute } from '@/hooks/use-route'
 import { useTheme } from '@/hooks/use-theme'
+import { formatTime } from '@/utils/time-formatter'
 import polyline from '@mapbox/polyline'
 import { useEffect, useRef, useState } from 'react'
 import { Pressable, StyleSheet } from 'react-native'
@@ -12,6 +14,7 @@ type ButtonStatus = 'initial' | 'active' | 'finishing'
 export const MainButton = () => {
   const [status, setStatus] = useState<ButtonStatus>('initial')
   const [routeId, setRouteId] = useState<number | null>(null)
+  const [timer, setTimer] = useState<number>(0)
 
   const theme = useTheme()
   const { createRouteMutation } = useCreateRoute()
@@ -20,6 +23,17 @@ export const MainButton = () => {
   const { finishRouteMutation } = useFinishRoute()
   const { publish } = useStompContext()
   const { location, hasRealLocation } = useCurrentPosition()
+
+  const { dismiss: dismissNotification } = useLocalNotification({
+    isActive: status === 'active',
+    options: {
+      title: 'Registrando su progreso',
+      body: 'Tiempo: {{timer}}',
+      priority: 'high',
+    },
+    variables: { timer: formatTime(timer) },
+    updateInterval: 1000,
+  })
 
   const locationRef = useRef(location)
   const routeIdRef = useRef(routeId)
@@ -40,7 +54,20 @@ export const MainButton = () => {
   useEffect(() => {
     if (status !== 'active') return
 
+    const timeInterval = setInterval(() => {
+      setTimer(prev => prev + 1)
+    }, 1000)
+
+    return () => {
+      clearInterval(timeInterval)
+    }
+  }, [status])
+
+  useEffect(() => {
+    if (status !== 'active') return
+
     const interval = setInterval(() => {
+      console.log('interval')
       if (routeIdRef.current && locationRef.current && hasRealLocationRef.current) {
         publish('/app/driver.location', {
           route_id: routeIdRef.current,
@@ -66,6 +93,7 @@ export const MainButton = () => {
       const response = await createRouteMutation.mutateAsync()
       setRouteId(response.id)
       setStatus('active')
+      setTimer(0)
     } catch (err) {
       console.error('Error al crear ruta:', err)
     }
@@ -82,6 +110,7 @@ export const MainButton = () => {
     const pl = polyline.encode(arrayPoints)
 
     try {
+      console.log({ routeId, pl })
       await finishRouteMutation.mutateAsync({
         route_id: routeId,
         polyline: pl,
@@ -89,6 +118,8 @@ export const MainButton = () => {
       // Reset for next route
       setStatus('initial')
       setRouteId(null)
+      setTimer(0)
+      await dismissNotification()
     } catch (error) {
       console.error('Error al terminar ruta:', error)
       setStatus('active') // Return to active state if there is an error
@@ -101,7 +132,9 @@ export const MainButton = () => {
       disabled={status === 'finishing'}
       style={[styles.container, { backgroundColor: theme?.greenAccent }]}
     >
-      <ThemedText style={styles.text}>{status === 'initial' ? 'Comenzar' : 'Terminar'}</ThemedText>
+      <ThemedText style={styles.text}>
+        {status === 'initial' ? 'Comenzar' : status === 'active' ? `${formatTime(timer)} | Terminar` : 'Finalizando...'}
+      </ThemedText>
     </Pressable>
   )
 }

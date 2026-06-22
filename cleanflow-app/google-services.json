@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "638582065729",
+    "project_id": "cleanflowapp-12b4b",
+    "storage_bucket": "cleanflowapp-12b4b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:638582065729:android:8b9a6bbe4686434007d4c0",
+        "android_client_info": {
+          "package_name": "com.iot.cleanflowapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNcgnfMyN12Rd_hrRmRagioP68B3bKPp4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

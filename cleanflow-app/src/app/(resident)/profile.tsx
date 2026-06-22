@@ -85,17 +85,17 @@ export default function ResidentProfile() {
         <ThemedView style={styles.card}>
           {data?.address && (
             <InfoItem label="Dirección" value={data?.address}>
-              <Ionicons name="home-outline" size={20} />
+              <Ionicons name="home-outline" size={20} color={theme.textSecondary} />
             </InfoItem>
           )}
           {data?.email && (
             <InfoItem label="Correo" value={data?.email}>
-              <Ionicons name="mail-outline" size={20} />
+              <Ionicons name="mail-outline" size={20} color={theme.textSecondary} />
             </InfoItem>
           )}
           {data?.username && (
             <InfoItem label="Usuario" value={data?.username}>
-              <FontAwesome name="user-o" size={20} />
+              <FontAwesome name="user-o" size={20} color={theme.textSecondary} />
             </InfoItem>
           )}
           <ThemedView
@@ -159,15 +159,10 @@ const styles = StyleSheet.create({
   name: { fontWeight: 'bold' },
   stats: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
     borderRadius: 16,
     marginBottom: 16,
     overflow: 'hidden',
     elevation: 1,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
   },
   statItem: { flex: 1, alignItems: 'center', padding: 16 },
   statNumber: { fontWeight: 'bold', fontSize: 18 },
