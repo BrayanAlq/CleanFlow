@@ -2,35 +2,54 @@ import { NearContainer } from '@/components/home/near-container'
 import { ThemedText } from '@/components/themed-text'
 import { ThemedView } from '@/components/themed-view'
 import { useAuthContext } from '@/context/auth-context'
+import { useNearContainers } from '@/hooks/use-container'
+import { useRemaining } from '@/hooks/use-resident'
 import { useTheme } from '@/hooks/use-theme'
-import { ScrollView, StyleSheet } from 'react-native'
+import { FlatList, StyleSheet } from 'react-native'
 
 export default function ResidentHome() {
   const theme = useTheme()
   const { user } = useAuthContext()
+  const { data: remaining } = useRemaining()
+  const { data: page, fetchNextPage, hasNextPage, isFetchingNextPage } = useNearContainers()
+
+  const flatNearContainers = page?.pages.flatMap(page => page.content) ?? []
+
+  const handleEndReached = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage()
+    }
+  }
+
   return (
     <ThemedView type="backgroundElement" style={styles.container}>
       <ThemedView style={styles.elevatedWrapper}>
         <ThemedText style={styles.welcomeText}>
-          Bienvenido
+          Hola!
           <ThemedText style={[styles.welcomeText, styles.name]}>{' ' + user?.first_name}</ThemedText>
         </ThemedText>
       </ThemedView>
       <ThemedText style={styles.titleText}>Contenedores cercanos</ThemedText>
       <ThemedView style={[styles.elevatedWrapper, styles.containerWrapper, { backgroundColor: theme.background }]}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <NearContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" />
-          <NearContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" />
-          <NearContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" />
-          <NearContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" />
-          <NearContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" />
-          <NearContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" />
-          <NearContainer id={1} name="Contenedor 1" image="https://picsum.photos/id/10/200/300" />
-        </ScrollView>
+        <FlatList
+          data={flatNearContainers}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={item => `${item.id}`}
+          renderItem={({ item }) => (
+            <NearContainer
+              id={item.id}
+              name={item.name}
+              image={item.url}
+              lastMetric={item.last_metric}
+              distance={item.distance}
+            />
+          )}
+          onEndReached={handleEndReached}
+        />
       </ThemedView>
       <ThemedText style={styles.titleText}>Logros</ThemedText>
       <ThemedView style={styles.elevatedWrapper}>
-        <ThemedText>Estás a x reportes de tu próxima insignia</ThemedText>
+        <ThemedText>Estás a {remaining?.remaining} reportes de tu próxima insignia</ThemedText>
       </ThemedView>
     </ThemedView>
   )

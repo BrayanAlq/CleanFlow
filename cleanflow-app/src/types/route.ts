@@ -24,3 +24,22 @@ export interface IScheduledRoute {
   created_at: string
   containers: IScheduledContainer[]
 }
+
+export interface ICreateRouteResponse {
+  id: number
+  start_at: string
+  end_at: string
+  status: 'STARTED' | 'FINISHED'
+}
+
+export interface IFinishRouteRequest {
+  route_id: number
+  polyline: string
+}
+
+export interface IPointResponse {
+  id: number
+  latitude: number
+  longitude: number
+  timestamp: string
+}

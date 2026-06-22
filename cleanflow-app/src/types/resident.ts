@@ -9,3 +9,7 @@ export interface IResidentProfile {
   report_count: number
   badge_count: number
 }
+
+export interface IRemaining {
+  remaining: number
+}

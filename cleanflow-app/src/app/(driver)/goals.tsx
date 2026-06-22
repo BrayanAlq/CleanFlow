@@ -15,7 +15,6 @@ export default function Goals() {
   const insets = useSafeAreaInsets()
 
   const contentHeight = height - insets.top - insets.bottom - 32 - 68
-  console.log(data)
 
   return (
     <ThemedView style={[styles.container, { height: contentHeight }]} type="backgroundElement">
