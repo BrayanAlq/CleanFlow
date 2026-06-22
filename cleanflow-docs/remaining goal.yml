@@ -8,7 +8,7 @@ http:
   url: "{{actual_url}}/resident/remaining/goal"
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiJ9.eyJsYXN0X25hbWUiOiJSZXNpZGVudCIsImZpcnN0X25hbWUiOiJKaG9uIiwiaWQiOjEwLCJyb2xlIjoiUkVTSURFTlQiLCJ1c2VybmFtZSI6InJlc2lkZW50NCIsImV4cCI6MTc4MjQyMzUyNX0.c2XO5jav0Z7cqacRcfijcNV2FfGWfIEoJqPsu_8wQaA
+    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InJlc2lkZW50MiIsImxhc3RfbmFtZSI6IlJlc2lkZW50IiwiZmlyc3RfbmFtZSI6IlZpY3RvcmlhIiwiaWQiOjgsInJvbGUiOiJSRVNJREVOVCIsImV4cCI6MTc4MjQzMTkyOX0.zN4FmhhBr2T_CFFEOLk7M4Un_Uwa_XnuDFXBB9t9g4Y
 
 settings:
   encodeUrl: true

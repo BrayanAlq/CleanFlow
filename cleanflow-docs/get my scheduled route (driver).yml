@@ -8,7 +8,7 @@ http:
   url: "{{actual_url}}/driver/scheduled-route"
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiJ9.eyJsYXN0X25hbWUiOiJEcml2ZXIiLCJmaXJzdF9uYW1lIjoiSnVhbiIsImlkIjoyLCJyb2xlIjoiRFJJVkVSIiwidXNlcm5hbWUiOiJkcml2ZXIxIiwiZXhwIjoxNzgxNjIyMjQyfQ.PUh5HbKX83g0nEcODVeqS_5FFSp7m4SdWTYyrC0gcO4
+    token: eyJhbGciOiJIUzI1NiJ9.eyJsYXN0X25hbWUiOiJEcml2ZXIiLCJ1c2VybmFtZSI6ImRyaXZlcjEiLCJyb2xlIjoiRFJJVkVSIiwiaWQiOjIsImZpcnN0X25hbWUiOiJKdWFuIiwiZXhwIjoxNzgyNDM0OTU4fQ.hBBa1Bx8m-CZWr5o1UGDudX_pcP7JKI4w21KnQ5eK_w
 
 settings:
   encodeUrl: true

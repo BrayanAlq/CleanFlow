@@ -5,12 +5,11 @@ info:
 
 http:
   method: GET
-  url: "{{actual_url}}/route"
+  url: "{{actual_url}}/route?driverId=2"
   params:
     - name: driverId
-      value: "9"
+      value: "2"
       type: query
-      disabled: true
     - name: date
       value: 2026-05-12
       type: query
@@ -21,7 +20,7 @@ http:
       disabled: true
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiJ9.eyJsYXN0X25hbWUiOiJTYW4gSXNpZHJvIiwiZmlyc3RfbmFtZSI6IkFkbWluIiwiaWQiOjEsInJvbGUiOiJBRE1JTiIsInVzZXJuYW1lIjoiYWRtaW4xIiwiZXhwIjoxNzgwNzcyMjczfQ.ZpubHH6yQGq843KAUooYrDiKaPBcj5PW3kTuEldnFo0
+    token: eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQURNSU4iLCJpZCI6MSwiZmlyc3RfbmFtZSI6IlNhbiBJc2lkcm8iLCJsYXN0X25hbWUiOiJBZG1pbiIsInVzZXJuYW1lIjoiYWRtaW4xIiwiZXhwIjoxNzgyNzQ3ODQ1fQ.QXMDGQzOouBq5lGD2nLAW5D-Luikz-T2-6kxoL3c_Xw
 
 settings:
   encodeUrl: true
