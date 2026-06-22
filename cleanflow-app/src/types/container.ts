@@ -25,3 +25,12 @@ export interface IContainerType {
   type: IContainerCodeType
   last_metric: IContainerMetric
 }
+
+export interface INearContainerFromResident {
+  id: number
+  name: string
+  address_name: string
+  distance: number
+  url: string
+  last_metric: IContainerMetric
+}

@@ -140,8 +140,6 @@ export const ExploreContentDriver = () => {
     ],
   } as const satisfies GeoJSON.GeoJSON
 
-  console.log(completeRoute?.length)
-
   return (
     <ThemedView type="backgroundElement" style={styles.container}>
       <ThemedView style={[styles.mapContainer, { height: mapHeight }]}>
@@ -161,6 +159,8 @@ export const ExploreContentDriver = () => {
               fillingLevel={last_metric?.filling_level ?? 0}
               containerId={id}
               onTap={handleContainerTap}
+              tooltipVisible={true}
+              iconVisible={true}
             />
           ))}
           {completeRoute && (

@@ -34,5 +34,7 @@ privateApi.interceptors.request.use(async config => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+
+  console.log(`API: ${config.method?.toUpperCase()} ${config.url}`)
   return config
 })

@@ -20,7 +20,6 @@ export const useGetReports = ({ containerId, size }: IUseReportsHookProps) => {
     meta: {
       onerror: (error: Error) => {
         toast.error('Ocurrió un error al cargar reportes')
-        console.log(error)
       },
     },
   })

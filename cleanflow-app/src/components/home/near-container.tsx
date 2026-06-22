@@ -10,9 +10,10 @@ interface INearContainerProps {
   name: string
   image: string
   lastMetric?: IContainerMetric
+  distance?: number
 }
 
-export const NearContainer = ({ id, name, image, lastMetric }: INearContainerProps) => {
+export const NearContainer = ({ id, name, image, lastMetric, distance }: INearContainerProps) => {
   return (
     <ThemedView key={id} style={styles.infoContainer}>
       <ThemedView style={styles.imageContainer}>
@@ -20,6 +21,7 @@ export const NearContainer = ({ id, name, image, lastMetric }: INearContainerPro
       </ThemedView>
       <ThemedView style={styles.nameContainer}>
         <ThemedText>{name}</ThemedText>
+        <ThemedText type="small">A {Math.floor(distance!)}m de ti</ThemedText>
       </ThemedView>
       <ThemedView style={styles.badgeContainer}>
         {lastMetric ? (

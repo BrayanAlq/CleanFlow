@@ -14,26 +14,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("admin")
+@RequestMapping("/admin")
 @AllArgsConstructor
 public class AdminController {
     private final DriverService driverService;
     private final ResidentService residentService;
     private final AuthService authService;
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/drivers")
     public ResponseEntity<List<DriverInfoResponseDTO>> getAllDrivers() {
         return ResponseEntity.ok(driverService.getAllDrivers());
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/driver")
     public ResponseEntity<Page<DriverInfoResponseDTO>> getDriverInfo(
         Pageable pageable
@@ -41,7 +38,6 @@ public class AdminController {
         return ResponseEntity.ok(driverService.getAllDrivers(pageable));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/resident")
     public ResponseEntity<Page<ResidentInfoDTO>> getResidentsInfo(
         Pageable pageable
@@ -49,12 +45,21 @@ public class AdminController {
         return ResponseEntity.ok(residentService.getAllResidentsInfo(pageable));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/user/status")
     public ResponseEntity<Void> updateUserStatus(
         @Valid @RequestBody UpdateUserStatusRequestDTO dto
     ) {
         authService.updateUserStatus(dto.userId(), dto.enabled());
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/resident/viewport")
+    public ResponseEntity<List<ResidentInfoDTO>> getResidentsInViewport(
+        @RequestParam(value = "north", required = true) Double north,
+        @RequestParam(value = "south", required = true) Double south,
+        @RequestParam(value = "west", required = true)  Double west,
+        @RequestParam(value = "east", required = true) Double east
+    ) {
+        return ResponseEntity.ok(residentService.getResidentsInViewport(north, south, east, west));
     }
 }
