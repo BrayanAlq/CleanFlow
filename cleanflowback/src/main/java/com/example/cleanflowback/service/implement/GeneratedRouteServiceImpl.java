@@ -3,6 +3,7 @@ package com.example.cleanflowback.service.implement;
 import com.example.cleanflowback.dto.GeneratedCursorInternalDTO;
 import com.example.cleanflowback.dto.GeneratedRouteCursorDTO;
 import com.example.cleanflowback.dto.out.CursorPageWithEncodedResponseDTO;
+import com.example.cleanflowback.dto.out.DriverHomeResponseDTO;
 import com.example.cleanflowback.dto.out.GeneratedContainerResponseDTO;
 import com.example.cleanflowback.dto.out.GeneratedRouteResponseDTO;
 import com.example.cleanflowback.exception.ResourceNotFoundException;
@@ -100,7 +101,6 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
         GeneratedRouteEntity generatedRoute = generatedRouteRepository.getByDriverIdAndDate(driverId, from, to)
             .orElseThrow(() -> new ResourceNotFoundException("generated route not found"));
 
-        // last metrics
         List<Long> containerIds = generatedRoute.getGeneratedContainers()
             .stream()
             .map(gc -> gc.getContainer().getId())
@@ -119,6 +119,63 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
                 .stream()
                 .sorted((a, b) -> a.visitOrder() - b.visitOrder()).toList(),
             generatedRoute.getCreatedAt()
+        );
+    }
+
+    @Override
+    public DriverHomeResponseDTO getDriverHome(Long driverId, int cursor) {
+        ZoneId zoneId = ZoneId.of("America/Lima");
+        LocalDate today = LocalDate.now(zoneId);
+        Instant from = today.atStartOfDay(zoneId).toInstant();
+        Instant to = today.atStartOfDay(zoneId).plusDays(1).toInstant();
+
+        GeneratedRouteEntity generatedRoute = generatedRouteRepository.getByDriverIdAndDate(driverId, from, to)
+            .orElseThrow(() -> new ResourceNotFoundException("generated route not found"));
+
+        List<Long> containerIds = generatedRoute.getGeneratedContainers()
+            .stream()
+            .map(gc -> gc.getContainer().getId())
+            .toList();
+
+        Map<Long, MetricEntity> latestMetrics = metricRepository
+            .findLatestByContainerIds(containerIds)
+            .stream()
+            .collect(Collectors.toMap(m -> m.getContainer().getId(), m -> m));
+
+        List<GeneratedContainerResponseDTO> containers = mapContainersWithLastMetric(generatedRoute, latestMetrics)
+            .stream()
+            .sorted((a, b) -> a.visitOrder() - b.visitOrder())
+            .toList();
+
+        int totalCount = containers.size();
+        GeneratedContainerResponseDTO currentTarget = cursor >= 0 && cursor < totalCount
+            ? containers.get(cursor)
+            : null;
+
+        int aliveCount = (int) containers.stream()
+            .filter(c -> c.lastMetric() != null && c.lastMetric().isAlive())
+            .count();
+
+        int highPriorityCount = (int) containers.stream()
+            .filter(c -> c.lastMetric() != null && c.lastMetric().fillingLevel() >= 0.8)
+            .count();
+
+        Map<String, Integer> airQualityCounts = containers.stream()
+            .filter(c -> c.lastMetric() != null && c.lastMetric().airQualityLevel() != null)
+            .collect(Collectors.groupingBy(
+                c -> c.lastMetric().airQualityLevel(),
+                Collectors.summingInt(c -> 1)
+            ));
+
+        return new DriverHomeResponseDTO(
+            generatedRoute.getId(),
+            generatedRoute.getCreatedAt(),
+            currentTarget,
+            cursor,
+            totalCount,
+            aliveCount,
+            highPriorityCount,
+            airQualityCounts
         );
     }
 

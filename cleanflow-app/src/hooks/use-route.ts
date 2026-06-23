@@ -1,7 +1,18 @@
-import { createRoute, finishRoute, getPointsByRoute, getScheduledRoutes } from '@/services/route'
+import { createRoute, finishRoute, getDriverHome, getPointsByRoute, getScheduledRoutes } from '@/services/route'
 import { IApiError } from '@/types/api-error'
 import { ICreateRouteResponse, IFinishRouteRequest } from '@/types/route'
 import { useMutation, useQuery } from '@tanstack/react-query'
+
+export const useDriverHome = () => {
+  const { data } = useQuery({
+    queryKey: ['driver', 'home'],
+    queryFn: getDriverHome,
+    staleTime: 30_000,
+    throwOnError: false,
+  })
+
+  return { data }
+}
 
 export const useDriverRoute = () => {
   const { data } = useQuery({
