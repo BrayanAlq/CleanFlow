@@ -67,7 +67,6 @@ export const MainButton = () => {
     if (status !== 'active') return
 
     const interval = setInterval(() => {
-      console.log('interval')
       if (routeIdRef.current && locationRef.current && hasRealLocationRef.current) {
         publish('/app/driver.location', {
           route_id: routeIdRef.current,

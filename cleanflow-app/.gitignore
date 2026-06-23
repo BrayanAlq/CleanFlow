@@ -42,10 +42,10 @@ example
 /ios
 /android
 
-cleanflowapp-12b4b-firebase-adminsdk-fbsvc-42c871829b.json
+cleanflowapp-12b4b-firebase-adminsdk-fbsvc-a00908dab5.json
 
 build*.apk
 
 # this is required for build
-# .env
-# google-services.json
+.env
+google-services.json
