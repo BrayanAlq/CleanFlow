@@ -1,18 +1,17 @@
 package com.example.cleanflowback.controller;
 
-import com.example.cleanflowback.dto.in.ContainerInfoRequestDTO;
-import com.example.cleanflowback.dto.in.CreateMetricRequestDTO;
-import com.example.cleanflowback.dto.in.DriverLocationRequestDTO;
-import com.example.cleanflowback.dto.in.ViewportRequestDTO;
+import com.example.cleanflowback.dto.in.*;
 import com.example.cleanflowback.dto.out.MetricResponseDTO;
 import com.example.cleanflowback.dto.out.DriverLocationResponseDTO;
 import com.example.cleanflowback.exception.ResourceNotFoundException;
 import com.example.cleanflowback.exception.UnauthorizedAccessException;
 import com.example.cleanflowback.model.*;
+import com.example.cleanflowback.repository.DriverRepository;
 import com.example.cleanflowback.repository.PointRepository;
 import com.example.cleanflowback.repository.RouteRepository;
 import com.example.cleanflowback.repository.ViewportRepository;
 import com.example.cleanflowback.service.MetricService;
+import com.example.cleanflowback.service.PointService;
 import com.example.cleanflowback.service.ViewportService;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -35,8 +34,8 @@ public class WebsocketController {
     private final ViewportRepository viewportRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final MetricService metricService;
-    private final RouteRepository routeRepository;
-    private final PointRepository pointRepository;
+    private final PointService pointService;
+    private final DriverRepository driverRepository;
 
     @MessageMapping("/viewport.update")
     public void createOrUpdateViewPort(
@@ -56,51 +55,55 @@ public class WebsocketController {
         @Payload DriverLocationRequestDTO requestDTO
     ) {
         UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) principal;
-        UserEntity driverEntity = (UserEntity) auth.getPrincipal();
+        UserEntity user = (UserEntity) auth.getPrincipal();
 
-        if (driverEntity == null) {
+        if (user == null) {
             System.out.println("No driver found");
             return;
         }
 
-        // Save in respective route
-        // TODO: verify if route is from driverId
-        RouteEntity route = routeRepository.findById(requestDTO.routeId())
-            .orElseThrow(() -> new ResourceNotFoundException("route does not exist"));
+        DriverEntity driver = driverRepository.findById(user.getId())
+            .orElseThrow(() -> new ResourceNotFoundException("Driver not found"));
 
-        if (!route.getDriver().getId().equals(driverEntity.getId())) {
-            throw new UnauthorizedAccessException("Access denied (not owner of this route)");
-        }
+        pointService.createPoint(requestDTO, driver);
 
-        PointEntity pointToSave = new PointEntity();
-        pointToSave.setRoute(route);
-        pointToSave.setLatitude(requestDTO.latitude());
-        pointToSave.setLongitude(requestDTO.longitude());
-        pointToSave.setTimestamp(Instant.now());
-
-        pointRepository.save(pointToSave);
-
-        // Search users with driver in their viewport
-        List<ViewportEntity> visibleUsers = viewportRepository.findVisibleUsers(
-            requestDTO.latitude(), requestDTO.longitude()
-        );
-
-        DriverLocationResponseDTO responseDTO = new DriverLocationResponseDTO(
-            driverEntity.getId(), requestDTO.latitude(), requestDTO.longitude()
-        );
-
-        for (ViewportEntity viewport: visibleUsers) {
-            String username = viewport.getUser().getUsername();
-            try {
-                simpMessagingTemplate.convertAndSendToUser(
-                    username,
-                    "/queue/drivers",
-                    responseDTO
-                );
-            } catch (Exception e) {
-                System.out.println("Error sending to: " + username + ": " + e.getMessage());
-            }
-        }
+//        // Save in respective route
+//        RouteEntity route = routeRepository.findById(requestDTO.routeId())
+//            .orElseThrow(() -> new ResourceNotFoundException("route does not exist"));
+//
+//        if (!route.getDriver().getId().equals(driverEntity.getId())) {
+//            throw new UnauthorizedAccessException("Access denied (not owner of this route)");
+//        }
+//
+//        PointEntity pointToSave = new PointEntity();
+//        pointToSave.setRoute(route);
+//        pointToSave.setLatitude(requestDTO.latitude());
+//        pointToSave.setLongitude(requestDTO.longitude());
+//        pointToSave.setTimestamp(Instant.now());
+//
+//        pointRepository.save(pointToSave);
+//
+//        // Search users with driver in their viewport
+//        List<ViewportEntity> visibleUsers = viewportRepository.findVisibleUsers(
+//            requestDTO.latitude(), requestDTO.longitude()
+//        );
+//
+//        DriverLocationResponseDTO responseDTO = new DriverLocationResponseDTO(
+//            driverEntity.getId(), requestDTO.latitude(), requestDTO.longitude()
+//        );
+//
+//        for (ViewportEntity viewport: visibleUsers) {
+//            String username = viewport.getUser().getUsername();
+//            try {
+//                simpMessagingTemplate.convertAndSendToUser(
+//                    username,
+//                    "/queue/drivers",
+//                    responseDTO
+//                );
+//            } catch (Exception e) {
+//                System.out.println("Error sending to: " + username + ": " + e.getMessage());
+//            }
+//        }
     }
 
     @Transactional
