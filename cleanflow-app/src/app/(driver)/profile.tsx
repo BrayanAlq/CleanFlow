@@ -47,16 +47,16 @@ export default function DriverProfile() {
         <ThemedView style={styles.card}>
           {data?.email && (
             <InfoItem label="Correo" value={data?.email}>
-              <Ionicons name="mail-outline" size={20} />
+              <Ionicons name="mail-outline" size={20} color={theme.textSecondary} />
             </InfoItem>
           )}
           {data?.username && (
             <InfoItem label="Usuario" value={data?.username}>
-              <FontAwesome name="user-o" size={20} />
+              <FontAwesome name="user-o" size={20} color={theme.textSecondary} />
             </InfoItem>
           )}
           <InfoItem label="Rol" value="Conductor">
-            <MaterialCommunityIcons name="steering" size={20} />
+            <MaterialCommunityIcons name="steering" size={20} color={theme.textSecondary} />
           </InfoItem>
         </ThemedView>
       </ThemedView>
