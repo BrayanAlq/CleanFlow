@@ -1,66 +1,39 @@
 import { ThemedText } from '@/components/themed-text'
+import { useAuthContext } from '@/context/auth-context'
 import { useTheme } from '@/hooks/use-theme'
 import { Ionicons } from '@expo/vector-icons'
+import * as Location from 'expo-location'
+import * as Notifications from 'expo-notifications'
 import { Tabs } from 'expo-router'
-import { BottomTabNavigationOptions } from 'expo-router/build/react-navigation/bottom-tabs'
+import { useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
-type IoniconsName = keyof typeof Ionicons.glyphMap
-
-interface ICreateTabOptionProps {
-  theme: ReturnType<typeof useTheme>
-  iconNameActive: IoniconsName
-  iconNameInactive: IoniconsName
-  label: string
-}
-
-const createTabOption = ({
-  theme,
-  iconNameActive,
-  iconNameInactive,
-  label,
-}: ICreateTabOptionProps): BottomTabNavigationOptions => ({
-  tabBarIcon: ({ size, focused }) => (
-    <Ionicons
-      name={focused ? iconNameActive : iconNameInactive}
-      color={focused ? theme.greenAccent : theme.textSecondary}
-      size={size}
-    />
-  ),
-  tabBarLabel: ({ focused }) => (
-    <ThemedText style={{ fontSize: 12 }} themeColor={focused ? 'greenAccent' : 'textSecondary'}>
-      {label}
-    </ThemedText>
-  ),
-})
-
-type IConstructedTabs = Omit<ICreateTabOptionProps, 'theme'> & {
-  name: string
-}
-
-const tabs: IConstructedTabs[] = [
-  {
-    label: 'Inicio',
-    iconNameActive: 'home',
-    iconNameInactive: 'home-outline',
-    name: 'home',
-  },
-  {
-    label: 'Explora',
-    iconNameActive: 'map',
-    iconNameInactive: 'map-outline',
-    name: 'explore',
-  },
-  {
-    label: 'Mi perfil',
-    iconNameActive: 'person',
-    iconNameInactive: 'person-outline',
-    name: 'profile',
-  },
-]
 
 export default function ResidentLayout() {
   const theme = useTheme()
+  const { user } = useAuthContext()
+
+  useEffect(() => {
+    if (user?.role !== 'RESIDENT') return
+
+    const requestPermissions = async () => {
+      const { status: notifStat } = await Notifications.getPermissionsAsync()
+      if (notifStat !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync()
+        if (status !== 'granted') {
+          console.log('❌ Permiso de notificaciones denegado')
+        }
+      }
+
+      const { status: locationForegroundStatue } = await Location.getBackgroundPermissionsAsync()
+      if (locationForegroundStatue !== 'granted') {
+        const { status } = await Location.requestForegroundPermissionsAsync()
+        if (status !== 'granted') {
+          console.log('❌ Permiso de ubicación foreground denegado')
+        }
+      }
+    }
+  }, [user?.role])
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Tabs
@@ -75,17 +48,54 @@ export default function ResidentLayout() {
           },
         }}
       >
-        {tabs.map(({ name, label, iconNameActive, iconNameInactive }) => (
-          <Tabs.Screen
-            name={name}
-            options={createTabOption({
-              theme,
-              iconNameActive,
-              iconNameInactive,
-              label,
-            })}
-          />
-        ))}
+        <Tabs.Screen
+          name="home"
+          options={{
+            tabBarIcon: ({ size, focused }) =>
+              focused ? (
+                <Ionicons name="home" size={20} color={theme.greenAccent} />
+              ) : (
+                <Ionicons name="home-outline" size={20} color={theme.textSecondary} />
+              ),
+            tabBarLabel: ({ focused }) => (
+              <ThemedText style={{ fontSize: 12 }} themeColor={focused ? 'greenAccent' : 'textSecondary'}>
+                Inicio
+              </ThemedText>
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="explore"
+          options={{
+            tabBarIcon: ({ size, focused }) =>
+              focused ? (
+                <Ionicons name="map" size={20} color={theme.greenAccent} />
+              ) : (
+                <Ionicons name="map-outline" size={20} color={theme.textSecondary} />
+              ),
+            tabBarLabel: ({ focused }) => (
+              <ThemedText style={{ fontSize: 12 }} themeColor={focused ? 'greenAccent' : 'textSecondary'}>
+                Explora
+              </ThemedText>
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            tabBarIcon: ({ size, focused }) =>
+              focused ? (
+                <Ionicons name="person" size={20} color={theme.greenAccent} />
+              ) : (
+                <Ionicons name="person-outline" size={20} color={theme.textSecondary} />
+              ),
+            tabBarLabel: ({ focused }) => (
+              <ThemedText style={{ fontSize: 12 }} themeColor={focused ? 'greenAccent' : 'textSecondary'}>
+                Mi perfil
+              </ThemedText>
+            ),
+          }}
+        />
       </Tabs>
     </SafeAreaView>
   )

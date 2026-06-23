@@ -5,12 +5,12 @@ export default function Index() {
   const { isLoggedIn, user } = useAuthContext()
 
   if (!isLoggedIn) {
-    return <Redirect href='/(auth)/login' />
+    return <Redirect href="/(auth)/login" />
   }
 
   if (user?.role === 'RESIDENT') {
-    return <Redirect href='/(resident)/profile' />
+    return <Redirect href="/(resident)/home" />
   }
 
-  return <Redirect href='/(driver)/profile' />
+  return <Redirect href="/(driver)/home" />
 }

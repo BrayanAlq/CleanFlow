@@ -1,153 +1,223 @@
+import { privateApi } from '@/api/api'
 import { useStompContext } from '@/context/stomp-context'
-import { useCurrentPosition } from '@/hooks/use-current-position'
-import { useLocalNotification } from '@/hooks/use-local-notification'
-import { useCreateRoute, useFinishRoute, useGetPointsByRoute } from '@/hooks/use-route'
-import { formatTime } from '@/utils/time-formatter'
+import { getPointsByRoute } from '@/services/route'
+import { createRoute as createRouteApi, finishRoute as finishRouteApi } from '@/services/route'
+import { watchPositionAsync } from '@/services/location'
+import { routeStore } from '@/store/route-store'
+import { startBackgroundTracking, stopBackgroundTracking } from '@/tasks/background-location'
 import polyline from '@mapbox/polyline'
 import { useQueryClient } from '@tanstack/react-query'
-import { createContext, ReactNode, useContext, useEffect, useRef, useState } from 'react'
+import * as Location from 'expo-location'
+import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { AppState, AppStateStatus } from 'react-native'
 
-type ButtonStatus = 'initial' | 'active' | 'finishing'
+type Status = 'initial' | 'active' | 'finishing'
 
 interface DriverTripContextValue {
-  status: ButtonStatus
-  routeId: number | null
-  timer: number
+  status: Status
   startRoute: () => Promise<void>
-  finishRoute: () => void
+  finishRoute: () => Promise<void>
+  timer: number
+  routeId: number | null
+  isLoading: boolean
 }
 
 const DriverTripContext = createContext<DriverTripContextValue | null>(null)
 
 export const DriverTripProvider = ({ children }: { children: ReactNode }) => {
-  const [status, setStatus] = useState<ButtonStatus>('initial')
-  const [routeId, setRouteId] = useState<number | null>(null)
-  const [timer, setTimer] = useState<number>(0)
+  const [status, setStatus] = useState<Status>('initial')
+  const [timer, setTimer] = useState(0)
+  const [routeId, setRouteIdState] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
-  const { createRouteMutation } = useCreateRoute()
-  const { data: points, isLoading: isLoadingPoints } = useGetPointsByRoute(status === 'finishing' ? routeId : null)
-  const { finishRouteMutation } = useFinishRoute()
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const unwatchRef = useRef<(() => void) | null>(null)
+  const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState)
+  const routeStartTsRef = useRef<number | null>(null)
+  const lastSentRef = useRef<{ lat: number; lng: number; time: number } | null>(null)
+  const isActiveRef = useRef(false)
+
   const { publish } = useStompContext()
-  const { location, hasRealLocation } = useCurrentPosition()
   const queryClient = useQueryClient()
 
-  const { dismiss: dismissNotification } = useLocalNotification({
-    isActive: status === 'active',
-    options: {
-      title: 'Registrando su progreso',
-      body: 'Tiempo: {{timer}}',
-      priority: 'high',
-    },
-    variables: { timer: formatTime(timer) },
-    updateInterval: 1000,
-  })
-
-  const locationRef = useRef(location)
-  const routeIdRef = useRef(routeId)
-  const hasRealLocationRef = useRef(hasRealLocation)
+  useEffect(() => {
+    stopBackgroundTracking().catch(() => {})
+  }, [])
 
   useEffect(() => {
-    locationRef.current = location
-  }, [location])
-
-  useEffect(() => {
-    routeIdRef.current = routeId
-
-    if (routeId) {
-      console.log('🔄 New route created, refs ready')
+    const handleAppState = (nextState: AppStateStatus) => {
+      appStateRef.current = nextState
     }
-  }, [routeId])
+    const subscription = AppState.addEventListener('change', handleAppState)
+    return () => subscription.remove()
+  }, [])
 
   useEffect(() => {
-    hasRealLocationRef.current = hasRealLocation
-  }, [hasRealLocation])
-
-  useEffect(() => {
-    if (status !== 'active') return
-
-    const timeInterval = setInterval(() => {
-      setTimer(prev => prev + 1)
-    }, 1000)
-
     return () => {
-      clearInterval(timeInterval)
+      if (timerRef.current) clearInterval(timerRef.current)
+      if (unwatchRef.current) unwatchRef.current()
+      if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current)
+      stopBackgroundTracking()
     }
-  }, [status])
+  }, [])
 
-  useEffect(() => {
-    if (status !== 'active') return
-
-    const interval = setInterval(() => {
-      const canPublish = routeIdRef.current && locationRef.current && hasRealLocationRef.current
-
-      if (!canPublish) {
-        console.log('❌ Cannot publish:', {
-          routeId: routeIdRef.current ? '✓' : '✗',
-          location: locationRef.current ? `[${locationRef.current.latitude}, ${locationRef.current.longitude}]` : '✗',
-          hasRealLocation: hasRealLocationRef.current ? '✓' : '✗',
-        })
+  const sendLocation = useCallback(
+    (route_id: number, latitude: number, longitude: number) => {
+      const last = lastSentRef.current
+      if (last && last.lat === latitude && last.lng === longitude && Date.now() - last.time < 5000) {
         return
       }
+      lastSentRef.current = { lat: latitude, lng: longitude, time: Date.now() }
 
-      console.log('✅ Publishing location')
-      publish('/app/driver.location', {
-        route_id: routeIdRef.current,
-        longitude: locationRef.current.longitude,
-        latitude: locationRef.current.latitude,
-      })
-    }, 3000)
+      const currentState = appStateRef.current
+      const body = { route_id, latitude, longitude }
 
-    return () => {
-      clearInterval(interval)
-    }
-  }, [status, publish])
+      if (currentState === 'active') {
+        console.log('[DRIVER_TRIP] Enviando ubicación por WS:', body)
+        publish('/app/driver.location', body)
+      } else {
+        console.log('[DRIVER_TRIP] Enviando ubicación por HTTP:', body)
+        privateApi.post('/driver/route/point', body).catch(err =>
+          console.error('[DRIVER_TRIP] Error sending location via HTTP:', err),
+        )
+      }
+    },
+    [publish],
+  )
 
-  useEffect(() => {
-    if (status === 'finishing' && points && !isLoadingPoints) {
-      finishRouteAction()
-    }
-  }, [points, isLoadingPoints, status])
+  const startLocationWatch = useCallback(
+    async (route_id: number) => {
+      try {
+        const unwatch = await watchPositionAsync(
+          (location: Location.LocationObject) => {
+            sendLocation(route_id, location.coords.latitude, location.coords.longitude)
+          },
+          (error) => {
+            console.error('[DRIVER_TRIP] Location watch error:', error)
+          },
+        )
+        unwatchRef.current = unwatch
+        console.log('[DRIVER_TRIP] Location watch started')
+      } catch (error) {
+        console.error('[DRIVER_TRIP] Error starting location watch:', error)
+      }
 
-  const startRoute = async () => {
+      const pollLocation = async () => {
+        if (!isActiveRef.current) return
+        try {
+          const location = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+          })
+          if (!isActiveRef.current) return
+          sendLocation(route_id, location.coords.latitude, location.coords.longitude)
+        } catch (err) {
+          console.error('[DRIVER_TRIP] Error polling location:', err)
+        }
+        if (isActiveRef.current) {
+          pollTimeoutRef.current = setTimeout(pollLocation, 5000)
+        }
+      }
+
+      pollTimeoutRef.current = setTimeout(pollLocation, 5000)
+    },
+    [sendLocation],
+  )
+
+  const startRoute = useCallback(async () => {
+    if (status !== 'initial') return
     try {
-      const response = await createRouteMutation.mutateAsync()
-      setRouteId(response.id)
+      setIsLoading(true)
+
+      const response = await createRouteApi()
+      const newRouteId = response.id
+
+      await routeStore.setRouteId(newRouteId)
+
+      const now = Date.now()
+      routeStartTsRef.current = now
+      routeStore.setStartTimestamp(now)
+      isActiveRef.current = true
+
+      setRouteIdState(newRouteId)
       setStatus('active')
       setTimer(0)
-    } catch (err) {
-      console.error('Error al crear ruta:', err)
-    }
-  }
 
-  const finishRoute = () => {
-    setStatus('finishing')
-  }
+      timerRef.current = setInterval(() => {
+        if (routeStartTsRef.current) {
+          setTimer(Math.floor((Date.now() - routeStartTsRef.current) / 1000))
+        }
+      }, 1000)
 
-  const finishRouteAction = async () => {
-    if (!routeId || !points) return
+      queryClient.invalidateQueries({ queryKey: ['driver', 'home'] })
 
-    const arrayPoints = points.map(p => [p.latitude, p.longitude]) as [number, number][]
-    const pl = polyline.encode(arrayPoints)
-
-    try {
-      console.log({ routeId, pl })
-      await finishRouteMutation.mutateAsync({
-        route_id: routeId,
-        polyline: pl,
-      })
-      setStatus('initial')
-      setRouteId(null)
-      setTimer(0)
-      queryClient.invalidateQueries({ queryKey: ['driver', 'route'] })
-      await dismissNotification()
+      startLocationWatch(newRouteId)
+      startBackgroundTracking()
     } catch (error) {
-      console.error('Error al terminar ruta:', error)
-      setStatus('active')
+      console.error('[DRIVER_TRIP] Error starting route:', error)
+      setStatus('initial')
+    } finally {
+      setIsLoading(false)
     }
-  }
+  }, [status, queryClient, startLocationWatch])
+
+  const finishRoute = useCallback(async () => {
+    if (status !== 'active' || !routeId) return
+    try {
+      setIsLoading(true)
+      setStatus('finishing')
+      isActiveRef.current = false
+
+      if (unwatchRef.current) {
+        unwatchRef.current()
+        unwatchRef.current = null
+      }
+
+      if (pollTimeoutRef.current) {
+        clearTimeout(pollTimeoutRef.current)
+        pollTimeoutRef.current = null
+      }
+
+      await stopBackgroundTracking()
+
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = null
+      }
+
+      const points = await getPointsByRoute(routeId)
+      const coords: [number, number][] = points.map(p => [p.latitude, p.longitude])
+      const polylineStr = coords.length > 0 ? polyline.encode(coords) : ''
+
+      await finishRouteApi({ route_id: routeId, polyline: polylineStr })
+
+      await routeStore.setRouteId(null)
+      routeStore.setStartTimestamp(null)
+      routeStartTsRef.current = null
+
+      setRouteIdState(null)
+      setStatus('initial')
+      setTimer(0)
+    } catch (error) {
+      console.error('[DRIVER_TRIP] Error finishing route:', error)
+      setStatus('active')
+      isActiveRef.current = true
+    } finally {
+      setIsLoading(false)
+    }
+  }, [status, routeId])
 
   return (
-    <DriverTripContext.Provider value={{ status, routeId, timer, startRoute, finishRoute }}>
+    <DriverTripContext.Provider
+      value={{
+        status,
+        startRoute,
+        finishRoute,
+        timer,
+        routeId,
+        isLoading,
+      }}
+    >
       {children}
     </DriverTripContext.Provider>
   )

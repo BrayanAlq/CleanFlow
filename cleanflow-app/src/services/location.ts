@@ -1,19 +1,47 @@
 import * as Location from 'expo-location'
 
 export const getCurrentLocation = async () => {
-  const { status } = await Location.requestForegroundPermissionsAsync()
-  if (status !== 'granted') {
-    return null
-  }
+  try {
+    console.log('[LOCATION_SERVICE] Checando permisos foreground...')
+    const { status: fgStatus } = await Location.getForegroundPermissionsAsync()
+    console.log('[LOCATION_SERVICE] Foreground status:', fgStatus)
 
-  const enabled = await Location.hasServicesEnabledAsync()
-  if (!enabled) {
-    throw new Error('GPS deshabilitado')
-  }
+    if (fgStatus !== 'granted') {
+      console.log('[LOCATION_SERVICE] Pidiendo foreground...')
+      const { status } = await Location.requestForegroundPermissionsAsync()
+      if (status !== 'granted') {
+        console.log('[LOCATION_SERVICE] Foreground denegado')
+        return null
+      }
+    }
 
-  return await Location.getCurrentPositionAsync({
-    accuracy: Location.Accuracy.Balanced,
-  })
+    console.log('[LOCATION_SERVICE] Checando permisos background...')
+    const { status: bgStatus } = await Location.getBackgroundPermissionsAsync()
+    console.log('[LOCATION_SERVICE] Background status:', bgStatus)
+
+    if (bgStatus !== 'granted') {
+      console.log('[LOCATION_SERVICE] Pidiendo background...')
+      await Location.requestBackgroundPermissionsAsync()
+    }
+
+    console.log('[LOCATION_SERVICE] Permisos OK, checando GPS...')
+    const enabled = await Location.hasServicesEnabledAsync()
+    console.log('[LOCATION_SERVICE] GPS enabled:', enabled)
+
+    if (!enabled) {
+      throw new Error('[LOCATION_SERVICE] GPS deshabilitado')
+    }
+
+    console.log('[LOCATION_SERVICE] Obteniendo posición...')
+    const position = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Balanced,
+    })
+    console.log('[LOCATION_SERVICE] Posición obtenida:', position.coords)
+    return position
+  } catch (err) {
+    console.error('[LOCATION_SERVICE] Error en getCurrentLocation:', err)
+    throw err
+  }
 }
 
 export const watchPositionAsync = async (
@@ -22,21 +50,21 @@ export const watchPositionAsync = async (
 ) => {
   const { status } = await Location.requestForegroundPermissionsAsync()
   if (status !== 'granted') {
-    onError(new Error('Permiso de ubicación denegado'))
+    onError(new Error('[LOCATION_SERVICE] Permiso de ubicación denegado'))
     return () => {}
   }
 
   const enabled = await Location.hasServicesEnabledAsync()
   if (!enabled) {
-    onError(new Error('GPS deshabilitado'))
+    onError(new Error('[LOCATION_SERVICE] GPS deshabilitado'))
     return () => {}
   }
 
   const subscription = await Location.watchPositionAsync(
     {
       accuracy: Location.Accuracy.Balanced,
-      timeInterval: 500, // update every 500ms
-      distanceInterval: 10,
+      timeInterval: 30000,
+      distanceInterval: 0,
     },
     callback,
   )

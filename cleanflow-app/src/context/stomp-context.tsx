@@ -29,7 +29,7 @@ export const StompProvider = ({ children }: { children: ReactNode }) => {
       onConnect: () => setConnected(true),
       onDisconnect: () => setConnected(false),
       onStompError: (frame: IFrame) => console.error('STOMP error: ', frame),
-      debug: str => console.log('STOMP debug:', str),
+      debug: str => console.log('[STOMP] Debug:', str),
       reconnectDelay: 5000,
     })
 
@@ -41,6 +41,7 @@ export const StompProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const handleAppState = (nextState: AppStateStatus) => {
+      console.log('[STOMP] App state changed:', nextState)
       const previousState = appStateRef.current
       appStateRef.current = nextState
 

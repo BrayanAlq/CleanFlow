@@ -39,10 +39,13 @@ export function useRouteProgress() {
     setRouteId(id)
     if (!loadedFromStore.current) {
       loadedFromStore.current = true
+      advancedRef.current = new Set()
       SecureStore.getItemAsync(`route_cursor_${id}`).then(raw => {
         const parsed = raw != null ? parseInt(raw, 10) : NaN
         if (!isNaN(parsed)) {
           setCursor(parsed)
+        } else {
+          setCursor(0)
         }
       })
     }
