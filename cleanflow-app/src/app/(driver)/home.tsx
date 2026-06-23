@@ -13,13 +13,7 @@ import { ScrollView, StyleSheet } from 'react-native'
 export default function DriverHome() {
   const { user } = useAuthContext()
 
-  const {
-    data,
-    currentTarget,
-    cursor,
-    totalCount,
-    isRouteFinished,
-  } = useRouteProgress()
+  const { data, currentTarget, cursor, totalCount, isRouteFinished } = useRouteProgress()
 
   const total = data?.total_count ?? 0
   const aliveCount = data?.alive_count ?? 0
@@ -31,31 +25,31 @@ export default function DriverHome() {
 
   return (
     <StompProvider>
-    <ThemedView type="backgroundElement" style={styles.container}>
-      <HeaderSection name={user?.first_name} total={total} routeAge={routeAge} />
+      <ThemedView type="backgroundElement" style={styles.container}>
+        <HeaderSection name={user?.first_name} total={total} routeAge={routeAge} />
 
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
-        {total > 0 && (
-          <>
-            <ProgressCard
-              progress={progress}
-              isRouteFinished={isRouteFinished}
-              cursor={cursor}
-              totalCount={totalCount}
-            />
-            <RouteSummary
-              total={total}
-              aliveCount={aliveCount}
-              highPriorityCount={highPriorityCount}
-              airQualityCounts={airQualityCounts}
-            />
-            {currentTarget && <CurrentTargetCard container={currentTarget} />}
-          </>
-        )}
-      </ScrollView>
+        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
+          {total > 0 && (
+            <>
+              <ProgressCard
+                progress={progress}
+                isRouteFinished={isRouteFinished}
+                cursor={cursor}
+                totalCount={totalCount}
+              />
+              <RouteSummary
+                total={total}
+                aliveCount={aliveCount}
+                highPriorityCount={highPriorityCount}
+                airQualityCounts={airQualityCounts}
+              />
+              {currentTarget && <CurrentTargetCard container={currentTarget} />}
+            </>
+          )}
+        </ScrollView>
 
-      <MainButton />
-    </ThemedView>
+        <MainButton />
+      </ThemedView>
     </StompProvider>
   )
 }

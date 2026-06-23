@@ -15,45 +15,43 @@ export const useCurrentPosition = () => {
 
     const initializeLocation = async () => {
       try {
-        // get initial location
         const initialLocation = await getCurrentLocation()
-
         if (initialLocation) {
           setLocation({
             longitude: initialLocation.coords.longitude,
             latitude: initialLocation.coords.latitude,
           })
-          setHasRealLocation(true)
+          setHasRealLocation(true) // ✓ Primera vez
           setError(null)
         } else {
           setError('Permiso de ubicación no concedido')
           return
         }
+
         unsubscribe = await watchPositionAsync(
           position => {
             setLocation({
               longitude: position.coords.longitude,
               latitude: position.coords.latitude,
             })
-            setHasRealLocation(true)
-            setError(null)
+            // No necesitas setHasRealLocation aquí si ya es true
           },
           err => {
             console.error('Error watching position:', err.message)
             setError(err.message)
-            setHasRealLocation(false)
+            // ⭐ REMOVEMOS: setHasRealLocation(false)
+            // Si ya obtuviste ubicación inicial, no vuelvas a false
           },
         )
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Error desconocido'
         console.error('Location error:', errorMsg)
         setError(errorMsg)
-        setHasRealLocation(false)
+        setHasRealLocation(false) // Solo aquí si falla TODO
       }
     }
 
     initializeLocation()
-
     return () => {
       if (unsubscribe) {
         unsubscribe()
