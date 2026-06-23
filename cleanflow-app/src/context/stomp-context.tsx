@@ -1,6 +1,7 @@
 import { useAuthContext } from '@/context/auth-context'
 import { Client, IFrame, IMessage, StompSubscription } from '@stomp/stompjs'
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { AppState, AppStateStatus } from 'react-native'
 import SockJS from 'sockjs-client'
 
 const API_URL = process.env.EXPO_PUBLIC_API_REST_URL
@@ -19,6 +20,7 @@ export const StompProvider = ({ children }: { children: ReactNode }) => {
   const [connected, setConnected] = useState(false)
   const clientRef = useRef<Client | null>(null)
   const { token } = useAuthContext()
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState)
 
   useEffect(() => {
     const client = new Client({
@@ -35,6 +37,23 @@ export const StompProvider = ({ children }: { children: ReactNode }) => {
     clientRef.current = client
 
     return () => void client.deactivate()
+  }, [])
+
+  useEffect(() => {
+    const handleAppState = (nextState: AppStateStatus) => {
+      const previousState = appStateRef.current
+      appStateRef.current = nextState
+
+      if (previousState.match(/inactive|background/) && nextState === 'active') {
+        const client = clientRef.current
+        if (client && !client.connected) {
+          client.activate()
+        }
+      }
+    }
+
+    const subscription = AppState.addEventListener('change', handleAppState)
+    return () => subscription.remove()
   }, [])
 
   const subscribe = useCallback((destination: string, callback: SubscribeCallback): StompSubscription | null => {

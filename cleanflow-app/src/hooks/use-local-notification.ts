@@ -12,6 +12,17 @@ interface UseNotificationProps {
   updateInterval?: number
 }
 
+let foregroundServiceRegistered = false
+
+const registerForegroundService = () => {
+  if (foregroundServiceRegistered) return
+  foregroundServiceRegistered = true
+
+  notifee.registerForegroundService(() => {
+    return new Promise(() => {})
+  })
+}
+
 export const useLocalNotification = ({
   isActive,
   options,
@@ -25,6 +36,7 @@ export const useLocalNotification = ({
     const initializeNotifee = async () => {
       try {
         await notifee.requestPermission()
+        registerForegroundService()
       } catch (err) {
         console.error('Error pidiendo permisos:', err)
       }
@@ -35,21 +47,19 @@ export const useLocalNotification = ({
 
   useEffect(() => {
     if (!isActive) {
-      // ✅ Limpia todo cuando se desactiva
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
         intervalRef.current = null
       }
       if (notificationIdRef.current) {
         notifee.cancelNotification(notificationIdRef.current)
-        notificationIdRef.current = null // ✅ Resetea el ref
+        notificationIdRef.current = null
       }
       return
     }
 
     const createChannelAndDisplay = async () => {
       try {
-        // Crea el channel cada vez (idempotente, no hay problema)
         const channelId = await notifee.createChannel({
           id: 'timer-route-channel',
           name: 'Progreso de Ruta',
@@ -58,7 +68,6 @@ export const useLocalNotification = ({
           sound: 'default',
         })
 
-        // Muestra la notificación
         const displayNotification = async () => {
           let body = options.body
           Object.entries(variables).forEach(([key, value]) => {
@@ -66,7 +75,6 @@ export const useLocalNotification = ({
           })
 
           try {
-            // ✅ Si ya existe, actualiza por ID
             if (notificationIdRef.current) {
               await notifee.displayNotification({
                 id: notificationIdRef.current,
@@ -74,18 +82,19 @@ export const useLocalNotification = ({
                 body,
                 android: {
                   channelId,
+                  asForegroundService: true,
                   smallIcon: 'ic_launcher',
                   ongoing: true,
                   onlyAlertOnce: true,
                 },
               })
             } else {
-              // ✅ Primera vez, crea nueva
               const id = await notifee.displayNotification({
                 title: options.title,
                 body,
                 android: {
                   channelId,
+                  asForegroundService: true,
                   smallIcon: 'ic_launcher',
                   ongoing: true,
                   onlyAlertOnce: true,
@@ -98,10 +107,8 @@ export const useLocalNotification = ({
           }
         }
 
-        // Muestra inmediatamente
         await displayNotification()
 
-        // Actualiza periódicamente
         intervalRef.current = setInterval(() => {
           displayNotification()
         }, updateInterval)
@@ -113,7 +120,6 @@ export const useLocalNotification = ({
     createChannelAndDisplay()
 
     return () => {
-      // Limpia el intervalo
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
         intervalRef.current = null
