@@ -1,6 +1,7 @@
 package com.example.cleanflowback.service;
 
 import com.example.cleanflowback.dto.out.CursorPageWithEncodedResponseDTO;
+import com.example.cleanflowback.dto.out.DriverHomeResponseDTO;
 import com.example.cleanflowback.dto.out.GeneratedRouteResponseDTO;
 
 import java.time.LocalDate;
@@ -11,4 +12,5 @@ public interface GeneratedRouteService {
         Long driverId, LocalDate date, String cursor, Integer size
     );
     GeneratedRouteResponseDTO getGeneratedRouteByDriver(Long driverId);
+    DriverHomeResponseDTO getDriverHome(Long driverId, int cursor);
 }
