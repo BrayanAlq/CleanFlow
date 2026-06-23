@@ -41,7 +41,10 @@ export default function Login() {
           router.replace('/')
         },
         onError: error => {
-          setError(getErrorMessage(error.response?.data?.code))
+          console.error('Login error:', error.message)
+          console.error('Status:', (error as any).response?.status)
+          console.error('Data:', JSON.stringify((error as any).response?.data))
+          setError(getErrorMessage((error as any).response?.data?.code))
         },
       },
     )

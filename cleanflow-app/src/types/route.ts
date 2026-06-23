@@ -17,6 +17,17 @@ export interface IScheduledContainer {
   last_metric: IContainerMetric
 }
 
+export interface IDriverHomeResponse {
+  id: number
+  created_at: string
+  current_target: IScheduledContainer | null
+  cursor: number
+  total_count: number
+  alive_count: number
+  high_priority_count: number
+  air_quality_counts: Record<string, number>
+}
+
 export interface IScheduledRoute {
   id: number
   polylines: IPolyline[]
