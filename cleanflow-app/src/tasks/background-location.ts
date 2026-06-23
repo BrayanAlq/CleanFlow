@@ -34,11 +34,6 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
 
         const startTs = await routeStore.getStartTimestamp()
         if (startTs) {
-          const elapsed = Math.floor((Date.now() - startTs) / 1000)
-          const m = Math.floor(elapsed / 60)
-          const s = elapsed % 60
-          const timerStr = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
-
           const channelId = await notifee.createChannel({
             id: 'timer-route-channel',
             name: 'Progreso de Ruta',
@@ -48,14 +43,17 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
           await notifee.displayNotification({
             id: 'timer-notification',
             title: 'Ruta activa',
-            body: `Progreso: ${timerStr}`,
+            body: 'Tiempo transcurrido',
             android: {
               channelId,
               ongoing: true,
               onlyAlertOnce: true,
+              showChronometer: true,
+              chronometerDirection: 'up',
+              timestamp: startTs,
             },
           })
-          console.log('[BACKGROUND_SERVICE] Notificación actualizada:', timerStr)
+          console.log('[BACKGROUND_SERVICE] Notificación actualizada')
         } else {
           console.log('[BACKGROUND_SERVICE] Sin timestamp de inicio')
         }
@@ -88,7 +86,7 @@ export const startBackgroundTracking = async () => {
 
     await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
       accuracy: Location.Accuracy.Balanced,
-      timeInterval: 30000,
+      timeInterval: 20000,
       distanceInterval: 10,
       foregroundService: {
         notificationTitle: 'Registrando tu progreso',

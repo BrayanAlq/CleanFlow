@@ -7,7 +7,6 @@ import { routeStore } from '@/store/route-store'
 import { startBackgroundTracking, stopBackgroundTracking } from '@/tasks/background-location'
 import polyline from '@mapbox/polyline'
 import { useQueryClient } from '@tanstack/react-query'
-import * as Location from 'expo-location'
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { AppState, AppStateStatus } from 'react-native'
 
@@ -20,6 +19,7 @@ interface DriverTripContextValue {
   timer: number
   routeId: number | null
   isLoading: boolean
+  routeStartTimestamp: number | null
 }
 
 const DriverTripContext = createContext<DriverTripContextValue | null>(null)
@@ -32,7 +32,6 @@ export const DriverTripProvider = ({ children }: { children: ReactNode }) => {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const unwatchRef = useRef<(() => void) | null>(null)
-  const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const appStateRef = useRef<AppStateStatus>(AppState.currentState)
   const routeStartTsRef = useRef<number | null>(null)
   const lastSentRef = useRef<{ lat: number; lng: number; time: number } | null>(null)
@@ -57,7 +56,6 @@ export const DriverTripProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
       if (unwatchRef.current) unwatchRef.current()
-      if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current)
       stopBackgroundTracking()
     }
   }, [])
@@ -90,7 +88,7 @@ export const DriverTripProvider = ({ children }: { children: ReactNode }) => {
     async (route_id: number) => {
       try {
         const unwatch = await watchPositionAsync(
-          (location: Location.LocationObject) => {
+          (location) => {
             sendLocation(route_id, location.coords.latitude, location.coords.longitude)
           },
           (error) => {
@@ -102,24 +100,6 @@ export const DriverTripProvider = ({ children }: { children: ReactNode }) => {
       } catch (error) {
         console.error('[DRIVER_TRIP] Error starting location watch:', error)
       }
-
-      const pollLocation = async () => {
-        if (!isActiveRef.current) return
-        try {
-          const location = await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.Balanced,
-          })
-          if (!isActiveRef.current) return
-          sendLocation(route_id, location.coords.latitude, location.coords.longitude)
-        } catch (err) {
-          console.error('[DRIVER_TRIP] Error polling location:', err)
-        }
-        if (isActiveRef.current) {
-          pollTimeoutRef.current = setTimeout(pollLocation, 5000)
-        }
-      }
-
-      pollTimeoutRef.current = setTimeout(pollLocation, 5000)
     },
     [sendLocation],
   )
@@ -173,11 +153,6 @@ export const DriverTripProvider = ({ children }: { children: ReactNode }) => {
         unwatchRef.current = null
       }
 
-      if (pollTimeoutRef.current) {
-        clearTimeout(pollTimeoutRef.current)
-        pollTimeoutRef.current = null
-      }
-
       await stopBackgroundTracking()
 
       if (timerRef.current) {
@@ -216,6 +191,7 @@ export const DriverTripProvider = ({ children }: { children: ReactNode }) => {
         timer,
         routeId,
         isLoading,
+        routeStartTimestamp: routeStartTsRef.current,
       }}
     >
       {children}
