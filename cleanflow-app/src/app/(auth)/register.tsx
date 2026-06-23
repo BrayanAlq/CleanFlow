@@ -7,19 +7,10 @@ import { DEFAULT_LOCATION } from '@/constants/location'
 import { useAuth } from '@/hooks/use-auth'
 import { getCurrentLocation } from '@/services/location'
 import { Ionicons } from '@expo/vector-icons'
-import {
-  ViewAnnotation,
-  ViewAnnotationEvent,
-} from '@maplibre/maplibre-react-native'
+import { ViewAnnotation, ViewAnnotationEvent } from '@maplibre/maplibre-react-native'
 import { useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
-import {
-  NativeSyntheticEvent,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native'
+import { NativeSyntheticEvent, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { toast } from 'sonner-native'
 
 export default function RegisterResident() {
@@ -86,79 +77,65 @@ export default function RegisterResident() {
   }
 
   return (
-    <ThemedView>
-      <ScrollView
-        scrollEnabled={scrollEnabled}
-        contentContainerStyle={styles.scroll}
-      >
-        <ThemedText themeColor='text' style={styles.title}>
+    <ThemedView type="backgroundElement">
+      <ScrollView scrollEnabled={scrollEnabled} contentContainerStyle={styles.scroll}>
+        <ThemedText themeColor="text" style={styles.title}>
           Registro vecino
         </ThemedText>
-        <ThemedText style={styles.subtitle}>
-          Crea tu cuenta de vecino
-        </ThemedText>
+        <ThemedText style={styles.subtitle}>Crea tu cuenta de vecino</ThemedText>
         <ThemedTextInput
-          placeholder='Usuario'
+          placeholder="Usuario"
           value={resident.username}
           onChangeValue={text => setResident({ ...resident, username: text })}
           pattern={/^.{6,}$/}
         />
         <ThemedTextInput
-          placeholder='Correo electrónico'
+          placeholder="Correo electrónico"
           value={resident.email}
           onChangeValue={text => setResident({ ...resident, email: text })}
-          keyboardType='email-address'
+          keyboardType="email-address"
           pattern={/^[^\s@]+@[^\s@]+\.[^\s@]+$/}
         />
         <ThemedTextInput
-          placeholder='Nombres'
+          placeholder="Nombres"
           value={resident.first_name}
           onChangeValue={text => setResident({ ...resident, first_name: text })}
         />
         <ThemedTextInput
-          placeholder='Apellidos'
+          placeholder="Apellidos"
           value={resident.last_name}
           onChangeValue={text => setResident({ ...resident, last_name: text })}
         />
         <ThemedTextInput
-          placeholder='Dirección'
+          placeholder="Dirección"
           value={resident.address}
           onChangeValue={text => setResident({ ...resident, address: text })}
         />
         <ThemedPasswordInput
-          placeholder='Contraseña'
+          placeholder="Contraseña"
           value={resident.password}
           onChangeValue={text => setResident({ ...resident, password: text })}
           pattern={/^.{8,}$/}
-          areSameStringPassword={
-            confirmPassword.trim() === resident.password.trim()
-          }
+          areSameStringPassword={confirmPassword.trim() === resident.password.trim()}
         />
         <ThemedPasswordInput
-          placeholder='Confirmar contraseña'
+          placeholder="Confirmar contraseña"
           value={confirmPassword}
           onChangeValue={text => setConfirmPassword(text)}
           pattern={/^.{8,}$/}
-          areSameStringPassword={
-            confirmPassword.trim() === resident.password.trim()
-          }
+          areSameStringPassword={confirmPassword.trim() === resident.password.trim()}
         />
 
-        <ThemedText style={styles.label}>
-          Selecciona tu ubicación en el mapa
-        </ThemedText>
+        <ThemedText style={styles.label}>Selecciona tu ubicación en el mapa</ThemedText>
         <ThemedView
           onTouchStart={() => setScrollEnabled(false)}
           onTouchEnd={() => setScrollEnabled(true)}
           style={styles.mapContainer}
         >
-          <MapView
-            center={[location.longitude, location.latitude]}
-            shouldCenter={hasRealLocation}
-          >
+          <MapView center={[location.longitude, location.latitude]} shouldCenter={hasRealLocation}>
             <ViewAnnotation
               draggable
-              key='marker'
+              key="marker"
               lngLat={[location.longitude, location.latitude]}
               onDragEnd={handleDragEnd}
             >
@@ -171,24 +148,19 @@ export default function RegisterResident() {
                   alignItems: 'center',
                 }}
               >
-                <Ionicons name='location-sharp' size={24} color='#2e7d32' />
+                <Ionicons name="location-sharp" size={24} color="#2e7d32" />
               </View>
             </ViewAnnotation>
           </MapView>
         </ThemedView>
 
         <TouchableOpacity
-          style={[
-            styles.button,
-            registerResidentMutation.isPending && styles.buttonDisabled,
-          ]}
+          style={[styles.button, registerResidentMutation.isPending && styles.buttonDisabled]}
           onPress={handleRegister}
           disabled={registerResidentMutation.isPending}
         >
           <ThemedText style={styles.buttonText}>
-            {registerResidentMutation.isPending
-              ? 'Registrando...'
-              : 'Registrarse'}
+            {registerResidentMutation.isPending ? 'Registrando...' : 'Registrarse'}
           </ThemedText>
         </TouchableOpacity>
 

@@ -12,16 +12,10 @@ interface UseNotificationProps {
   updateInterval?: number
 }
 
-let foregroundServiceRegistered = false
+const NOTIFICATION_ID = 'timer-notification'
 
-const registerForegroundService = () => {
-  if (foregroundServiceRegistered) return
-  foregroundServiceRegistered = true
-
-  notifee.registerForegroundService(() => {
-    return new Promise(() => {})
-  })
-}
+notifee.registerForegroundService(() => new Promise(() => {}))
+notifee.onBackgroundEvent(async () => {})
 
 export const useLocalNotification = ({
   isActive,
@@ -29,21 +23,7 @@ export const useLocalNotification = ({
   variables = {},
   updateInterval = 1000,
 }: UseNotificationProps) => {
-  const notificationIdRef = useRef<string | null>(null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  useEffect(() => {
-    const initializeNotifee = async () => {
-      try {
-        await notifee.requestPermission()
-        registerForegroundService()
-      } catch (err) {
-        console.error('Error pidiendo permisos:', err)
-      }
-    }
-
-    initializeNotifee()
-  }, [])
 
   useEffect(() => {
     if (!isActive) {
@@ -51,10 +31,8 @@ export const useLocalNotification = ({
         clearInterval(intervalRef.current)
         intervalRef.current = null
       }
-      if (notificationIdRef.current) {
-        notifee.cancelNotification(notificationIdRef.current)
-        notificationIdRef.current = null
-      }
+      notifee.cancelNotification(NOTIFICATION_ID)
+      notifee.stopForegroundService().catch(() => {})
       return
     }
 
@@ -75,35 +53,20 @@ export const useLocalNotification = ({
           })
 
           try {
-            if (notificationIdRef.current) {
-              await notifee.displayNotification({
-                id: notificationIdRef.current,
-                title: options.title,
-                body,
-                android: {
-                  channelId,
-                  asForegroundService: true,
-                  smallIcon: 'ic_launcher',
-                  ongoing: true,
-                  onlyAlertOnce: true,
-                },
-              })
-            } else {
-              const id = await notifee.displayNotification({
-                title: options.title,
-                body,
-                android: {
-                  channelId,
-                  asForegroundService: true,
-                  smallIcon: 'ic_launcher',
-                  ongoing: true,
-                  onlyAlertOnce: true,
-                },
-              })
-              notificationIdRef.current = id
-            }
+            await notifee.displayNotification({
+              id: NOTIFICATION_ID,
+              title: options.title,
+              body,
+              android: {
+                channelId,
+                asForegroundService: true,
+                smallIcon: 'ic_launcher',
+                ongoing: true,
+                onlyAlertOnce: true,
+              },
+            })
           } catch (err) {
-            console.error('Error mostrando notificación:', err)
+            console.error('[LOCAL_NOTIFICATION] Error mostrando notificación:', err)
           }
         }
 
@@ -113,7 +76,7 @@ export const useLocalNotification = ({
           displayNotification()
         }, updateInterval)
       } catch (err) {
-        console.error('Error inicializando channel:', err)
+        console.error('[LOCAL_NOTIFICATION] Error inicializando channel:', err)
       }
     }
 
@@ -132,10 +95,8 @@ export const useLocalNotification = ({
       clearInterval(intervalRef.current)
       intervalRef.current = null
     }
-    if (notificationIdRef.current) {
-      await notifee.cancelNotification(notificationIdRef.current)
-      notificationIdRef.current = null
-    }
+    await notifee.cancelNotification(NOTIFICATION_ID)
+    await notifee.stopForegroundService().catch(() => {})
   }
 
   return { dismiss }

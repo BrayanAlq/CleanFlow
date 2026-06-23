@@ -14,7 +14,7 @@ export default function DriverLayout() {
   const { user } = useAuthContext()
 
   useEffect(() => {
-    if (user?.role === 'DRIVER') return
+    if (user?.role !== 'DRIVER') return
 
     const requestPermissions = async () => {
       try {
@@ -36,6 +36,7 @@ export default function DriverLayout() {
       <DriverTripProvider>
         <SafeAreaView style={{ flex: 1 }}>
           <Tabs
+            initialRouteName="home"
             screenOptions={{
               headerShown: false,
               tabBarStyle: {

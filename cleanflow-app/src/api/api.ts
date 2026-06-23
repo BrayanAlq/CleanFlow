@@ -22,6 +22,11 @@ export const publicApi = axios.create({
   },
 })
 
+publicApi.interceptors.request.use(async config => {
+  console.log(`[API]: ${config.method?.toUpperCase()} ${config.url}`)
+  return config
+})
+
 export const privateApi = axios.create({
   baseURL: API_URL,
   headers: {
@@ -35,6 +40,6 @@ privateApi.interceptors.request.use(async config => {
     config.headers.Authorization = `Bearer ${token}`
   }
 
-  console.log(`API: ${config.method?.toUpperCase()} ${config.url}`)
+  console.log(`[API]: ${config.method?.toUpperCase()} ${config.url}`)
   return config
 })

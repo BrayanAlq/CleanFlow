@@ -6,7 +6,8 @@ import { ThemedText } from '../themed-text'
 
 export const MainButton = () => {
   const theme = useTheme()
-  const { status, timer, startRoute, finishRoute } = useDriverTripContext()
+
+  const { startRoute, finishRoute, timer, status, isLoading } = useDriverTripContext()
 
   const handlePress = () => {
     if (status === 'initial') {
@@ -16,15 +17,21 @@ export const MainButton = () => {
     }
   }
 
+  const buttonText = isLoading
+    ? 'Cargando...'
+    : status === 'initial'
+      ? 'Comenzar'
+      : status === 'active'
+        ? `${formatTime(timer)} | Terminar`
+        : 'Finalizando...'
+
   return (
     <Pressable
       onPress={handlePress}
-      disabled={status === 'finishing'}
+      disabled={status === 'finishing' || isLoading}
       style={[styles.container, { backgroundColor: theme?.greenAccent }]}
     >
-      <ThemedText style={styles.text}>
-        {status === 'initial' ? 'Comenzar' : status === 'active' ? `${formatTime(timer)} | Terminar` : 'Finalizando...'}
-      </ThemedText>
+      <ThemedText style={styles.text}>{buttonText}</ThemedText>
     </Pressable>
   )
 }

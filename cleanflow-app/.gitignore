@@ -46,6 +46,6 @@ cleanflowapp-12b4b-firebase-adminsdk-fbsvc-a00908dab5.json
 
 build*.apk
 
-# this is required for build
+# comment this is required for build
 .env
 google-services.json

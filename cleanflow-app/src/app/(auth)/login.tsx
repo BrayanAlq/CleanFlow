@@ -7,13 +7,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { useTheme } from '@/hooks/use-theme'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native'
+import { ActivityIndicator, KeyboardAvoidingView, StyleSheet, TouchableOpacity, View } from 'react-native'
 
 export default function Login() {
   const [userCredential, setUserCredential] = useState({
@@ -55,12 +49,12 @@ export default function Login() {
       style={[
         styles.container,
         {
-          backgroundColor: theme.background,
+          backgroundColor: theme.backgroundElement,
         },
       ]}
     >
       <View style={styles.inner}>
-        <ThemedText type='subtitle' style={styles.title}>
+        <ThemedText type="subtitle" style={styles.title}>
           CleanFlow
         </ThemedText>
         <ThemedText style={styles.subtitle}>Inicia sesión</ThemedText>
@@ -68,21 +62,17 @@ export default function Login() {
         {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
 
         <ThemedTextInput
-          placeholder='Usuario'
+          placeholder="Usuario"
           value={userCredential.username}
-          onChangeValue={text =>
-            setUserCredential({ ...userCredential, username: text })
-          }
-          autoCapitalize='none'
+          onChangeValue={text => setUserCredential({ ...userCredential, username: text })}
+          autoCapitalize="none"
           pattern={/^.{6,}$/}
         />
 
         <ThemedPasswordInput
-          placeholder='Contraseña'
+          placeholder="Contraseña"
           value={userCredential.password}
-          onChangeValue={text =>
-            setUserCredential({ ...userCredential, password: text })
-          }
+          onChangeValue={text => setUserCredential({ ...userCredential, password: text })}
           pattern={/^.{8,}$/}
         />
 
@@ -92,7 +82,7 @@ export default function Login() {
           disabled={loginMutation.isPending}
         >
           {loginMutation.isPending ? (
-            <ActivityIndicator color='#fff' />
+            <ActivityIndicator color="#fff" />
           ) : (
             <ThemedText style={styles.buttonText}>Entrar</ThemedText>
           )}
