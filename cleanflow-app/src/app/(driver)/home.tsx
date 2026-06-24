@@ -6,6 +6,7 @@ import { RouteSummary } from '@/components/home/route-summary'
 import { ThemedView } from '@/components/themed-view'
 import { useAuthContext } from '@/context/auth-context'
 import { useDriverTripContext } from '@/context/driver-trip-context'
+import { StompProvider } from '@/context/stomp-context'
 import { useLocalNotification } from '@/hooks/use-local-notification'
 import { useRouteProgress } from '@/hooks/use-route-progress'
 import { parseAge } from '@/utils/date'
@@ -32,31 +33,33 @@ export default function DriverHome() {
   const routeAge = data?.created_at ? parseAge(data.created_at) : ''
 
   return (
-    <ThemedView type="backgroundElement" style={styles.container}>
-      <HeaderSection name={user?.first_name} total={total} routeAge={routeAge} />
+    <StompProvider>
+      <ThemedView type="backgroundElement" style={styles.container}>
+        <HeaderSection name={user?.first_name} total={total} routeAge={routeAge} />
 
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
-        {total > 0 && (
-          <>
-            <ProgressCard
-              progress={progress}
-              isRouteFinished={isRouteFinished}
-              cursor={cursor}
-              totalCount={totalCount}
-            />
-            <RouteSummary
-              total={total}
-              aliveCount={aliveCount}
-              highPriorityCount={highPriorityCount}
-              airQualityCounts={airQualityCounts}
-            />
-            {currentTarget && <CurrentTargetCard container={currentTarget} />}
-          </>
-        )}
-      </ScrollView>
+        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
+          {total > 0 && (
+            <>
+              <ProgressCard
+                progress={progress}
+                isRouteFinished={isRouteFinished}
+                cursor={cursor}
+                totalCount={totalCount}
+              />
+              <RouteSummary
+                total={total}
+                aliveCount={aliveCount}
+                highPriorityCount={highPriorityCount}
+                airQualityCounts={airQualityCounts}
+              />
+              {currentTarget && <CurrentTargetCard container={currentTarget} />}
+            </>
+          )}
+        </ScrollView>
 
-      <MainButton />
-    </ThemedView>
+        <MainButton />
+      </ThemedView>
+    </StompProvider>
   )
 }
 
