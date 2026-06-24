@@ -37,7 +37,7 @@ export const DriverTripProvider = ({ children }: { children: ReactNode }) => {
   const lastSentRef = useRef<{ lat: number; lng: number; time: number } | null>(null)
   const isActiveRef = useRef(false)
 
-  const { publish } = useStompContext()
+  const { publish, connected } = useStompContext()
   const queryClient = useQueryClient()
 
   useEffect(() => {
@@ -71,7 +71,7 @@ export const DriverTripProvider = ({ children }: { children: ReactNode }) => {
       const currentState = appStateRef.current
       const body = { route_id, latitude, longitude }
 
-      if (currentState === 'active') {
+      if (connected || currentState === 'active') {
         console.log('[DRIVER_TRIP] Enviando ubicación por WS:', body)
         publish('/app/driver.location', body)
       } else {
@@ -81,7 +81,7 @@ export const DriverTripProvider = ({ children }: { children: ReactNode }) => {
         )
       }
     },
-    [publish],
+    [publish, connected],
   )
 
   const startLocationWatch = useCallback(
