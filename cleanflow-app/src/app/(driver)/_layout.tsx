@@ -3,11 +3,15 @@ import { useAuthContext } from '@/context/auth-context'
 import { DriverTripProvider } from '@/context/driver-trip-context'
 import { StompProvider } from '@/context/stomp-context'
 import { useTheme } from '@/hooks/use-theme'
+import loggers from '@/utils/loggers'
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 import * as Location from 'expo-location'
+import * as Notifications from 'expo-notifications'
 import { Tabs } from 'expo-router'
 import { useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
+
+const log = loggers.driverLayout
 
 export default function DriverLayout() {
   const theme = useTheme()
@@ -18,13 +22,18 @@ export default function DriverLayout() {
 
     const requestPermissions = async () => {
       try {
+        // location permissions
         const { status: foreground } = await Location.requestForegroundPermissionsAsync()
         if (foreground !== 'granted') return
 
         const { status: background } = await Location.requestBackgroundPermissionsAsync()
-        console.log('Location permission on background:', background)
+        log.debug('Location permission on background:', background)
+
+        // notification permissions
+        const { status: notifications } = await Notifications.requestPermissionsAsync()
+        log.debug('Notifications permission:', notifications)
       } catch (error) {
-        console.error('Error requesting location permissions:', error)
+        log.error('Error requesting location permissions:', error)
       }
     }
 

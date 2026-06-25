@@ -5,14 +5,20 @@ import { ProgressCard } from '@/components/home/progress-card'
 import { RouteSummary } from '@/components/home/route-summary'
 import { ThemedView } from '@/components/themed-view'
 import { useAuthContext } from '@/context/auth-context'
+import { useDriverTripContext } from '@/context/driver-trip-context'
 import { StompProvider } from '@/context/stomp-context'
 import { useRouteProgress } from '@/hooks/use-route-progress'
 import { parseAge } from '@/utils/date'
+import loggers from '@/utils/loggers'
+import { useEffect } from 'react'
 import { ScrollView, StyleSheet } from 'react-native'
+
+const log = loggers.driverHome
 
 export default function DriverHome() {
   const { user } = useAuthContext()
 
+  const { currentPosition } = useDriverTripContext()
   const { data, currentTarget, cursor, totalCount, isRouteFinished } = useRouteProgress()
 
   const total = data?.total_count ?? 0
@@ -22,6 +28,11 @@ export default function DriverHome() {
 
   const progress = totalCount > 0 ? cursor / totalCount : 0
   const routeAge = data?.created_at ? parseAge(data.created_at) : ''
+
+  // TODO: currentPosition for home screen details
+  useEffect(() => {
+    log.debug('currentPosition:', currentPosition)
+  }, [currentPosition])
 
   return (
     <StompProvider>

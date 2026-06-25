@@ -1,7 +1,10 @@
 import { useAuthContext } from '@/context/auth-context'
+import loggers from '@/utils/loggers'
 import { Client, IFrame, IMessage, StompSubscription } from '@stomp/stompjs'
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import SockJS from 'sockjs-client'
+
+const log = loggers.stompContext
 
 const API_URL = process.env.EXPO_PUBLIC_API_REST_URL
 
@@ -26,8 +29,8 @@ export const StompProvider = ({ children }: { children: ReactNode }) => {
       connectHeaders: { Authorization: `Bearer ${token}` },
       onConnect: () => setConnected(true),
       onDisconnect: () => setConnected(false),
-      onStompError: (frame: IFrame) => console.error('STOMP error: ', frame),
-      debug: str => console.log('[STOMP] Debug:', str),
+      onStompError: (frame: IFrame) => log.error('', frame),
+      debug: str => log.debug('', str),
       reconnectDelay: 5000,
     })
 

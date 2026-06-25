@@ -1,5 +1,6 @@
 import { privateApi } from '@/api/api'
 import { routeStore } from '@/store/route-store'
+import loggers from '@/utils/loggers'
 import notifee, { AndroidImportance } from '@notifee/react-native'
 import * as Location from 'expo-location'
 import * as TaskManager from 'expo-task-manager'
@@ -7,10 +8,12 @@ import * as TaskManager from 'expo-task-manager'
 const LOCATION_TASK_NAME = 'background-location-task'
 const NOTIFICATION_ID = 'timer-notification'
 
+const log = loggers.backgroundLocation
+
 TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
-  console.log('[BACKGROUND_SERVICE] Tarea ejecutada en background')
+  log.debug('Tarea ejecutada en background')
   if (error) {
-    console.error('[BACKGROUND_SERVICE] Error en tarea de ubicación:', error)
+    log.error('Error en tarea de ubicación:', error)
     return
   }
 
@@ -22,7 +25,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
       try {
         const routeId = await routeStore.getRouteId()
         if (!routeId) {
-          console.log('[BACKGROUND_SERVICE] No hay ruta activa')
+          log.debug('No hay ruta activa')
           return
         }
 
@@ -31,7 +34,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
         })
-        console.log('[BACKGROUND_SERVICE] Ubicación enviada en background')
+        log.debug('Ubicación enviada en background')
 
         const startTs = await routeStore.getStartTimestamp()
         if (startTs) {
@@ -54,12 +57,12 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
               timestamp: startTs,
             },
           })
-          console.log('[BACKGROUND_SERVICE] Notificación actualizada')
+          log.debug('Notificación actualizada')
         } else {
-          console.log('[BACKGROUND_SERVICE] Sin timestamp de inicio')
+          log.debug('Sin timestamp de inicio')
         }
       } catch (error) {
-        console.error('[BACKGROUND_SERVICE] Error en tarea:', error)
+        log.error('Error en tarea:', error)
       }
     }
   }
@@ -69,18 +72,18 @@ export const startBackgroundTracking = async () => {
   try {
     const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync()
     if (foregroundStatus !== 'granted') {
-      console.warn('[BACKGROUND_SERVICE] Permiso de foreground denegado')
+      log.warn('Permiso de foreground denegado')
       return
     }
 
     const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync()
     if (backgroundStatus !== 'granted') {
-      console.warn('[BACKGROUND_SERVICE] Permiso de background denegado')
+      log.warn('Permiso de background denegado')
       return
     }
 
     const isDefined = TaskManager.isTaskDefined(LOCATION_TASK_NAME)
-    console.log('[BACKGROUND_SERVICE] Tarea definida?', isDefined)
+    log.debug('Tarea definida?', isDefined)
     if (!isDefined) {
       throw new Error('La tarea no está definida')
     }
@@ -95,14 +98,24 @@ export const startBackgroundTracking = async () => {
         notificationColor: '#2196F3',
       },
     })
-    console.log('[BACKGROUND_SERVICE] Rastreo en background iniciado')
+    log.debug('Rastreo en background iniciado')
   } catch (error) {
-    console.error('[BACKGROUND_SERVICE] Error al iniciar rastreo en background:', error)
+    log.error('Error al iniciar rastreo en background:', error)
   }
 }
 
 export const stopBackgroundTracking = async () => {
-  await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME)
-  await notifee.cancelNotification(NOTIFICATION_ID)
-  console.log('[BACKGROUND_SERVICE] Rastreo en background detenido')
+  try {
+    await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME)
+  } catch (error: any) {
+    log.debug('Location task no estaba activa:', error)
+  }
+
+  try {
+    await notifee.cancelNotification(NOTIFICATION_ID)
+  } catch (error: any) {
+    log.debug('Notification no existía:', error)
+  }
+
+  log.debug('Rastreo en background detenido')
 }

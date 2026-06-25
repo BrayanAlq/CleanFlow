@@ -1,11 +1,14 @@
+import loggers from '@/utils/loggers'
 import axios from 'axios'
 import * as SecureStore from 'expo-secure-store'
 
 const API_URL = process.env.EXPO_PUBLIC_API_REST_URL
 const WS_URL = process.env.EXPO_PUBLIC_API_WS_URL
 
-console.log(API_URL)
-console.log(WS_URL)
+const log = loggers.api
+
+log.debug('', API_URL)
+log.debug('', WS_URL)
 
 if (!API_URL) {
   throw new Error('EXPO_PUBLIC_API_REST_URL is not defined')
@@ -23,7 +26,7 @@ export const publicApi = axios.create({
 })
 
 publicApi.interceptors.request.use(async config => {
-  console.log(`[API]: ${config.method?.toUpperCase()} ${config.url}`)
+  log.debug(`${config.method?.toUpperCase()} ${config.url}`)
   return config
 })
 
@@ -40,6 +43,6 @@ privateApi.interceptors.request.use(async config => {
     config.headers.Authorization = `Bearer ${token}`
   }
 
-  console.log(`[API]: ${config.method?.toUpperCase()} ${config.url}`)
+  log.debug(`${config.method?.toUpperCase()} ${config.url}`)
   return config
 })

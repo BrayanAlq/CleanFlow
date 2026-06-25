@@ -1,45 +1,48 @@
+import loggers from '@/utils/loggers'
 import * as Location from 'expo-location'
+
+const log = loggers.location
 
 export const getCurrentLocation = async () => {
   try {
-    console.log('[LOCATION_SERVICE] Checando permisos foreground...')
+    log.debug('Checando permisos foreground...')
     const { status: fgStatus } = await Location.getForegroundPermissionsAsync()
-    console.log('[LOCATION_SERVICE] Foreground status:', fgStatus)
+    log.debug('Foreground status:', fgStatus)
 
     if (fgStatus !== 'granted') {
-      console.log('[LOCATION_SERVICE] Pidiendo foreground...')
+      log.debug('Pidiendo foreground...')
       const { status } = await Location.requestForegroundPermissionsAsync()
       if (status !== 'granted') {
-        console.log('[LOCATION_SERVICE] Foreground denegado')
+        log.debug('Foreground denegado')
         return null
       }
     }
 
-    console.log('[LOCATION_SERVICE] Checando permisos background...')
+    log.debug('Checando permisos background...')
     const { status: bgStatus } = await Location.getBackgroundPermissionsAsync()
-    console.log('[LOCATION_SERVICE] Background status:', bgStatus)
+    log.debug('Background status:', bgStatus)
 
     if (bgStatus !== 'granted') {
-      console.log('[LOCATION_SERVICE] Pidiendo background...')
+      log.debug('Pidiendo background...')
       await Location.requestBackgroundPermissionsAsync()
     }
 
-    console.log('[LOCATION_SERVICE] Permisos OK, checando GPS...')
+    log.debug('Permisos OK, checando GPS...')
     const enabled = await Location.hasServicesEnabledAsync()
-    console.log('[LOCATION_SERVICE] GPS enabled:', enabled)
+    log.debug('GPS enabled:', enabled)
 
     if (!enabled) {
       throw new Error('[LOCATION_SERVICE] GPS deshabilitado')
     }
 
-    console.log('[LOCATION_SERVICE] Obteniendo posición...')
+    log.debug('Obteniendo posición...')
     const position = await Location.getCurrentPositionAsync({
       accuracy: Location.Accuracy.Balanced,
     })
-    console.log('[LOCATION_SERVICE] Posición obtenida:', position.coords)
+    log.debug('Posición obtenida:', position.coords)
     return position
   } catch (err) {
-    console.error('[LOCATION_SERVICE] Error en getCurrentLocation:', err)
+    log.error('Error en getCurrentLocation:', err)
     throw err
   }
 }
