@@ -1,8 +1,7 @@
 import { privateApi } from '@/api/api'
 import { useStompContext } from '@/context/stomp-context'
-import { getPointsByRoute } from '@/services/route'
-import { createRoute as createRouteApi, finishRoute as finishRouteApi } from '@/services/route'
 import { watchPositionAsync } from '@/services/location'
+import { createRoute as createRouteApi, finishRoute as finishRouteApi, getPointsByRoute } from '@/services/route'
 import { routeStore } from '@/store/route-store'
 import { startBackgroundTracking, stopBackgroundTracking } from '@/tasks/background-location'
 import polyline from '@mapbox/polyline'
@@ -71,14 +70,14 @@ export const DriverTripProvider = ({ children }: { children: ReactNode }) => {
       const currentState = appStateRef.current
       const body = { route_id, latitude, longitude }
 
-      if (connected || currentState === 'active') {
+      if (currentState === 'active') {
         console.log('[DRIVER_TRIP] Enviando ubicación por WS:', body)
         publish('/app/driver.location', body)
       } else {
         console.log('[DRIVER_TRIP] Enviando ubicación por HTTP:', body)
-        privateApi.post('/driver/route/point', body).catch(err =>
-          console.error('[DRIVER_TRIP] Error sending location via HTTP:', err),
-        )
+        privateApi
+          .post('/driver/route/point', body)
+          .catch(err => console.error('[DRIVER_TRIP] Error sending location via HTTP:', err))
       }
     },
     [publish, connected],
@@ -88,10 +87,10 @@ export const DriverTripProvider = ({ children }: { children: ReactNode }) => {
     async (route_id: number) => {
       try {
         const unwatch = await watchPositionAsync(
-          (location) => {
+          location => {
             sendLocation(route_id, location.coords.latitude, location.coords.longitude)
           },
-          (error) => {
+          error => {
             console.error('[DRIVER_TRIP] Location watch error:', error)
           },
         )

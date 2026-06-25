@@ -5,9 +5,7 @@ import { ProgressCard } from '@/components/home/progress-card'
 import { RouteSummary } from '@/components/home/route-summary'
 import { ThemedView } from '@/components/themed-view'
 import { useAuthContext } from '@/context/auth-context'
-import { useDriverTripContext } from '@/context/driver-trip-context'
 import { StompProvider } from '@/context/stomp-context'
-import { useLocalNotification } from '@/hooks/use-local-notification'
 import { useRouteProgress } from '@/hooks/use-route-progress'
 import { parseAge } from '@/utils/date'
 import { ScrollView, StyleSheet } from 'react-native'
@@ -16,13 +14,6 @@ export default function DriverHome() {
   const { user } = useAuthContext()
 
   const { data, currentTarget, cursor, totalCount, isRouteFinished } = useRouteProgress()
-  const { status, timer, routeStartTimestamp } = useDriverTripContext()
-
-  useLocalNotification({
-    isActive: status === 'active',
-    options: { title: 'Ruta activa', body: 'Tiempo transcurrido' },
-    startTimestamp: routeStartTimestamp,
-  })
 
   const total = data?.total_count ?? 0
   const aliveCount = data?.alive_count ?? 0

@@ -5,6 +5,7 @@ import * as Location from 'expo-location'
 import * as TaskManager from 'expo-task-manager'
 
 const LOCATION_TASK_NAME = 'background-location-task'
+const NOTIFICATION_ID = 'timer-notification'
 
 TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
   console.log('[BACKGROUND_SERVICE] Tarea ejecutada en background')
@@ -41,7 +42,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
           })
 
           await notifee.displayNotification({
-            id: 'timer-notification',
+            id: NOTIFICATION_ID,
             title: 'Ruta activa',
             body: 'Tiempo transcurrido',
             android: {
@@ -102,5 +103,6 @@ export const startBackgroundTracking = async () => {
 
 export const stopBackgroundTracking = async () => {
   await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME)
+  await notifee.cancelNotification(NOTIFICATION_ID)
   console.log('[BACKGROUND_SERVICE] Rastreo en background detenido')
 }
