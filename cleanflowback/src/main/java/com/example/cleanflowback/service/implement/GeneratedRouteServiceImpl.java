@@ -1,5 +1,7 @@
 package com.example.cleanflowback.service.implement;
 
+import com.example.cleanflowback.dto.ContainerNearByPointRawDTO;
+import com.example.cleanflowback.dto.FromToInstant;
 import com.example.cleanflowback.dto.GeneratedCursorInternalDTO;
 import com.example.cleanflowback.dto.GeneratedRouteCursorDTO;
 import com.example.cleanflowback.dto.out.CursorPageWithEncodedResponseDTO;
@@ -14,17 +16,20 @@ import com.example.cleanflowback.mapper.PolylineMapper;
 import com.example.cleanflowback.model.DriverEntity;
 import com.example.cleanflowback.model.GeneratedRouteEntity;
 import com.example.cleanflowback.model.MetricEntity;
+import com.example.cleanflowback.repository.ContainerRepository;
 import com.example.cleanflowback.repository.DriverRepository;
 import com.example.cleanflowback.repository.GeneratedRouteRepository;
 import com.example.cleanflowback.repository.MetricRepository;
 import com.example.cleanflowback.service.GeneratedRouteService;
 import com.example.cleanflowback.utils.CursorUtil;
+import com.example.cleanflowback.utils.InstantUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,6 +47,7 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
     private final ContainerImageMapper containerImageMapper;
     private final MetricRepository metricRepository;
     private final MetricMapper metricMapper;
+    private final ContainerRepository containerRepository;
 
     @Override
     public CursorPageWithEncodedResponseDTO<GeneratedRouteResponseDTO> getGeneratedRoutes(
@@ -117,20 +123,20 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
             generatedRoute.getPolylines().stream().map(polylineMapper::fromEntityToDTO).toList(),
             mapContainersWithLastMetric(generatedRoute, latestMetrics)
                 .stream()
-                .sorted((a, b) -> a.visitOrder() - b.visitOrder()).toList(),
+                .sorted(Comparator.comparingInt(GeneratedContainerResponseDTO::visitOrder))
+                .toList(),
             generatedRoute.getCreatedAt()
         );
     }
 
     @Override
-    public DriverHomeResponseDTO getDriverHome(Long driverId, int cursor) {
-        ZoneId zoneId = ZoneId.of("America/Lima");
-        LocalDate today = LocalDate.now(zoneId);
-        Instant from = today.atStartOfDay(zoneId).toInstant();
-        Instant to = today.atStartOfDay(zoneId).plusDays(1).toInstant();
+    public DriverHomeResponseDTO getDriverHome(Long driverId, double latitude, double longitude) {
+        FromToInstant fromToInstant = InstantUtil.getFromToInstant("America/Lima");
 
-        GeneratedRouteEntity generatedRoute = generatedRouteRepository.getByDriverIdAndDate(driverId, from, to)
+        GeneratedRouteEntity generatedRoute = generatedRouteRepository.getByDriverIdAndDate(driverId, fromToInstant.from(), fromToInstant.to())
             .orElseThrow(() -> new ResourceNotFoundException("generated route not found"));
+
+        int totalCount = generatedRoute.getGeneratedContainers().size();
 
         List<Long> containerIds = generatedRoute.getGeneratedContainers()
             .stream()
@@ -144,13 +150,8 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
 
         List<GeneratedContainerResponseDTO> containers = mapContainersWithLastMetric(generatedRoute, latestMetrics)
             .stream()
-            .sorted((a, b) -> a.visitOrder() - b.visitOrder())
+            .sorted(Comparator.comparingInt(GeneratedContainerResponseDTO::visitOrder))
             .toList();
-
-        int totalCount = containers.size();
-        GeneratedContainerResponseDTO currentTarget = cursor >= 0 && cursor < totalCount
-            ? containers.get(cursor)
-            : null;
 
         int aliveCount = (int) containers.stream()
             .filter(c -> c.lastMetric() != null && c.lastMetric().isAlive())
@@ -167,11 +168,19 @@ public class GeneratedRouteServiceImpl implements GeneratedRouteService {
                 Collectors.summingInt(c -> 1)
             ));
 
+        System.out.println(containerIds);
+        ContainerNearByPointRawDTO currentContainer = containerRepository.getNearContainerInPath(containerIds, latitude, longitude);
+        System.out.println(currentContainer);
+
+        var currentContainerResponse = containers.stream()
+            .filter(c -> c.containerId().equals(currentContainer.id()))
+            .toList()
+            .getFirst();
+
         return new DriverHomeResponseDTO(
             generatedRoute.getId(),
             generatedRoute.getCreatedAt(),
-            currentTarget,
-            cursor,
+            currentContainerResponse,
             totalCount,
             aliveCount,
             highPriorityCount,

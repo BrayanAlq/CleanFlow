@@ -12,5 +12,5 @@ public interface GeneratedRouteService {
         Long driverId, LocalDate date, String cursor, Integer size
     );
     GeneratedRouteResponseDTO getGeneratedRouteByDriver(Long driverId);
-    DriverHomeResponseDTO getDriverHome(Long driverId, int cursor);
+    DriverHomeResponseDTO getDriverHome(Long driverId, double latitude, double longitude);
 }

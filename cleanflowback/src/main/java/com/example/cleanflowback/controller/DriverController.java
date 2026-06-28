@@ -40,8 +40,9 @@ public class DriverController {
     @GetMapping("/home")
     public ResponseEntity<DriverHomeResponseDTO> getDriverHome(
         @AuthenticationPrincipal DriverEntity driverEntity,
-        @RequestParam(defaultValue = "0") int cursor
+        @RequestParam double longitude,
+        @RequestParam double latitude
     ) {
-        return ResponseEntity.ok(generatedRouteService.getDriverHome(driverEntity.getId(), cursor));
+        return ResponseEntity.ok(generatedRouteService.getDriverHome(driverEntity.getId(), latitude, longitude));
     }
 }
