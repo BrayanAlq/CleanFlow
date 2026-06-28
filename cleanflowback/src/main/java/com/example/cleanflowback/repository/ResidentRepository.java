@@ -27,17 +27,16 @@ public interface ResidentRepository extends JpaRepository<ResidentEntity, Long> 
     );
 
     @Query(value = """
-        SELECT r.id
+        SELECT DISTINCT r.id
         FROM residents r
-        WHERE ST_DWithin(
+        JOIN containers c ON TRUE
+        WHERE c.id IN (:containerIds) AND ST_DWithin(
             r.location,
-            (SELECT location
-            FROM containers
-            WHERE id = :containerId),
+            c.location,
             100
         );
     """, nativeQuery = true)
-    List<Long> findAllInRadiusPoint(
-        @Param("containerId") Long containerId
+    List<Long> findAllInRoutePoints(
+        @Param("containerIds") List<Long> containerIds
     );
 }

@@ -1,13 +1,23 @@
 import { privateApi } from '@/api/api'
-import { ICreateRouteResponse, IDriverHomeResponse, IFinishRouteRequest, IPointResponse, IScheduledRoute } from '@/types/route'
+import {
+  ICreateRouteResponse,
+  IDriverHomeResponse,
+  IFinishRouteRequest,
+  IPointResponse,
+  IScheduledRoute,
+} from '@/types/route'
 
 export const getScheduledRoutes = async () => {
   const response = await privateApi.get<IScheduledRoute>('/driver/scheduled-route')
   return response.data
 }
 
-export const getDriverHome = async (cursor: number) => {
-  const response = await privateApi.get<IDriverHomeResponse>('/driver/home', { params: { cursor } })
+interface IGetDriverHomeParams {
+  latitude: number
+  longitude: number
+}
+export const getDriverHome = async (params: IGetDriverHomeParams) => {
+  const response = await privateApi.get<IDriverHomeResponse>('/driver/home', { params })
   return response.data
 }
 

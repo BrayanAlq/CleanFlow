@@ -10,7 +10,6 @@ public record DriverHomeResponseDTO(
     Long id,
     Instant createdAt,
     GeneratedContainerResponseDTO currentTarget,
-    int cursor,
     int totalCount,
     int aliveCount,
     int highPriorityCount,

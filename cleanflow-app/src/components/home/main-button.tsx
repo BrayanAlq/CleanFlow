@@ -1,8 +1,8 @@
+import { ThemedText } from '@/components/themed-text'
 import { useDriverTripContext } from '@/context/driver-trip-context'
 import { useTheme } from '@/hooks/use-theme'
 import { formatTime } from '@/utils/time-formatter'
 import { Pressable, StyleSheet } from 'react-native'
-import { ThemedText } from '../themed-text'
 
 export const MainButton = () => {
   const theme = useTheme()
@@ -47,5 +47,6 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 24,
+    lineHeight: 28,
   },
 })

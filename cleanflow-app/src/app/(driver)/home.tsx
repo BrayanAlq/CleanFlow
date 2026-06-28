@@ -7,30 +7,34 @@ import { ThemedView } from '@/components/themed-view'
 import { useAuthContext } from '@/context/auth-context'
 import { useDriverTripContext } from '@/context/driver-trip-context'
 import { StompProvider } from '@/context/stomp-context'
-import { useLocalNotification } from '@/hooks/use-local-notification'
 import { useRouteProgress } from '@/hooks/use-route-progress'
 import { parseAge } from '@/utils/date'
+import loggers from '@/utils/loggers'
+import { useEffect } from 'react'
 import { ScrollView, StyleSheet } from 'react-native'
+
+const log = loggers.driverHome
 
 export default function DriverHome() {
   const { user } = useAuthContext()
 
-  const { data, currentTarget, cursor, totalCount, isRouteFinished } = useRouteProgress()
-  const { status, timer, routeStartTimestamp } = useDriverTripContext()
-
-  useLocalNotification({
-    isActive: status === 'active',
-    options: { title: 'Ruta activa', body: 'Tiempo transcurrido' },
-    startTimestamp: routeStartTimestamp,
-  })
+  const { currentPosition } = useDriverTripContext()
+  const { data } = useRouteProgress({ latitude: currentPosition?.latitude!, longitude: currentPosition?.longitude! })
 
   const total = data?.total_count ?? 0
   const aliveCount = data?.alive_count ?? 0
   const highPriorityCount = data?.high_priority_count ?? 0
   const airQualityCounts = data?.air_quality_counts ?? {}
+  const currentTarget = data?.current_target
 
-  const progress = totalCount > 0 ? cursor / totalCount : 0
+  const progress = currentTarget?.visit_order
   const routeAge = data?.created_at ? parseAge(data.created_at) : ''
+  const isRouteFinished = currentTarget?.visit_order === data?.total_count
+
+  // TODO: currentPosition for home screen details
+  useEffect(() => {
+    log.debug('currentPosition:', currentPosition)
+  }, [currentPosition])
 
   return (
     <StompProvider>
@@ -41,10 +45,10 @@ export default function DriverHome() {
           {total > 0 && (
             <>
               <ProgressCard
-                progress={progress}
-                isRouteFinished={isRouteFinished}
-                cursor={cursor}
-                totalCount={totalCount}
+                progress={progress!}
+                isRouteFinished={isRouteFinished!}
+                cursor={progress!}
+                totalCount={total!}
               />
               <RouteSummary
                 total={total}

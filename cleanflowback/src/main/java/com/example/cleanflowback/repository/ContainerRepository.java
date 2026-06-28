@@ -56,4 +56,23 @@ public interface ContainerRepository extends JpaRepository<ContainerEntity, Long
         @Param("cursor_id") Long cursorId,
         @Param("size") int size
     );
+
+    @Query(value = """
+        SELECT 
+            c.id,
+            c.name,
+            c.address_name,
+            ci.url,
+            ST_Distance(c.location::geography, ST_Point(:longitude, :latitude)::geography) as distance
+        FROM containers c
+        JOIN container_images ci ON ci.id = c.container_image_id
+        WHERE c.id IN (:containerIds)
+        ORDER BY distance
+        LIMIT 1
+    """, nativeQuery = true)
+    ContainerNearByPointRawDTO getNearContainerInPath(
+        @Param("containerIds") List<Long> containerIds,
+        @Param("latitude") double latitude,
+        @Param("longitude") double longitude
+    );
 }

@@ -1,6 +1,9 @@
 import { DEFAULT_LOCATION } from '@/constants/location'
 import { getCurrentLocation, watchPositionAsync } from '@/services/location'
+import loggers from '@/utils/loggers'
 import { useEffect, useState } from 'react'
+
+const log = loggers.hookCurrentLocation
 
 interface LocationState {
   longitude: number
@@ -16,46 +19,46 @@ export const useCurrentPosition = () => {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    let unsubscribe: (() => void) | null = null // ✅ Ya está bien aquí
+    let unsubscribe: (() => void) | null = null
 
     const initializeLocation = async () => {
       try {
-        console.log('[HOOK_CURRENT_POSITION] [1] Iniciando initialization...')
+        log.debug('[1] Iniciando hookCurrentLocation')
 
         const initialLocation = await getCurrentLocation()
-        console.log('[HOOK_CURRENT_POSITION] [2] getCurrentLocation completo')
+        log.debug('[2] getCurrentLocation completo')
 
         if (!initialLocation) {
-          console.log('[HOOK_CURRENT_POSITION] [3] initialLocation es null/undefined')
+          log.debug('[3] initialLocation es null/undefined')
           setError('Sin permiso de ubicación')
           return
         }
 
-        console.log('[HOOK_CURRENT_POSITION] [4] Tenemos ubicación inicial:', initialLocation.coords)
+        log.debug('[4] Tenemos ubicación inicial:', initialLocation.coords)
         setLocation({
           longitude: initialLocation.coords.longitude,
           latitude: initialLocation.coords.latitude,
         })
         setHasRealLocation(true)
-        console.log('[HOOK_CURRENT_POSITION] [5] setHasRealLocation(true) ejecutado')
+        log.debug('[5] setHasRealLocation(true) ejecutado')
 
         // 🔥 AQUÍ ASIGNAS watchPositionAsync
         unsubscribe = await watchPositionAsync(
           position => {
-            console.log('[HOOK_CURRENT_POSITION] Watch - Nueva posición:', position.coords)
+            log.debug('Watch - Nueva posición:', position.coords)
             setLocation({
               longitude: position.coords.longitude,
               latitude: position.coords.latitude,
             })
           },
           err => {
-            console.error('[HOOK_CURRENT_POSITION] Watch error:', err.message)
+            log.error('Watch error:', err.message)
             setError(err.message)
           },
         )
-        console.log('[HOOK_CURRENT_POSITION] [6] Watch iniciado')
+        log.debug('[6] Watch iniciado')
       } catch (err) {
-        console.error('[HOOK_CURRENT_POSITION] [ERROR]', err)
+        log.error('[ERROR]', err)
         setHasRealLocation(false)
       }
     }

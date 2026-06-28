@@ -32,9 +32,7 @@ export const ProgressCard = ({ progress, isRouteFinished, cursor, totalCount }: 
         />
       </View>
       <ThemedText style={styles.progressLabel}>
-        {isRouteFinished
-          ? 'Ruta completada'
-          : `${cursor} de ${totalCount} contenedores`}
+        {isRouteFinished ? 'Ruta completada' : `${cursor} de ${totalCount} contenedores`}
       </ThemedText>
     </ThemedView>
   )

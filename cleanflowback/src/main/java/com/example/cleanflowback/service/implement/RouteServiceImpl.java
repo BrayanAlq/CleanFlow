@@ -1,5 +1,6 @@
 package com.example.cleanflowback.service.implement;
 
+import com.example.cleanflowback.dto.FromToInstant;
 import com.example.cleanflowback.dto.in.FinishRouteBodyRequestDTO;
 import com.example.cleanflowback.dto.out.CursorPageResponseDTO;
 import com.example.cleanflowback.dto.out.PointResponseDTO;
@@ -15,15 +16,14 @@ import com.example.cleanflowback.repository.*;
 import com.example.cleanflowback.service.PushNotificationService;
 import com.example.cleanflowback.service.RouteService;
 import com.example.cleanflowback.specification.RouteSpecifications;
+import com.example.cleanflowback.utils.InstantUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -47,22 +47,16 @@ public class RouteServiceImpl implements RouteService {
         RouteEntity routeEntity = new RouteEntity();
         routeEntity.setDriver(driver);
 
-        ZoneId zoneId = ZoneId.of("America/Lima");
-        LocalDate today = LocalDate.now(zoneId);
-        Instant from = today.atStartOfDay(zoneId).toInstant();
-        Instant to = today.atStartOfDay(zoneId).plusDays(1).toInstant();
+        FromToInstant fromToInstant = InstantUtil.getFromToInstant("America/Lima");
 
-        GeneratedRouteEntity generatedRoute = generatedRouteRepository.getByDriverIdAndDate(driver.getId(), from, to)
+        GeneratedRouteEntity generatedRoute = generatedRouteRepository.getByDriverIdAndDate(driver.getId(), fromToInstant.from(), fromToInstant.to())
             .orElseThrow(() -> new ResourceNotFoundException("No route generated yet"));
 
         List<Long> containersInPath = generatedRoute.getGeneratedContainers().stream()
             .map(gc -> gc.getContainer().getId())
             .toList();
 
-        List<Long> usersInRoute = containersInPath.stream()
-            .flatMap(c -> residentRepository.findAllInRadiusPoint(c).stream())
-            .distinct()
-            .toList();
+        List<Long> usersInRoute = residentRepository.findAllInRoutePoints(containersInPath);
 
         List<String> devices = deviceTokenRepository.findAllByUserIds(usersInRoute).stream()
             .map(DeviceTokenEntity::getToken)
