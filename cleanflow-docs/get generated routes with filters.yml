@@ -5,14 +5,14 @@ info:
 
 http:
   method: GET
-  url: "{{actual_url}}/generated-route?driverId=4"
+  url: "{{actual_url}}/generated-route?driverId=2"
   params:
     - name: cursor
       value: eyJpZCI6NDgsImNyZWF0ZWRfYXQiOiIyMDI2LTA1LTExVDE3OjA2OjMxLjc0NyJ9
       type: query
       disabled: true
     - name: driverId
-      value: "4"
+      value: "2"
       type: query
     - name: size
       value: "6"
@@ -20,7 +20,7 @@ http:
       disabled: true
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiJ9.eyJsYXN0X25hbWUiOiJBZG1pbiIsImZpcnN0X25hbWUiOiJTYW4gSXNpZHJvIiwiaWQiOjEsInJvbGUiOiJBRE1JTiIsInVzZXJuYW1lIjoiYWRtaW4xIiwiZXhwIjoxNzgxNjIxNzAxfQ.XOg3XGAw4YhpBCv7HhusNIvGGx_rJQuo1IsaN5YGIGo
+    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImFkbWluMSIsImxhc3RfbmFtZSI6IkFkbWluIiwiZmlyc3RfbmFtZSI6IlNhbiBJc2lkcm8iLCJpZCI6MSwicm9sZSI6IkFETUlOIiwiZXhwIjoxNzgzMjgyNzE3fQ.teMfxrnfwRJUni0H3VtW3o1VbCTFvpE9nFwi1zqYTwE
 
 settings:
   encodeUrl: true
