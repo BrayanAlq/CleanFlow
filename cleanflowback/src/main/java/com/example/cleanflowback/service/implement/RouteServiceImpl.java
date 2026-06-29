@@ -62,7 +62,11 @@ public class RouteServiceImpl implements RouteService {
             .map(DeviceTokenEntity::getToken)
             .toList();
 
-        pushNotificationService.sendBatch(devices, "", "El basurero ha empezado su recorrido");
+        pushNotificationService.sendBatch(
+            devices,
+            "\uD83D\uDE9B Recolección iniciada",
+            "El camión recolector ha iniciado su recorrido. Te avisaremos cuando esté cerca de tu ubicación."
+        );
 
         return (routeMapper.fromEntityToDTO(routeRepository.save(routeEntity)));
     }

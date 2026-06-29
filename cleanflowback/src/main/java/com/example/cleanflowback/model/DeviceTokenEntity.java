@@ -30,6 +30,9 @@ public class DeviceTokenEntity {
     @Column(nullable = false)
     private Instant updatedAt;
 
+    @Column
+    private Instant lastSend;
+
     @PrePersist
     public void prePersist() {
         this.createdAt = Instant.now();

@@ -31,7 +31,7 @@ public class PointServiceImpl implements PointService {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     @Override
-    public void createPoint(DriverLocationRequestDTO requestDTO, DriverEntity driver) {
+    public PointResponseDTO createPoint(DriverLocationRequestDTO requestDTO, DriverEntity driver) {
         RouteEntity route = routeRepository.findById(requestDTO.routeId())
             .orElseThrow(() -> new ResourceNotFoundException("Route not found"));
 
@@ -47,6 +47,7 @@ public class PointServiceImpl implements PointService {
         PointResponseDTO saved = pointMapper.fromEntityToDTO(pointRepository.save(point));
 
         sendPointViaWS(driver, saved);
+        return saved;
     }
 
     public void sendPointViaWS(DriverEntity driver, PointResponseDTO response) {
