@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: "{{actual_url}}/test-notify/10"
+  url: "{{actual_url}}/test-notify/resident4"
   auth: inherit
 
 settings:
