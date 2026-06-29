@@ -6,7 +6,6 @@ import com.example.cleanflowback.dto.out.PointResponseDTO;
 import com.example.cleanflowback.dto.out.RouteCompleteResponseDTO;
 import com.example.cleanflowback.dto.out.RouteResponseDTO;
 import com.example.cleanflowback.model.DriverEntity;
-import com.example.cleanflowback.model.PointEntity;
 
 import java.time.LocalDate;
 import java.util.List;

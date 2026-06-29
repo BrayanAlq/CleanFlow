@@ -9,6 +9,7 @@ import com.example.cleanflowback.service.PushNotificationService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -19,14 +20,22 @@ public class TestNotificationController {
     private final UserRepository userRepository;
     private final PushNotificationService pushNotificationService;
 
-    @PostMapping("/{idUser}")
-    public void sendToUser(@PathVariable Long idUser) {
-        UserEntity user = userRepository.findById(idUser)
+    @PostMapping("/{residentUsername}")
+    public void sendToUser(@PathVariable String residentUsername) {
+        UserEntity user = userRepository.findByUsername(residentUsername)
             .orElseThrow(() -> new ResourceNotFoundException("user id not found"));
-        List<DeviceTokenEntity> deviceTokenEntity = deviceTokenRepository.findByUser(user);
+        List<DeviceTokenEntity> deviceTokenEntities = deviceTokenRepository.findByUser(user);
 
-        List<String> deviceTokens = deviceTokenEntity.stream().map(DeviceTokenEntity::getToken).toList();
+        List<String> deviceTokens = deviceTokenEntities.stream().map(DeviceTokenEntity::getToken).toList();
 
-        pushNotificationService.sendBatch(deviceTokens, "Hello", "Este mensaje es una prueba");
+        pushNotificationService.sendBatch(
+            deviceTokens,
+            "\uD83D\uDE9B Recolección iniciada",
+            "El camión recolector ha iniciado su recorrido. Te avisaremos cuando esté cerca de tu ubicación."
+        );
+
+        deviceTokenRepository.updateDeviceTokensLastSend(
+            deviceTokenEntities.stream().map(DeviceTokenEntity::getId).toList(), Instant.now()
+        );
     }
 }

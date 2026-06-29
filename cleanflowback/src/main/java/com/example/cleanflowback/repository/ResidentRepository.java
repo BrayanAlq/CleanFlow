@@ -39,4 +39,19 @@ public interface ResidentRepository extends JpaRepository<ResidentEntity, Long> 
     List<Long> findAllInRoutePoints(
         @Param("containerIds") List<Long> containerIds
     );
+
+    @Query(value = """
+        SELECT DISTINCT r.id
+        FROM residents r
+        WHERE ST_DWithin(
+            r.location,
+            ST_Point(:longitude, :latitude),
+            200
+        );
+    """, nativeQuery = true)
+    List<Long> findAllAroundPointInRadius(
+        @Param("latitude") double latitude,
+        @Param("longitude") double longitude,
+        @Param("radius") double radius
+    );
 }
