@@ -15,12 +15,13 @@ interface UserMarkerProps {
   username: string
   latitude: number
   longitude: number
+  visible?: boolean
 }
-export const UserMarker = ({ id, username, latitude, longitude }: UserMarkerProps) => {
+export const UserMarker = ({ id, username, latitude, longitude, visible = true }: UserMarkerProps) => {
   return (
     <>
       <div className="relative">
-        <Marker key={id} position={[latitude, longitude]} icon={userIcon}>
+        <Marker key={id} position={[latitude, longitude]} icon={userIcon} opacity={visible ? 1 : 0}>
           <Tooltip>{username}</Tooltip>
         </Marker>
       </div>

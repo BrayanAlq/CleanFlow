@@ -1,8 +1,8 @@
 import { Client } from '@stomp/stompjs'
 import axios from 'axios'
 
-const API_URL = 'wss://cleanflow.deyvigo.online'
-const REST_URL = 'https://cleanflow.deyvigo.online'
+const API_URL = 'ws://localhost:8080'
+const REST_URL = 'http://localhost:8080'
 
 const getCredentials = async () => {
   const response = await axios.get(`${REST_URL}/container/device`)
@@ -22,7 +22,7 @@ getCredentials()
         console.log('Connected')
 
         let isAlive = true
-        let airQualityLevel = 'good'
+        let airQualityLevel = 'VERY_GOOD'
         let ppm = 10.2
         let fillingLevel = 0.5
 

@@ -1,7 +1,7 @@
-import { useState, useMemo } from "react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { getResidents, updateUserStatus } from "@/service/adminService"
-import { toast } from "sonner"
+import { useState, useMemo } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { getResidents, updateUserStatus } from '@/service/adminService'
+import { toast } from 'sonner'
 
 const PAGE_SIZE = 5
 
@@ -17,15 +17,14 @@ export const ResidentsScreen = () => {
         toast.error('Error al cargar residentes', {
           description: error.message,
         })
-      }
-    }
+      },
+    },
   })
 
   const queryClient = useQueryClient()
 
   const statusMutation = useMutation({
-    mutationFn: ({ userId, enabled }: { userId: number, enabled: boolean }) =>
-      updateUserStatus(userId, enabled),
+    mutationFn: ({ userId, enabled }: { userId: number; enabled: boolean }) => updateUserStatus(userId, enabled),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'residents'] })
       toast.success('Estado actualizado')
@@ -34,7 +33,7 @@ export const ResidentsScreen = () => {
       toast.error('Error al actualizar estado', {
         description: error.message,
       })
-    }
+    },
   })
 
   const totalElements = allResidents?.length ?? 0
@@ -51,7 +50,7 @@ export const ResidentsScreen = () => {
       <div className="flex items-center gap-3 mb-4">
         <h1 className="text-white text-lg font-normal">Residentes</h1>
         {!isLoading && (
-          <span className="text-tiny text-white/50 bg-black/20 px-2 py-0.5 rounded-md border-[0.1px] border-border-accent">
+          <span className="text-tiny font-normal text-white/50 bg-black/20 px-2 py-0.5 rounded-md border-[0.1px] border-border-accent">
             {totalElements} registrados
           </span>
         )}
@@ -64,7 +63,7 @@ export const ResidentsScreen = () => {
       ) : residents.length > 0 ? (
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 overflow-auto">
-            <table className="w-full text-tiny text-white">
+            <table className="w-full text-sm font-normal text-white">
               <thead>
                 <tr className="border-b-[0.1px] border-border-accent text-white/50">
                   <th className="text-left font-normal py-3 px-4">Nombres</th>
@@ -77,10 +76,10 @@ export const ResidentsScreen = () => {
                 </tr>
               </thead>
               <tbody>
-                {residents.map((resident) => (
+                {residents.map(resident => (
                   <tr
                     key={resident.id}
-                    className="border-b-[0.1px] border-border-accent hover:bg-white/10 transition-colors"
+                    className="border-b-[0.1px] border-border-accent hover:bg-white/10 transition-colors font-normal text-tiny"
                   >
                     <td className="py-3 px-4">
                       {resident.first_name} {resident.last_name}
@@ -92,26 +91,24 @@ export const ResidentsScreen = () => {
                     <td className="py-3 px-4 text-white/70">{resident.badge_count}</td>
                     <td className="py-3 px-4">
                       <button
-                        onClick={() =>
-                          statusMutation.mutate({ userId: resident.id, enabled: !resident.enabled })
-                        }
+                        onClick={() => statusMutation.mutate({ userId: resident.id, enabled: !resident.enabled })}
                         disabled={statusMutation.isPending}
                         className={`flex items-center gap-2 cursor-pointer disabled:opacity-50 transition-all ${
-                          resident.enabled
-                            ? 'text-green-400'
-                            : 'text-red-400'
+                          resident.enabled ? 'text-green-400' : 'text-red-400'
                         }`}
                       >
-                        <span className={`relative w-10 h-5 rounded-full transition-colors ${
-                          resident.enabled ? 'bg-green-500' : 'bg-white/20'
-                        }`}>
-                          <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
-                            resident.enabled ? 'translate-x-5' : 'translate-x-0'
-                          }`} />
+                        <span
+                          className={`relative w-10 h-5 rounded-full transition-colors ${
+                            resident.enabled ? 'bg-green-500' : 'bg-white/20'
+                          }`}
+                        >
+                          <span
+                            className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+                              resident.enabled ? 'translate-x-5' : 'translate-x-0'
+                            }`}
+                          />
                         </span>
-                        <span className="text-tiny font-medium">
-                          {resident.enabled ? 'Activo' : 'Inactivo'}
-                        </span>
+                        <span className="text-tiny font-medium">{resident.enabled ? 'Activo' : 'Inactivo'}</span>
                       </button>
                     </td>
                   </tr>
@@ -120,9 +117,9 @@ export const ResidentsScreen = () => {
             </table>
           </div>
 
-          <div className="flex items-center justify-center gap-4 pt-4 pb-1">
+          <div className="flex items-center justify-center gap-4 pt-4 pb-1 font-normal">
             <button
-              onClick={() => setPage((p) => p - 1)}
+              onClick={() => setPage(p => p - 1)}
               disabled={page === 0}
               className="px-4 py-1.5 text-tiny rounded-lg border-[0.1px] border-border-accent bg-black/20 text-white/70 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
@@ -132,7 +129,7 @@ export const ResidentsScreen = () => {
               P&aacute;gina {page + 1} de {totalPages}
             </span>
             <button
-              onClick={() => setPage((p) => p + 1)}
+              onClick={() => setPage(p => p + 1)}
               disabled={page + 1 >= totalPages}
               className="px-4 py-1.5 text-tiny rounded-lg border-[0.1px] border-border-accent bg-black/20 text-white/70 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >

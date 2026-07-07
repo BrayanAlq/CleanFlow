@@ -2,7 +2,7 @@ import { Client } from '@stomp/stompjs'
 import axios from 'axios'
 import SockJS from 'sockjs-client'
 
-const API_URL = 'https://cleanflow.deyvigo.online'
+const API_URL = 'http://localhost:8080'
 
 const getCredentials = async () => {
   const response = await axios.get(`${API_URL}/container/device`)

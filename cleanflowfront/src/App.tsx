@@ -14,8 +14,15 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginScreen />} />
 
-        <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
-          <Route path="map" element={<MapManageScreen />} />
+        <Route
+          path="/"
+          element={
+            <PrivateRoute>
+              <Layout />
+            </PrivateRoute>
+          }
+        >
+          <Route path="" element={<MapManageScreen />} />
           <Route path="routes" element={<RouteViewerScreen />} />
           <Route path="generated-routes" element={<GeneratedRoutesScreen />} />
           <Route path="drivers" element={<DriversScreen />} />
