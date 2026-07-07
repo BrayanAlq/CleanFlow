@@ -75,4 +75,19 @@ public interface ContainerRepository extends JpaRepository<ContainerEntity, Long
         @Param("latitude") double latitude,
         @Param("longitude") double longitude
     );
+
+    @Query(value = """
+        SELECT c.*
+        FROM containers c
+        JOIN (
+            SELECT DISTINCT ON(container_id) *
+            FROM metrics
+            ORDER BY container_id, timestamp DESC
+        ) m
+        ON c.id = m.container_id
+        WHERE m.air_quality_level IN ('BAD', 'VERY_BAD') OR
+            m.filling_level > 0.6 OR
+            m.is_alive = false;
+    """, nativeQuery = true)
+    List<ContainerEntity> getAllForRouterService();
 }

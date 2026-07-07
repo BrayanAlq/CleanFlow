@@ -27,7 +27,7 @@ public class RouterServiceImpl implements RouterService {
     @Override
     @Transactional
     public List<RouterResponseDTO> kMeansGroupByDistance() {
-        List<ContainerEntity> allContainers = containerRepository.findAll();
+        List<ContainerEntity> allContainers = containerRepository.getAllForRouterService();
         List<DriverEntity> allDrivers = driverRepository.findAll();
 
         if (allContainers.isEmpty() || allDrivers.isEmpty()) {
@@ -41,6 +41,9 @@ public class RouterServiceImpl implements RouterService {
 
         KMeans model = KMeans.fit(data, k);
         int[] labels = model.y;
+        double[][] centroids = model.centroids;
+
+        // TODO
 
         List<RouterResponseDTO> generatedRoutesDTO = new ArrayList<>();
 
@@ -50,16 +53,17 @@ public class RouterServiceImpl implements RouterService {
             clusterDriverMap.put(i, allDrivers.get(i));
         }
 
-        Map<Integer, List<ContainerEntity>> clusterMap = new HashMap<>();
-        for (int i = 0; i < allContainers.size(); i++) {
-            int cluster = labels[i];
-            clusterMap
-                .computeIfAbsent(cluster, c -> new ArrayList<>())
-                .add(allContainers.get(i));
-        }
+//        Map<Integer, List<ContainerEntity>> clusterMap = new HashMap<>();
+//        for (int i = 0; i < allContainers.size(); i++) {
+//            int cluster = labels[i];
+//            clusterMap
+//                .computeIfAbsent(cluster, c -> new ArrayList<>())
+//                .add(allContainers.get(i));
+//        }
+
+        var clusterMap = balanceClusterization(labels, allContainers, centroids);
 
         // save
-
 
         for (Map.Entry<Integer, List<ContainerEntity>> entry : clusterMap.entrySet()) {
             Integer cluster = entry.getKey();
@@ -184,5 +188,53 @@ public class RouterServiceImpl implements RouterService {
         }
 
         return polylines;
+    }
+
+    private Map<Integer, List<ContainerEntity>> balanceClusterization(int[] labels, List<ContainerEntity> containers, double[][] centroids) {
+        Map<Integer, List<ContainerEntity>> tempMap = new HashMap<>();
+        for (int i = 0; i < containers.size(); i++) {
+            int cluster = labels[i];
+            tempMap.computeIfAbsent(cluster, c -> new ArrayList<>())
+                .add(containers.get(i));
+        }
+
+        int k = tempMap.size();
+
+        for (int i = 0; i < k; i++) {
+            int finalI = i;
+            tempMap.get(i).sort(Comparator.comparingDouble(c ->
+                distance((ContainerEntity) c, centroids[finalI])
+            ).reversed());
+        }
+
+        int targetSize = containers.size() / k;
+        for (int i = 0; i < k; i++) {
+            List<ContainerEntity> cluster = tempMap.get(i);
+            while (cluster.size() > targetSize + 1) {
+                ContainerEntity toMove = cluster.removeFirst();
+
+                int bestCluster = i;
+                double minDist = Double.MAX_VALUE;
+
+                for (int j = 0; j < k; j++) {
+                    if (tempMap.get(j).size() < targetSize) {
+                        double dist = distance(toMove, centroids[j]);
+                        if (dist < minDist) {
+                            minDist = dist;
+                            bestCluster = j;
+                        }
+                    }
+                }
+                tempMap.get(bestCluster).add(toMove);
+            }
+        }
+
+        return tempMap;
+    }
+
+    private double distance(ContainerEntity c, double[] centroid) {
+        return Math.sqrt(
+            Math.pow(c.getLatitude() - centroid[0], 2) + Math.pow(c.getLongitude() - centroid[1], 2)
+        );
     }
 }
