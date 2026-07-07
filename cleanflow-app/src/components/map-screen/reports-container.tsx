@@ -47,8 +47,8 @@ export const ReportsContainer = ({ containerId }: IReportContainerProps) => {
   const joinedReports = [...liveReports, ...flatData.filter(r => !liveReports.some(lr => lr.id === r.id))]
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedView>
+    <ThemedView type="backgroundElement" style={styles.container}>
+      <ThemedView type="backgroundElement">
         <ThemedText style={styles.title}>Reportes</ThemedText>
       </ThemedView>
       {joinedReports.length !== 0 ? (
@@ -59,13 +59,13 @@ export const ReportsContainer = ({ containerId }: IReportContainerProps) => {
           keyExtractor={item => `${item.id}`}
           style={styles.reportsContainer}
           renderItem={({ item }) => (
-            <ThemedView style={styles.reportContainer}>
-              <ThemedView style={styles.textPartContainer}>
+            <ThemedView type="backgroundElement" style={styles.reportContainer}>
+              <ThemedView type="backgroundElement" style={styles.textPartContainer}>
                 <ThemedView style={styles.avatarContainer}>
                   <Avatar firstName={item.user.first_name} lastName={item.user.last_name} />
                 </ThemedView>
-                <ThemedView style={styles.infoContainer}>
-                  <ThemedView style={styles.nameContainer}>
+                <ThemedView type="backgroundElement" style={styles.infoContainer}>
+                  <ThemedView type="backgroundElement" style={styles.nameContainer}>
                     <ThemedText>
                       {item.user.first_name} {item.user.last_name}
                     </ThemedText>
@@ -79,7 +79,7 @@ export const ReportsContainer = ({ containerId }: IReportContainerProps) => {
                 </ThemedView>
               </ThemedView>
               {item.images.length > 0 && (
-                <ThemedView style={styles.imagePartContainer}>
+                <ThemedView type="backgroundElement" style={styles.imagePartContainer}>
                   {item.images?.map(({ id, path }) => (
                     <Pressable key={id} onPress={() => setSelectedImage(path)}>
                       <ThemedView style={styles.imagesWrapper}>

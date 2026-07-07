@@ -9,6 +9,7 @@ const loggers = {
   stompContext: new Logger({ enabled: false, minLevel: 'debug', namespace: 'STOMP_CONTEXT' }),
   driverHome: new Logger({ enabled: false, minLevel: 'debug', namespace: 'DRIVER_HOME' }),
   api: new Logger({ enabled: false, minLevel: 'debug', namespace: 'API' }),
+  exploreDriver: new Logger({ enabled: false, minLevel: 'debug', namespace: 'EXPLORE_DRIVER' }),
 }
 
 type LoggerNamespaces = keyof typeof loggers
@@ -31,6 +32,6 @@ export const loggersConfig = {
   },
 }
 
-loggersConfig.enableCustom(['api', 'stompContext'])
+loggersConfig.enableCustom(['api', 'stompContext', 'exploreDriver'])
 
 export default loggers

@@ -66,7 +66,7 @@ export const watchPositionAsync = async (
   const subscription = await Location.watchPositionAsync(
     {
       accuracy: Location.Accuracy.Balanced,
-      timeInterval: 20000,
+      timeInterval: 10000,
       distanceInterval: 0,
     },
     callback,

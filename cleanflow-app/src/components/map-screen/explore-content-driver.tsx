@@ -1,18 +1,3 @@
-import { ContainerInfo } from '@/components/map-screen/container-info'
-import { ReportsContainer } from '@/components/map-screen/reports-container'
-import { Submit } from '@/components/map-screen/submit'
-import { MapView } from '@/components/register/map-view'
-import { ThemedText } from '@/components/themed-text'
-import { ThemedView } from '@/components/themed-view'
-import { MarkerContainer } from '@/components/ui/marker-container'
-import { DEFAULT_LOCATION } from '@/constants/location'
-import { useStompContext } from '@/context/stomp-context'
-import { useContainerInViewport } from '@/hooks/use-container'
-import { useDriverRoute } from '@/hooks/use-route'
-import { useTheme } from '@/hooks/use-theme'
-import { getCurrentLocation } from '@/services/location'
-import { IBound } from '@/types/bound'
-import { IContainerMetric } from '@/types/container'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import polyline from '@mapbox/polyline'
 import { GeoJSONSource, Layer, ViewAnnotation, ViewStateChangeEvent } from '@maplibre/maplibre-react-native'
@@ -23,6 +8,25 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Dimensions, NativeSyntheticEvent, Pressable, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { ContainerInfo } from '@/components/map-screen/container-info'
+import { ReportsContainer } from '@/components/map-screen/reports-container'
+import { Submit } from '@/components/map-screen/submit'
+import { MapView } from '@/components/register/map-view'
+import { ThemedText } from '@/components/themed-text'
+import { ThemedView } from '@/components/themed-view'
+import { MarkerContainer } from '@/components/ui/marker-container'
+import { DEFAULT_LOCATION } from '@/constants/location'
+import { useDriverTripContext } from '@/context/driver-trip-context'
+import { useStompContext } from '@/context/stomp-context'
+import { useContainerInViewport } from '@/hooks/use-container'
+import { useDriverRoute } from '@/hooks/use-route'
+import { useTheme } from '@/hooks/use-theme'
+import { IBound } from '@/types/bound'
+import { IContainerMetric } from '@/types/container'
+import loggers from '@/utils/loggers'
+
+const log = loggers.exploreDriver
+
 const { height } = Dimensions.get('window')
 
 export const ExploreContentDriver = () => {
@@ -32,7 +36,7 @@ export const ExploreContentDriver = () => {
     longitude: DEFAULT_LOCATION.longitude,
     latitude: DEFAULT_LOCATION.latitude,
   })
-  const [hasRealLocation, setHasRealLocation] = useState(false)
+  // const [hasRealLocation, setHasRealLocation] = useState(false)
   const [bounds, setBounds] = useState<IBound | null>(null)
   const [containerSelectedId, setContainerSelectedId] = useState<number | null>(null)
   const [liveMetric, setLiveMetric] = useState<IContainerMetric | null>(null)
@@ -45,22 +49,27 @@ export const ExploreContentDriver = () => {
   const { connected, subscribe, publish } = useStompContext()
   const { data: myRoutes } = useDriverRoute()
   const queryClient = useQueryClient()
+  const { currentPosition } = useDriverTripContext()
 
   const mapHeight = height - insets.top - insets.bottom - 32 - 68
 
-  useEffect(() => {
-    const localLocation = async () => {
-      const location = await getCurrentLocation()
-      if (!location) return
-      setLocation({
-        longitude: location.coords.longitude,
-        latitude: location.coords.latitude,
-      })
-      setHasRealLocation(true)
-    }
+  // useEffect(() => {
+  //   log.debug('currentPosition:', currentPosition)
+  // }, [currentPosition])
 
-    localLocation()
-  }, [])
+  // useEffect(() => {
+  //   const localLocation = async () => {
+  //     const location = await getCurrentLocation()
+  //     if (!location) return
+  //     setLocation({
+  //       longitude: location.coords.longitude,
+  //       latitude: location.coords.latitude,
+  //     })
+  //     setHasRealLocation(true)
+  //   }
+
+  //   localLocation()
+  // }, [])
 
   useEffect(() => {
     if (!connected) return
@@ -143,14 +152,12 @@ export const ExploreContentDriver = () => {
   return (
     <ThemedView type="backgroundElement" style={styles.container}>
       <ThemedView style={[styles.mapContainer, { height: mapHeight }]}>
-        <MapView
-          center={[location.longitude, location.latitude]}
-          shouldCenter={hasRealLocation}
-          onBoundsChange={handleMapMove}
-        >
-          <ViewAnnotation lngLat={[location.longitude, location.latitude]}>
-            <View style={styles.myLocationMarker} />
-          </ViewAnnotation>
+        <MapView center={[location.longitude, location.latitude]} shouldCenter={false} onBoundsChange={handleMapMove}>
+          {currentPosition && (
+            <ViewAnnotation lngLat={[currentPosition.longitude, currentPosition.latitude]}>
+              <View style={styles.myLocationMarker} />
+            </ViewAnnotation>
+          )}
           {updatedContainers?.map(({ id, latitude, longitude, last_metric }) => (
             <MarkerContainer
               key={id}
@@ -188,7 +195,9 @@ export const ExploreContentDriver = () => {
         enablePanDownToClose
         index={-1}
         onChange={handleSheetChanges}
-        backgroundStyle={{ backgroundColor: theme.background }}
+        backgroundStyle={{ backgroundColor: theme.backgroundElement }}
+        handleStyle={{ backgroundColor: theme.backgroundElement }}
+        handleIndicatorStyle={{ backgroundColor: theme.text }}
         enableDynamicSizing={false}
         keyboardBehavior="interactive"
         keyboardBlurBehavior="restore"

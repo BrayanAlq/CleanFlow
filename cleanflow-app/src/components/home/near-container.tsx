@@ -1,6 +1,7 @@
 import { BadgeInfo } from '@/components/map-screen/badge-info'
 import { ThemedText } from '@/components/themed-text'
 import { ThemedView } from '@/components/themed-view'
+import { useTheme } from '@/hooks/use-theme'
 import { IContainerMetric } from '@/types/container'
 import { EvilIcons, Feather } from '@expo/vector-icons'
 import { Image, StyleSheet } from 'react-native'
@@ -14,6 +15,8 @@ interface INearContainerProps {
 }
 
 export const NearContainer = ({ id, name, image, lastMetric, distance }: INearContainerProps) => {
+  const theme = useTheme()
+
   return (
     <ThemedView key={id} style={styles.infoContainer}>
       <ThemedView style={styles.imageContainer}>
@@ -27,10 +30,10 @@ export const NearContainer = ({ id, name, image, lastMetric, distance }: INearCo
         {lastMetric ? (
           <>
             <BadgeInfo data={lastMetric.is_alive ? 'Trabajando' : 'Inactivo'}>
-              <Feather name="activity" size={18} />
+              <Feather name="activity" size={18} color={theme.text} />
             </BadgeInfo>
             <BadgeInfo data={`${Math.round((lastMetric.filling_level ?? 0) * 100)}%`}>
-              <EvilIcons name="trash" size={18} />
+              <EvilIcons name="trash" size={18} color={theme.text} />
             </BadgeInfo>
           </>
         ) : (

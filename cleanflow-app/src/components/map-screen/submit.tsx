@@ -45,9 +45,9 @@ export const Submit = ({ containerId }: SubmitProps) => {
 
   return (
     <ThemedView
+      type="backgroundElement"
       style={{
         ...styles.messageBoxContainer,
-        backgroundColor: theme.background,
         borderColor: theme.textSecondary,
       }}
     >
@@ -59,10 +59,13 @@ export const Submit = ({ containerId }: SubmitProps) => {
         onChangeText={text => {
           setText(text)
         }}
-        style={styles.textInput}
+        style={[
+          styles.textInput,
+          { backgroundColor: theme.background, borderColor: theme.borderColor, color: theme.text },
+        ]}
       />
       <Pressable style={styles.cameraButton} onPress={openGallery}>
-        <MaterialIcons name="photo-library" size={20} color="#000" />
+        <MaterialIcons name="photo-library" size={20} color={theme.text} />
       </Pressable>
       <ThemedView style={[styles.iconSendContainer, { backgroundColor: theme.greenBackground }]}>
         <Pressable onPress={handleSubmit} disabled={imageMutation.isPending}>
@@ -104,6 +107,7 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     padding: 10,
+    paddingLeft: 10,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#000',

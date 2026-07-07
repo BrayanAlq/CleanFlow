@@ -200,7 +200,9 @@ export const ExploreContentResident = () => {
         enablePanDownToClose
         index={-1}
         onChange={handleSheetChanges}
-        backgroundStyle={{ backgroundColor: theme.background }}
+        backgroundStyle={{ backgroundColor: theme.backgroundElement }}
+        handleStyle={{ backgroundColor: theme.backgroundElement }}
+        handleIndicatorStyle={{ backgroundColor: theme.text }}
         enableDynamicSizing={false}
         keyboardBehavior="interactive"
         keyboardBlurBehavior="restore"

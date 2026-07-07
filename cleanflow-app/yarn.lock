@@ -3746,11 +3746,6 @@ normalize-package-data@^3.0.0:
     semver "^7.3.4"
     validate-npm-package-license "^3.0.1"
 
-notifee@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/notifee/-/notifee-0.0.1.tgz#0b06f1fc2dc03d2573a167148df0dd39faeb9ae8"
-  integrity sha512-R5DEyfQnhBR717u66Zut+Jx5MAOS4iLNSVEdsbiVcSzPH9S1gjxHEUJNnLnUmRTbvz8L8sUzhgkNMrtgm55UHg==
-
 npm-package-arg@^11.0.0:
   version "11.0.3"
   resolved "https://registry.yarnpkg.com/npm-package-arg/-/npm-package-arg-11.0.3.tgz#dae0c21199a99feca39ee4bfb074df3adac87e2d"
